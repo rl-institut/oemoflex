@@ -2,17 +2,9 @@ import os
 
 import pandas as pd
 
-from oemoflex.tools.helpers import load_yaml
-
 module_path = os.path.dirname(os.path.abspath(__file__))
 
 datetimeindex = pd.date_range(start='2019-01-01', freq='H', periods=8760)
-
-topology = load_yaml(os.path.join(module_path, 'topology.yml'))
-
-regions_list = topology['regions']
-
-link_list = topology['links']
 
 
 def create_default_data(
@@ -22,8 +14,8 @@ def create_default_data(
         component_attrs_dir=os.path.join(module_path, 'component_attrs'),
         select_components=None,
         select_busses=None,
-        select_regions=regions_list,
-        select_links=link_list,
+        select_regions=None,
+        select_links=None,
         elements_subdir='elements',
         sequences_subdir='sequences',
         dummy_sequences=False,
@@ -189,7 +181,7 @@ def create_component_element(component_attrs_file, select_regions, select_links)
 def create_component_sequences(
         component_attrs_file, select_regions, destination,
         dummy_sequences=False, dummy_value=0,
-    ):
+):
     r"""
 
     Parameters
