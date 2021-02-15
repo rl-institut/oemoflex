@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from oemof_b3.tools.helpers import load_yaml
+from oemoflex.tools.helpers import load_yaml
 
 module_path = os.path.dirname(os.path.abspath(__file__))
 
