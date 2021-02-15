@@ -15,6 +15,7 @@ setup(
     long_description=read('README.md'),
     packages=['oemoflex'],
     install_requires=[
+        'pyyaml',
         'pandas',
         'pyomo<5.6.9',
         'pyutilib<6.0.0',
