@@ -4,14 +4,13 @@ import pandas as pd
 
 module_path = os.path.dirname(os.path.abspath(__file__))
 
-datetimeindex = pd.date_range(start='2019-01-01', freq='H', periods=8760)
-
 
 def create_default_data(
         destination,
         busses_file=os.path.join(module_path, 'busses.csv'),
         components_file=os.path.join(module_path, 'components.csv'),
         component_attrs_dir=os.path.join(module_path, 'component_attrs'),
+        datetimeindex=None,
         select_components=None,
         select_busses=None,
         select_regions=None,
@@ -81,6 +80,7 @@ def create_default_data(
         create_component_sequences(
             component_attrs_file,
             select_regions,
+            datetimeindex,
             os.path.join(destination, sequences_subdir),
             dummy_sequences,
         )
@@ -179,7 +179,7 @@ def create_component_element(component_attrs_file, select_regions, select_links)
 
 
 def create_component_sequences(
-        component_attrs_file, select_regions, destination,
+        component_attrs_file, select_regions, datetimeindex, destination,
         dummy_sequences=False, dummy_value=0,
 ):
     r"""
