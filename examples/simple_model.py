@@ -1,6 +1,13 @@
-from oemof.solph import EnergySystem, Model
-from oemoflex import EnergyDataPackage, postprocess
+import os
 
+# DONT REMOVE THIS LINE!
+# pylint: disable=unused-import
+from oemof.tabular import datapackage  # noqa
+from oemof.solph import EnergySystem, Model
+from oemoflex.model.datapackage import EnergyDataPackage#, postprocess
+
+
+destination = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'simple_model')
 
 edp = EnergyDataPackage.setup_default(
     datetimeindex=None,
@@ -13,9 +20,9 @@ edp = EnergyDataPackage.setup_default(
 
 edp.infer_metadata()
 
-edp.to_csv_dir()
+edp.to_csv_dir(destination)
 
-es = EnergySystem.from_datapackage()
+es = EnergySystem.from_datapackage(destination)
 
 om = Model(es)
 

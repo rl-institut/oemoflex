@@ -3,6 +3,8 @@ import os
 import pandas as pd
 from frictionless import Package
 
+from oemoflex.model.model_structure import create_default_data
+
 
 class DataFramePackage:
     r"""
@@ -95,3 +97,18 @@ class DataFramePackage:
             os.makedirs(root)
 
         data.to_csv(path)
+
+
+class EnergyDataPackage(DataFramePackage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def setup_default(cls, *args, **kwargs):
+
+        # create_default_data()
+
+        return cls('', {}, {})
+
+    def infer_metadata(self):
+        print("Not implemented")
