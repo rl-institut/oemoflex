@@ -6,18 +6,17 @@ module_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def create_default_data(
-        destination,
-        busses_file=os.path.join(module_path, 'busses.csv'),
-        components_file=os.path.join(module_path, 'components.csv'),
-        component_attrs_dir=os.path.join(module_path, 'component_attrs'),
+        select_regions,
+        select_links,
         datetimeindex=None,
         select_components=None,
         select_busses=None,
-        select_regions=None,
-        select_links=None,
+        dummy_sequences=False,
+        busses_file=os.path.join(module_path, 'busses.csv'),
+        components_file=os.path.join(module_path, 'components.csv'),
+        component_attrs_dir=os.path.join(module_path, 'component_attrs'),
         elements_subdir='elements',
         sequences_subdir='sequences',
-        dummy_sequences=False,
 ):
     r"""
     Prepares oemoef.tabluar input CSV files:
@@ -42,14 +41,6 @@ def create_default_data(
     -------
     None
     """
-    for subdir in [elements_subdir, sequences_subdir]:
-
-        subdir_full_path = os.path.join(destination, subdir)
-
-        if not os.path.exists(subdir_full_path):
-
-            os.makedirs(subdir_full_path)
-
     components_file = os.path.join(module_path, components_file)
 
     # TODO Better put this as another field into the components.csv as well?
@@ -65,9 +56,11 @@ def create_default_data(
 
         components = [c for c in components if c in select_components]
 
+    data = {}
+
     bus_df = create_bus_element(busses_file, select_busses, select_regions)
 
-    bus_df.to_csv(os.path.join(destination, elements_subdir, 'bus.csv'))
+    data['bus'] = bus_df
 
     for component in components:
         component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
@@ -75,15 +68,9 @@ def create_default_data(
         df = create_component_element(component_attrs_file, select_regions, select_links)
 
         # Write to target directory
-        df.to_csv(os.path.join(destination, elements_subdir, component + '.csv'))
+        data[component] = df
 
-        create_component_sequences(
-            component_attrs_file,
-            select_regions,
-            datetimeindex,
-            os.path.join(destination, sequences_subdir),
-            dummy_sequences,
-        )
+    return data
 
 
 def create_bus_element(busses_file, select_busses, select_regions):
