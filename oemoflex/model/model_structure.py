@@ -70,6 +70,15 @@ def create_default_data(
         # Write to target directory
         data[component] = df
 
+    profile_data = create_component_sequences(
+        component_attrs_file,
+        select_regions,
+        datetimeindex,
+        dummy_sequences=False, dummy_value=0,
+    )
+
+    data.update(profile_data)
+
     return data
 
 
@@ -166,7 +175,7 @@ def create_component_element(component_attrs_file, select_regions, select_links)
 
 
 def create_component_sequences(
-        component_attrs_file, select_regions, datetimeindex, destination,
+        component_attrs_file, select_regions, datetimeindex,
         dummy_sequences=False, dummy_value=0,
 ):
     r"""
@@ -207,9 +216,9 @@ def create_component_sequences(
 
     profile_names = {k: remove_prefix(v, '-') for k, v in suffices.items() if 'profile' in v}
 
-    for profile_name in profile_names.values():
+    profile_data = {}
 
-        profile_filename = remove_suffix(profile_name, '-profile') + '_profile.csv'
+    for profile_name in profile_names.values():
 
         profile_columns = []
 
@@ -229,8 +238,8 @@ def create_component_sequences(
 
         profile_df.index.name = 'timeindex'
 
-        profile_destination = os.path.join(destination, profile_filename)
+        profile_data[profile_name] = profile_df
 
-        profile_df.to_csv(profile_destination)
+        print(f"Created {dummy_msg} profile.")
 
-        print(f"Saved {dummy_msg} profile to {profile_destination}")
+    return profile_data
