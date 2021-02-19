@@ -21,7 +21,9 @@ def test_edp():
 
 
 def test_edp_setup_default():
-    
+
+    name = 'test_edp'
+    basepath = './test_edp',
     datetimeindex = None
     components = None
     busses = None
@@ -29,9 +31,15 @@ def test_edp_setup_default():
     links = None
 
     EnergyDataPackage.setup_default(
+        name=name,
+        basepath=basepath,
         datetimeindex=datetimeindex,
         components=components,
         busses=busses,
         regions=regions,
         links=links,
     )
+
+    assert name == name
+
+    assert basepath == basepath

@@ -12,7 +12,7 @@ class DataFramePackage:
     Provides a representation of frictionless datapackages as a collection
     of pandas.DataFrames.
     """
-    def __init__(self, basepath, data, rel_paths):
+    def __init__(self, basepath, data, rel_paths, *args, **kwargs):
 
         self.basepath = basepath
 
@@ -104,9 +104,16 @@ class EnergyDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.name = kwargs.get("name")
+
+        self.components = kwargs.get("components")
+
+
     @classmethod
     def setup_default(
             cls,
+            name,
+            basepath,
             datetimeindex,
             components,
             busses,
@@ -114,13 +121,17 @@ class EnergyDataPackage(DataFramePackage):
             links,
     ):
 
-        basepath = None
-
         rel_paths = {}
 
         data = {}  # create_default_data()
 
-        return cls(basepath, rel_paths, data)
+        return cls(
+            name=name,
+            basepath=basepath,
+            rel_paths=rel_paths,
+            data=data,
+            components=components
+        )
 
     def infer_metadata(self):
         print("Not implemented")
