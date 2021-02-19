@@ -4,6 +4,7 @@ import pandas as pd
 from frictionless import Package
 
 from oemoflex.model.model_structure import create_default_data
+from oemoflex.model.inferring import infer
 
 
 class DataFramePackage:
@@ -104,11 +105,22 @@ class EnergyDataPackage(DataFramePackage):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def setup_default(cls, *args, **kwargs):
+    def setup_default(
+            cls,
+            datetimeindex,
+            components,
+            busses,
+            regions,
+            links,
+    ):
 
-        # create_default_data()
+        basepath = None
 
-        return cls('', {}, {})
+        rel_paths = {}
+
+        data = {}  # create_default_data()
+
+        return cls(basepath, rel_paths, data)
 
     def infer_metadata(self):
         print("Not implemented")
