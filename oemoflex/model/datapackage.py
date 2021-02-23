@@ -138,4 +138,8 @@ class EnergyDataPackage(DataFramePackage):
         )
 
     def infer_metadata(self):
-        print("Not implemented")
+        infer(
+            select_components=self.components,
+            package_name=self.name,
+            path=self.basepath,
+        )
