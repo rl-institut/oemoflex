@@ -70,6 +70,8 @@ def create_default_data(
         # Write to target directory
         data[component] = df
 
+    rel_paths = {key: os.path.join(elements_subdir, key + '.csv') for key in data.keys()}
+
     profile_data = create_component_sequences(
         component_attrs_file,
         select_regions,
@@ -77,9 +79,13 @@ def create_default_data(
         dummy_sequences=False, dummy_value=0,
     )
 
+    rel_paths.update(
+        {key: os.path.join(sequences_subdir, key + '.csv') for key in profile_data.keys()}
+    )
+
     data.update(profile_data)
 
-    return data
+    return data, rel_paths
 
 
 def create_bus_element(busses_file, select_busses, select_regions):

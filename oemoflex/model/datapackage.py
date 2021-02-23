@@ -121,9 +121,13 @@ class EnergyDataPackage(DataFramePackage):
             links,
     ):
 
-        rel_paths = {}
-
-        data = {}  # create_default_data()
+        data, rel_paths = create_default_data(
+            select_regions=regions,
+            select_links=links,
+            datetimeindex=datetimeindex,
+            select_components=components,
+            select_busses=busses,
+        )
 
         return cls(
             name=name,
