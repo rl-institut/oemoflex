@@ -70,7 +70,7 @@ def create_default_data(
         # Write to target directory
         data[component] = df
 
-    rel_paths = {key: os.path.join(elements_subdir, key + '.csv') for key in data.keys()}
+    rel_paths = {key: os.path.join('data', elements_subdir, key + '.csv') for key in data.keys()}
 
     profile_data = create_component_sequences(
         component_attrs_file,
@@ -80,7 +80,7 @@ def create_default_data(
     )
 
     rel_paths.update(
-        {key: os.path.join(sequences_subdir, key + '.csv') for key in profile_data.keys()}
+        {key: os.path.join('data', sequences_subdir, key + '.csv') for key in profile_data.keys()}
     )
 
     data.update(profile_data)
