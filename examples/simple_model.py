@@ -24,7 +24,7 @@ edp.infer_metadata()
 
 edp.to_csv_dir(destination)
 
-es = EnergySystem.from_datapackage(destination)
+es = EnergySystem.from_datapackage(os.path.join(destination, 'datapackage.json'))
 
 om = Model(es)
 
