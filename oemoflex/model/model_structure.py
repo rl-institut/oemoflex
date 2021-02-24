@@ -79,8 +79,16 @@ def create_default_data(
         dummy_sequences=False, dummy_value=0,
     )
 
+    def get_profile_rel_path(name):
+
+        file_name = name.replace('-profile', '_profile') + '.csv'
+
+        path = os.path.join('data', sequences_subdir, file_name)
+
+        return path
+
     rel_paths.update(
-        {key: os.path.join('data', sequences_subdir, key + '.csv') for key in profile_data.keys()}
+        {key: get_profile_rel_path(key) for key in profile_data.keys()}
     )
 
     data.update(profile_data)
@@ -238,7 +246,7 @@ def create_component_sequences(
             dummy_msg = 'dummy'
 
         else:
-            profile_df = pd.DataFrame(columns=profile_columns)
+            profile_df = pd.DataFrame(columns=profile_columns, index=datetimeindex)
 
             dummy_msg = 'empty'
 
