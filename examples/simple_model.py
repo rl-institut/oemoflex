@@ -5,6 +5,7 @@ from oemof.solph import EnergySystem, Model
 # DONT REMOVE THIS LINE!
 # pylint: disable=unused-import
 from oemof.tabular import datapackage  # noqa
+from oemof.tabular.facades import TYPEMAP
 
 from oemoflex.model.datapackage import EnergyDataPackage  # , postprocess
 
@@ -32,6 +33,10 @@ edp.data['heat-demand']['amount'] = 100
 
 edp.data['ch4-boiler']['capacity'] = [1, 2]
 
+edp.data['ch4-boiler']['efficiency'] = 0.9
+
+edp.data['heat-demand-profile'].loc[:, :] = [[1, 1]] * 240
+
 # save to csv
 edp.to_csv_dir(destination)
 
@@ -39,7 +44,11 @@ edp.to_csv_dir(destination)
 edp.infer_metadata()
 
 # create EnergySystem and Model and solve it.
-es = EnergySystem.from_datapackage(os.path.join(destination, 'datapackage.json'))
+es = EnergySystem.from_datapackage(
+    os.path.join(destination, 'datapackage.json'),
+    attributemap={},
+    typemap=TYPEMAP,
+)
 
 om = Model(es)
 
