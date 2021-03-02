@@ -161,17 +161,21 @@ class ResultsDataPackage(DataFramePackage):
 
     def get_results(self, es):
 
-        data = {
-            'dummy-scalar': pd.DataFrame()
-        }
+        data = {}
 
-        rel_paths = {'dummy-scalar': 'scalars/dummy.csv'}
+        rel_paths = {}
+
+        data_scal, rel_paths_scal = self.get_scalars(self, es)
 
         data_seq, rel_paths_seq = self.get_sequences(self, es)
 
         data.update(data_seq)
 
+        data.update(data_scal)
+
         rel_paths.update(rel_paths_seq)
+
+        rel_paths.update(rel_paths_scal)
 
         return data, rel_paths
 
@@ -194,3 +198,12 @@ class ResultsDataPackage(DataFramePackage):
         }
 
         return bus_results, rel_paths
+
+    def get_scalars(self, es):
+        # TODO: Import functions for scalar postprocessing from separate module.
+
+        data_scal = {}
+
+        rel_paths_scal = {}
+
+        return data_scal, rel_paths_scal
