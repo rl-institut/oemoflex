@@ -186,6 +186,8 @@ class ResultsDataPackage(DataFramePackage):
 
         bus_results = tabular_pp.bus_results(es, es.results)
 
+        bus_results = {key: value for key, value in bus_results.items() if not value.empty}
+
         rel_paths = {
             key: os.path.join('sequences', 'bus', key + '.csv')
             for key in bus_results.keys()
