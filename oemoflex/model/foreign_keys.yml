@@ -2,8 +2,7 @@
     'heat-shortage',
     'heat-excess',
     'heat-demand',
-    'heat-storage-large',
-    'heat-storage-small',
+    'heat-storage',
     'wind-onshore',
     'wind-offshore',
     'solar-pv',
@@ -29,11 +28,9 @@
     'electricity-transmission',
     'ch4-gt',
     'uranium-nuclear-st',
-    'ch4-boiler-small',
-    'ch4-boiler-large',
+    'ch4-boiler',
     'electricity-pth',
-    'electricity-heatpump-small',
-    'electricity-heatpump-large',
+    'electricity-heatpump',
 ]
 
 'chp': [
@@ -42,8 +39,7 @@
 ]
 
 'efficiency': [
-    'electricity-heatpump-large',
-    'electricity-heatpump-small',
+    'electricity-heatpump',
 ]
 
 'availability': ['electricity-bev']
