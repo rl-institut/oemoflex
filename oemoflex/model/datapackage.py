@@ -5,6 +5,7 @@ from frictionless import Package
 
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.inferring import infer
+import oemof.tabular.tools.postprocessing as tabular_pp
 
 
 class DataFramePackage:
@@ -143,3 +144,51 @@ class EnergyDataPackage(DataFramePackage):
             package_name=self.name,
             path=self.basepath,
         )
+
+
+class ResultsDataPackage(DataFramePackage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def from_energysytem(cls, es):
+
+        basepath = None
+
+        data, rel_paths = cls.get_results(cls, es)
+
+        return cls(basepath, data, rel_paths)
+
+    def get_results(self, es):
+
+        data = {
+            'dummy-scalar': pd.DataFrame()
+        }
+
+        rel_paths = {'dummy-scalar': 'scalars/dummy.csv'}
+
+        data_seq, rel_paths_seq = self.get_sequences(self, es)
+
+        data.update(data_seq)
+
+        rel_paths.update(rel_paths_seq)
+
+        return data, rel_paths
+
+    def get_sequences(self, es):
+
+        data_seq, rel_paths_seq = self.get_bus_sequences(es)
+
+        return data_seq, rel_paths_seq
+
+    @staticmethod
+    def get_bus_sequences(es):
+
+        bus_results = tabular_pp.bus_results(es, es.results)
+
+        rel_paths = {
+            key: os.path.join('sequences', 'bus', key + '.csv')
+            for key in bus_results.keys()
+        }
+
+        return bus_results, rel_paths

@@ -7,11 +7,12 @@ from oemof.solph import EnergySystem, Model
 from oemof.tabular import datapackage  # noqa
 from oemof.tabular.facades import TYPEMAP
 
-from oemoflex.model.datapackage import EnergyDataPackage  # , postprocess
+from oemoflex.model.datapackage import EnergyDataPackage, ResultsDataPackage
 
 here = os.path.abspath(os.path.dirname(__file__))
 preprocessed = os.path.join(here, 'simple_model')
 optimized = here
+postprocessed = os.path.join(here, 'simple_model_results')
 
 # setup default structure
 edp = EnergyDataPackage.setup_default(
@@ -66,6 +67,6 @@ es_restored = EnergySystem()
 
 es_restored.restore(here)
 
-results_dp = postprocess(es_restored)
+results_dp = ResultsDataPackage.from_energysytem(es_restored)
 
-results_dp.to_csv_dir()
+results_dp.to_csv_dir(postprocessed)
