@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 from oemof.solph import EnergySystem, Model
+from oemof.outputlib.processing import parameter_as_dict
 # DONT REMOVE THIS LINE!
 # pylint: disable=unused-import
 from oemof.tabular import datapackage  # noqa
@@ -59,6 +60,7 @@ om.solve()
 
 # save EnergySystem with results
 es.results = om.results()
+es.params = parameter_as_dict(es)
 
 es.dump(here)
 

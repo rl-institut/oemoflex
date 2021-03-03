@@ -5,6 +5,7 @@ from frictionless import Package
 
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.inferring import infer
+from oemoflex.model.postprocessing import run_postprocessing, group_by_element
 import oemof.tabular.tools.postprocessing as tabular_pp
 
 
@@ -202,8 +203,10 @@ class ResultsDataPackage(DataFramePackage):
     def get_scalars(self, es):
         # TODO: Import functions for scalar postprocessing from separate module.
 
-        data_scal = {}
+        all_scalars = run_postprocessing(es)
 
-        rel_paths_scal = {}
+        data_scal = group_by_element(all_scalars)
+
+        rel_paths_scal = {key: os.path.join('scalars', key + '.csv') for key in data_scal.keys()}
 
         return data_scal, rel_paths_scal
