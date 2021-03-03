@@ -11,9 +11,9 @@ from oemof.tabular.facades import TYPEMAP
 from oemoflex.model.datapackage import EnergyDataPackage, ResultsDataPackage
 
 here = os.path.abspath(os.path.dirname(__file__))
-preprocessed = os.path.join(here, 'simple_model')
-optimized = here
-postprocessed = os.path.join(here, 'simple_model_results')
+preprocessed = os.path.join(here, '01_preprocessed', 'simple_model')
+optimized = os.path.join(here, '02_optimized')
+postprocessed = os.path.join(here, '03_postprocessed', 'simple_model')
 
 # setup default structure
 edp = EnergyDataPackage.setup_default(
@@ -62,12 +62,15 @@ om.solve()
 es.results = om.results()
 es.params = parameter_as_dict(es)
 
-es.dump(here)
+if not os.path.exists(optimized):
+    os.makedirs(optimized)
+
+es.dump(optimized)
 
 # restore and postprocess
 es_restored = EnergySystem()
 
-es_restored.restore(here)
+es_restored.restore(optimized)
 
 results_dp = ResultsDataPackage.from_energysytem(es_restored)
 
