@@ -444,6 +444,29 @@ def map_var_names(scalars):
 
             return in_out
 
+    def get_from_to(id, component_id):
+        from oemoflex.facades import Link
+
+        if id[1] is np.nan:
+            return None
+
+        if not isinstance(id[component_id], Link):
+            return None
+
+        from_bus = id[component_id].from_bus
+
+        to_bus = id[component_id].to_bus
+
+        bus = get_bus_from_oemof_tuple(id)
+
+        if bus == to_bus:
+            in_out = 'to_bus'
+
+        elif bus == from_bus:
+            in_out = 'from_bus'
+
+        return in_out
+
     def map_index(id):
         component_id = get_component_id(id)
 
@@ -453,7 +476,9 @@ def map_var_names(scalars):
 
         in_out = get_in_out(id, component_id)
 
-        var_name = [id[2], in_out, carrier]
+        from_to = get_from_to(id, component_id)
+
+        var_name = [id[2], in_out, carrier, from_to]
 
         var_name = [item for item in var_name if item is not None]
 
