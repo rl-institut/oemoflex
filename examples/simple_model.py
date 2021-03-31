@@ -35,9 +35,11 @@ edp = EnergyDataPackage.setup_default(
 # parametrize
 edp.data['heat-demand']['amount'] = 100
 
-edp.data['ch4-boiler']['capacity'] = [1, 2]
+edp.data['ch4-boiler']['capacity'] = [200, 300]
 
 edp.data['ch4-boiler']['efficiency'] = 0.9
+
+edp.data['ch4-boiler']['marginal_cost'] = 30
 
 edp.data['heat-demand-profile'].loc[:, :] = [[1, 1]] * 240
 
