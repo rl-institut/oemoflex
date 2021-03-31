@@ -664,7 +664,8 @@ def run_postprocessing(es):
     all_scalars = [
         summed_flows,
         storage_losses,
-        transmission_losses,
+        # TODO: Fix transmission loss calculation. Returns 4 separate values as of now.
+        # transmission_losses,
         capacity,
         storage_capacity,
         invested_capacity,
