@@ -1,0 +1,12 @@
+!!python/tuple ['from', 'to', 'type', 'timeindex']: Timestamp
+!!python/tuple ['BB-biomass-st', 'BB-electricity', 'flow', 'Unnamed: 1_level_3']: Biomass
+!!python/tuple ['BB-ch4-gt', 'BB-electricity', 'flow', 'Unnamed: 2_level_3']: CH4
+!!python/tuple ['BB-electricity', 'BB-electricity-curtailment', 'flow', 'Unnamed: 3_level_3']: Curtailment
+!!python/tuple ['BB-electricity', 'BB-electricity-demand', 'flow', 'Unnamed: 4_level_3']: Demand
+!!python/tuple ['BB-electricity', 'BB-electricity-liion-battery', 'flow', 'Unnamed: 5_level_3']: BAT_charge
+!!python/tuple ['BB-electricity', 'BE-BB', 'flow', 'Unnamed: 6_level_3']: Export
+!!python/tuple ['BB-electricity-liion-battery', 'BB-electricity', 'flow', 'Unnamed: 7_level_3']: BAT_discharge
+!!python/tuple ['BB-electricity-shortage', 'BB-electricity', 'flow', 'Unnamed: 8_level_3']: Shortage
+!!python/tuple ['BB-solar-pv', 'BB-electricity', 'flow', 'Unnamed: 9_level_3']: PV
+!!python/tuple ['BB-wind-onshore', 'BB-electricity', 'flow', 'Unnamed: 10_level_3']: Wind
+!!python/tuple ['BE-BB', 'BB-electricity', 'flow', 'Unnamed: 11_level_3']: Import
