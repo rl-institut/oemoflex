@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import yaml
+from matplotlib.ticker import EngFormatter
 
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
-
 
 # eine Funktion für stackplot
 # eine Funktion für Linien
@@ -44,6 +44,8 @@ def stackplot(df, colors_dict, x, y_stack):
     y = np.vstack(y)
 
     fig, ax = plt.subplots(figsize=(12,5))
+    formatter0 = EngFormatter(unit='W')
+    ax.yaxis.set_major_formatter(formatter0)
     ax.stackplot(x, y, colors=colors, labels=labels)
 
     ax.set_ylim(ymin=-1e+7, ymax=1.8e+7) # bottom, es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
@@ -72,7 +74,7 @@ def plot_dispatch(df, timestamp_col, colors_dict, labels_dict, start_date, end_d
 
 
 # import data and yaml files
-input_data = r'\\FS01\RL-Institut\04_Projekte\305_UMAS_Gasspeicher\09-Stud_Ordner\Julius\oemof-B3-Ergebnisdaten\03_postprocessed\simple_model\sequences\bus\BB-electricity.csv'
+input_data = r'C:\Users\meinm\Documents\Git\oemof-B3-Ergebnisdaten\03_postprocessed\simple_model\sequences\bus\BB-electricity.csv'
 data = pd.read_csv(input_data, header=[0,1,2,3], parse_dates=[0])
 
 colors_yaml = open('colors.yaml', "r")
