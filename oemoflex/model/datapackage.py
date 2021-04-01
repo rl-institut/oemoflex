@@ -3,13 +3,18 @@ import os
 import pandas as pd
 from frictionless import Package
 
+from oemoflex.model.model_structure import create_default_data
+from oemoflex.model.inferring import infer
+from oemoflex.model.postprocessing import run_postprocessing, group_by_element
+import oemof.tabular.tools.postprocessing as tabular_pp
+
 
 class DataFramePackage:
     r"""
     Provides a representation of frictionless datapackages as a collection
     of pandas.DataFrames.
     """
-    def __init__(self, basepath, data, rel_paths):
+    def __init__(self, basepath, data, rel_paths, *args, **kwargs):
 
         self.basepath = basepath
 
@@ -95,3 +100,113 @@ class DataFramePackage:
             os.makedirs(root)
 
         data.to_csv(path)
+
+
+class EnergyDataPackage(DataFramePackage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.name = kwargs.get("name")
+
+        self.components = kwargs.get("components")
+
+
+    @classmethod
+    def setup_default(
+            cls,
+            name,
+            basepath,
+            datetimeindex,
+            components,
+            busses,
+            regions,
+            links,
+    ):
+
+        data, rel_paths = create_default_data(
+            select_regions=regions,
+            select_links=links,
+            datetimeindex=datetimeindex,
+            select_components=components,
+            select_busses=busses,
+        )
+
+        return cls(
+            name=name,
+            basepath=basepath,
+            rel_paths=rel_paths,
+            data=data,
+            components=components
+        )
+
+    def infer_metadata(self):
+        infer(
+            select_components=self.components,
+            package_name=self.name,
+            path=self.basepath,
+        )
+
+
+class ResultsDataPackage(DataFramePackage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def from_energysytem(cls, es):
+
+        basepath = None
+
+        data, rel_paths = cls.get_results(cls, es)
+
+        return cls(basepath, data, rel_paths)
+
+    def get_results(self, es):
+
+        data = {}
+
+        rel_paths = {}
+
+        data_scal, rel_paths_scal = self.get_scalars(self, es)
+
+        data_seq, rel_paths_seq = self.get_sequences(self, es)
+
+        data.update(data_seq)
+
+        data.update(data_scal)
+
+        rel_paths.update(rel_paths_seq)
+
+        rel_paths.update(rel_paths_scal)
+
+        return data, rel_paths
+
+    def get_sequences(self, es):
+
+        data_seq, rel_paths_seq = self.get_bus_sequences(es)
+
+        return data_seq, rel_paths_seq
+
+    @staticmethod
+    def get_bus_sequences(es):
+
+        bus_results = tabular_pp.bus_results(es, es.results)
+
+        bus_results = {key: value for key, value in bus_results.items() if not value.empty}
+
+        rel_paths = {
+            key: os.path.join('sequences', 'bus', key + '.csv')
+            for key in bus_results.keys()
+        }
+
+        return bus_results, rel_paths
+
+    def get_scalars(self, es):
+        # TODO: Import functions for scalar postprocessing from separate module.
+
+        all_scalars = run_postprocessing(es)
+
+        data_scal = group_by_element(all_scalars)
+
+        rel_paths_scal = {key: os.path.join('scalars', key + '.csv') for key in data_scal.keys()}
+
+        return data_scal, rel_paths_scal
