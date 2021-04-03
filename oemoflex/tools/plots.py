@@ -9,6 +9,25 @@ register_matplotlib_converters()
 
 
 def map_labels(df, labels_dict, bus_name, demand_name):
+    r"""
+    Changes the column names and makes electricity consumers negative except demand.
+
+    Parameters
+    ---------------
+    'df' : pandas.DataFrame
+        Dataframe with electricity data.
+    'labels_dict' : dictionary
+        Contains old and new column names. The new column names are used for the labels in the plot.
+    'bus_name' : string
+        Name of the bus to identify columns where electricty goes from the bus to a consumer.
+    'demand_name' : string
+        Name of the demand bus to identify the column where demand is the consumer.
+
+    Returns
+    ----------
+    'df' : pandas.DataFrame
+        Edited dataframe with new column names and negative sign for consumer columns.
+    """
     df.columns = data.columns.to_flat_index()
     for i in df.columns:
         if i[0] == bus_name and not (i[1] == demand_name):
@@ -20,6 +39,25 @@ def map_labels(df, labels_dict, bus_name, demand_name):
     return df
 
 def filter_timeseries(df, timestamp_col, start_date, end_date):
+    r"""
+    Filters a dataframe with a timeseries from a start date to an end date.
+
+    Parameters
+    ---------------
+    'df' : pandas.DataFrame
+        Dataframe with timeseries.
+    'timestamp_col' : string
+        Column name of the column which contains the timestamps.
+    'start_date' : string
+        String with the start date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
+    'end_date' : string
+        String with the end date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
+
+    Returns
+    ----------
+    'df' : pandas.DataFrame
+        Filtered dataframe.
+    """
     mask = (df[timestamp_col] >= start_date) & (df[timestamp_col] <= end_date)
     df = df.loc[mask]
     df = df.copy()
