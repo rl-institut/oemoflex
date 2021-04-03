@@ -7,50 +7,53 @@ from matplotlib.ticker import EngFormatter
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
-# eine Funktion für stackplot
-# eine Funktion für Linien
-# eine Funktion, die alles auf einmal erstellt
-# at first, the stackplot has to be created, then its axis is used to plot the line plots
-# es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
-# cool wäre, wenn es egal ist, ob man zuerst stackplot oder lineplot erstellt und beides auch alleine
-# verwenden kann
 
-def map_labels(df, labels_dict):
-    # changes column names
+def map_labels(df, labels_dict, bus_name, demand_name):
     df.columns = data.columns.to_flat_index()
     for i in df.columns:
-        df.rename(columns={i: labels_dict[i]}, inplace=True)
+        if i[0] == bus_name and not (i[1] == demand_name):
+            df[i] = df[i] * -1
+            df.rename(columns={i: labels_dict[i]}, inplace=True)
+        else:
+            df.rename(columns={i: labels_dict[i]}, inplace=True)
 
+    return df
 
 def filter_timeseries(df, timestamp_col, start_date, end_date):
     mask = (df[timestamp_col] >= start_date) & (df[timestamp_col] <= end_date)
     df = df.loc[mask]
     df = df.copy()
+
     return df
 
 
-def stackplot(df, colors_dict, x, y_stack):
-    # y_stack determine the stack order
+def stackplot(ax, df, colors_dict, x, y_stack_pos, y_stack_neg):
+    # pos_stack and neg_stack determine the stack order
     colors=[]
     labels=[]
-    y = []
+    y_pos = []
 
-    for i in y_stack:
+    for i in y_stack_pos:
         labels.append(i)
         colors.append(colors_dict[i])
-        y.append(df[i])
+        y_pos.append(df[i])
 
     x = df[x]
-    y = np.vstack(y)
 
-    fig, ax = plt.subplots(figsize=(12,5))
-    formatter0 = EngFormatter(unit='W')
-    ax.yaxis.set_major_formatter(formatter0)
-    ax.stackplot(x, y, colors=colors, labels=labels)
+    y_pos = np.vstack(y_pos)
+    ax.stackplot(x, y_pos, colors=colors, labels=labels)
 
-    ax.set_ylim(ymin=-1e+7, ymax=1.8e+7) # bottom, es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
+    colors = []
+    labels = []
+    y_neg = []
 
-    return fig, ax
+    for i in y_stack_neg:
+        labels.append(i)
+        colors.append(colors_dict[i])
+        y_neg.append(df[i])
+
+    y_neg = np.vstack(y_neg)
+    ax.stackplot(x, y_neg, colors=colors, labels=labels)
 
 
 def lineplot(ax, df, colors_dict, x, y_line):
@@ -59,18 +62,22 @@ def lineplot(ax, df, colors_dict, x, y_line):
         ax.plot(df[x], df[i], color=colors_dict[i], label=i)
 
 
-def plot_dispatch(df, timestamp_col, colors_dict, labels_dict, start_date, end_date, x, y_stack, y_line):
-    map_labels(df, labels_dict)
+def plot_dispatch(ax, df, colors_dict, labels_dict, start_date, end_date, x_timestamp,
+                  y_stack_pos, y_stack_neg, y_line, bus_name, demand_name):
+    df = map_labels(df, labels_dict, bus_name=bus_name, demand_name=demand_name)
     if not (start_date is None and end_date is None):
-        df = filter_timeseries(df, timestamp_col, start_date, end_date)
+        df = filter_timeseries(df, x_timestamp, start_date, end_date)
 
-    # ????????????????????????????????
-    df.BAT_charge = df.BAT_charge * -1
-    df.Export = df.Export * -1
+    stackplot(ax, df, colors_dict=colors_dict, x=x_timestamp,
+              y_stack_pos=y_stack_pos, y_stack_neg=y_stack_neg)
+    lineplot(ax, df, colors_dict=colors_dict, x=x_timestamp, y_line=y_line)
 
-    fig, ax = stackplot(df, colors_dict=colors_dict, x=x,
-                        y_stack=y_stack)
-    lineplot(ax, df, colors_dict=colors_dict, x=x, y_line=y_line)
+
+def eng_format(ax, df, unit, conv_number):
+    formatter0 = EngFormatter(unit=unit)
+    ax.yaxis.set_major_formatter(formatter0)
+    df[df.select_dtypes(include=['number']).columns] *= conv_number
+    return df
 
 
 # import data and yaml files
@@ -82,12 +89,18 @@ colors_dict = yaml.load(colors_yaml, Loader=yaml.FullLoader)
 labels_yaml = open('labels.yaml', "r")
 labels_dict = yaml.load(labels_yaml, Loader=yaml.FullLoader)
 
+
+fig, ax = plt.subplots(figsize=(12,5))
+data = eng_format(ax, data, 'W', 1000)
+
 start_date = '2019-12-01 00:00:00'
 end_date = '2019-12-13 23:00:00'
-plot_dispatch(data, 'Timestamp', colors_dict, labels_dict, start_date=start_date, end_date=end_date,
-              x='Timestamp', y_stack=['Biomass', 'CH4', 'Wind', 'PV', 'BAT_discharge', 'Import'],
-              y_line=['Demand', 'Export', 'BAT_charge'])
+plot_dispatch(ax, data, colors_dict, labels_dict, start_date=start_date, end_date=end_date,
+              x_timestamp='Timestamp', y_stack_pos=['Biomass', 'CH4', 'Wind', 'PV', 'BAT discharge', 'Import'],
+              y_stack_neg=['Export', 'BAT charge'], y_line=['Demand'],
+              bus_name='BB-electricity', demand_name='BB-electricity-demand')
 
+# ax.set_ylim(ymin=-1e+7, ymax=1.8e+7) # bottom, es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
 plt.legend(loc='best')
 plt.tight_layout()
 plt.show()
