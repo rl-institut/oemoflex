@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from matplotlib.ticker import EngFormatter
 #from pandas.plotting import register_matplotlib_converters
 #register_matplotlib_converters()
@@ -52,6 +53,7 @@ def filter_timeseries(df, start_date, end_date):
     'df_filtered' : pandas.DataFrame
         Filtered dataframe.
     """
+    assert isinstance(df.index, pd.DatetimeIndex), "Index should be DatetimeIndex"
     df_filtered = df.copy()
     df_filtered = df_filtered.loc[start_date:end_date]
 
