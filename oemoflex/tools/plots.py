@@ -49,14 +49,13 @@ def filter_timeseries(df, start_date, end_date):
 
     Returns
     ----------
-    'df' : pandas.DataFrame
+    'df_filtered' : pandas.DataFrame
         Filtered dataframe.
     """
-    mask = (df.index >= start_date) & (df.index <= end_date)
-    df = df.loc[mask]
-    df = df.copy()
+    df_filtered = df.copy()
+    df_filtered = df_filtered.loc[start_date:end_date]
 
-    return df
+    return df_filtered
 
 
 def stackplot(ax, df, colors_dict, y_stack_pos, y_stack_neg):
