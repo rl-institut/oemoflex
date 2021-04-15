@@ -34,7 +34,7 @@ def map_labels(df, labels_dict, bus_name, demand_name):
 
     return df
 
-def filter_timeseries(df, timestamp_col, start_date, end_date):
+def filter_timeseries(df, start_date, end_date):
     r"""
     Filters a dataframe with a timeseries from a start date to an end date.
 
@@ -42,8 +42,6 @@ def filter_timeseries(df, timestamp_col, start_date, end_date):
     ---------------
     'df' : pandas.DataFrame
         Dataframe with timeseries.
-    'timestamp_col' : string
-        Column name of the column which contains the timestamps.
     'start_date' : string
         String with the start date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
     'end_date' : string
@@ -54,14 +52,14 @@ def filter_timeseries(df, timestamp_col, start_date, end_date):
     'df' : pandas.DataFrame
         Filtered dataframe.
     """
-    mask = (df[timestamp_col] >= start_date) & (df[timestamp_col] <= end_date)
+    mask = (df.index >= start_date) & (df.index <= end_date)
     df = df.loc[mask]
     df = df.copy()
 
     return df
 
 
-def stackplot(ax, df, colors_dict, x, y_stack_pos, y_stack_neg):
+def stackplot(ax, df, colors_dict, y_stack_pos, y_stack_neg):
     # pos_stack and neg_stack determine the stack order
     colors=[]
     labels=[]
@@ -72,10 +70,8 @@ def stackplot(ax, df, colors_dict, x, y_stack_pos, y_stack_neg):
         colors.append(colors_dict[i])
         y_pos.append(df[i])
 
-    x = df[x]
-
     y_pos = np.vstack(y_pos)
-    ax.stackplot(x, y_pos, colors=colors, labels=labels)
+    ax.stackplot(df.index, y_pos, colors=colors, labels=labels)
 
     colors = []
     labels = []
@@ -87,24 +83,24 @@ def stackplot(ax, df, colors_dict, x, y_stack_pos, y_stack_neg):
         y_neg.append(df[i])
 
     y_neg = np.vstack(y_neg)
-    ax.stackplot(x, y_neg, colors=colors, labels=labels)
+    ax.stackplot(df.index, y_neg, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_dict, x, y_line):
+def lineplot(ax, df, colors_dict, y_line):
     y = y_line
     for i in y:
-        ax.plot(df[x], df[i], color=colors_dict[i], label=i)
+        ax.plot(df.index, df[i], color=colors_dict[i], label=i)
 
 
-def plot_dispatch(ax, df, colors_dict, labels_dict, start_date, end_date, x_timestamp,
+def plot_dispatch(ax, df, colors_dict, labels_dict, start_date, end_date,
                   y_stack_pos, y_stack_neg, y_line, bus_name, demand_name):
     df = map_labels(df, labels_dict, bus_name=bus_name, demand_name=demand_name)
     if not (start_date is None and end_date is None):
-        df = filter_timeseries(df, x_timestamp, start_date, end_date)
+        df = filter_timeseries(df, start_date, end_date)
 
-    stackplot(ax, df, colors_dict=colors_dict, x=x_timestamp,
+    stackplot(ax, df, colors_dict=colors_dict,
               y_stack_pos=y_stack_pos, y_stack_neg=y_stack_neg)
-    lineplot(ax, df, colors_dict=colors_dict, x=x_timestamp, y_line=y_line)
+    lineplot(ax, df, colors_dict=colors_dict, y_line=y_line)
 
 
 def eng_format(ax, df, unit, conv_number):
