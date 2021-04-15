@@ -1,11 +1,7 @@
-import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
-import yaml
 from matplotlib.ticker import EngFormatter
-
-from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
+#from pandas.plotting import register_matplotlib_converters
+#register_matplotlib_converters()
 
 
 def map_labels(df, labels_dict, bus_name, demand_name):
@@ -28,7 +24,7 @@ def map_labels(df, labels_dict, bus_name, demand_name):
     'df' : pandas.DataFrame
         Edited dataframe with new column names and negative sign for consumer columns.
     """
-    df.columns = data.columns.to_flat_index()
+    df.columns = df.columns.to_flat_index()
     for i in df.columns:
         if i[0] == bus_name and not (i[1] == demand_name):
             df[i] = df[i] * -1
@@ -116,29 +112,3 @@ def eng_format(ax, df, unit, conv_number):
     ax.yaxis.set_major_formatter(formatter0)
     df[df.select_dtypes(include=['number']).columns] *= conv_number
     return df
-
-
-# import data and yaml files
-input_data = r'C:\Users\meinm\Documents\Git\oemof-B3-Ergebnisdaten\03_postprocessed\simple_model\sequences\bus\BB-electricity.csv'
-data = pd.read_csv(input_data, header=[0,1,2,3], parse_dates=[0])
-
-colors_yaml = open('colors.yaml', "r")
-colors_dict = yaml.load(colors_yaml, Loader=yaml.FullLoader)
-labels_yaml = open('labels.yaml', "r")
-labels_dict = yaml.load(labels_yaml, Loader=yaml.FullLoader)
-
-
-fig, ax = plt.subplots(figsize=(12,5))
-data = eng_format(ax, data, 'W', 1000)
-
-start_date = '2019-12-01 00:00:00'
-end_date = '2019-12-13 23:00:00'
-plot_dispatch(ax, data, colors_dict, labels_dict, start_date=start_date, end_date=end_date,
-              x_timestamp='Timestamp', y_stack_pos=['Biomass', 'CH4', 'Wind', 'PV', 'BAT discharge', 'Import'],
-              y_stack_neg=['Export', 'BAT charge'], y_line=['Demand'],
-              bus_name='BB-electricity', demand_name='BB-electricity-demand')
-
-# ax.set_ylim(ymin=-1e+7, ymax=1.8e+7) # bottom, es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
-plt.legend(loc='best')
-plt.tight_layout()
-plt.show()
