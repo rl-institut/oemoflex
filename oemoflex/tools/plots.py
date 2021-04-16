@@ -5,10 +5,12 @@ from matplotlib.ticker import EngFormatter
 #register_matplotlib_converters()
 import oemoflex.tools.helpers as helpers
 
+
 colors_dict = helpers.load_yaml('colors.yaml')
 labels_dict = helpers.load_yaml('labels.yaml')
 
-def map_labels(df, labels_dict=labels_dict): # demand_name,
+
+def map_labels(df, labels_dict=labels_dict):
     r"""
     Changes the column names and makes electricity consumers negative except demand.
 
@@ -33,6 +35,7 @@ def map_labels(df, labels_dict=labels_dict): # demand_name,
         df.rename(columns={i: labels_dict[i]}, inplace=True)
 
     return df
+
 
 def filter_timeseries(df, start_date=None, end_date=None):
     r"""
@@ -59,55 +62,61 @@ def filter_timeseries(df, start_date=None, end_date=None):
     return df_filtered
 
 
-def stackplot(ax, df, y_stack_pos, y_stack_neg, colors_dict=colors_dict):
-    # pos_stack and neg_stack determine the stack order
+def stackplot(ax, df, colors_dict=colors_dict):
+    # y is a list which gets the correct stack order from colors file
     colors=[]
     labels=[]
-    y_pos = []
+    y = []
 
-    for i in y_stack_pos:
+    order = list(colors_dict)
+
+    for i in order:
+        if i not in df.columns:
+            continue
         labels.append(i)
         colors.append(colors_dict[i])
-        y_pos.append(df[i])
+        y.append(df[i])
 
-    y_pos = np.vstack(y_pos)
-    ax.stackplot(df.index, y_pos, colors=colors, labels=labels)
-
-    colors = []
-    labels = []
-    y_neg = []
-
-    for i in y_stack_neg:
-        labels.append(i)
-        colors.append(colors_dict[i])
-        y_neg.append(df[i])
-
-    y_neg = np.vstack(y_neg)
-    ax.stackplot(df.index, y_neg, colors=colors, labels=labels)
+    y = np.vstack(y)
+    ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_dict, y_line):
-    y = y_line
-    for i in y:
+def lineplot(ax, df, colors_dict=colors_dict):
+    for i in df.columns:
         ax.plot(df.index, df[i], color=colors_dict[i], label=i)
 
 
-def plot_dispatch(ax, df, y_stack_pos, y_stack_neg, y_line, bus_name, demand_name,
-                  start_date=None, end_date=None):
-
+def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None):
     # identify consumers, which shall be plotted negative
     df.columns = df.columns.to_flat_index()
     for i in df.columns:
-        if i[0] == bus_name and not (i[1] == demand_name):
+        if i[0] == bus_name:
             df[i] = df[i] * -1
 
     df = map_labels(df)
 
     df = filter_timeseries(df, start_date, end_date)
 
-    stackplot(ax, df,
-              y_stack_pos, y_stack_neg)
-    lineplot(ax, df, colors_dict=colors_dict, y_line=y_line)
+    # isolate column with demand and make the data positive again
+    df_demand = (df[demand_name] * -1).to_frame()
+    df.drop(columns=[demand_name], inplace=True)
+
+    # plot stackplot
+    y_stack_pos=[]
+    y_stack_neg=[]
+    for index, value in (df < 0).any().items():
+        if value == True:
+            y_stack_neg.append(index)
+        else:
+            y_stack_pos.append(index)
+    for i in y_stack_pos:
+        if df[i].isin([0]).all():
+            y_stack_pos.remove(i)
+    stackplot(ax, df[y_stack_pos])
+    stackplot(ax, df[y_stack_neg])
+
+    # plot lineplot (demand)
+    lineplot(ax, df_demand)
 
 
 def eng_format(ax, df, unit, conv_number):
