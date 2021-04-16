@@ -3,9 +3,12 @@ import pandas as pd
 from matplotlib.ticker import EngFormatter
 #from pandas.plotting import register_matplotlib_converters
 #register_matplotlib_converters()
+import oemoflex.tools.helpers as helpers
 
+colors_dict = helpers.load_yaml('colors.yaml')
+labels_dict = helpers.load_yaml('labels.yaml')
 
-def map_labels(df, labels_dict, bus_name, demand_name):
+def map_labels(df, bus_name, demand_name, labels_dict=labels_dict):
     r"""
     Changes the column names and makes electricity consumers negative except demand.
 
@@ -60,7 +63,7 @@ def filter_timeseries(df, start_date, end_date):
     return df_filtered
 
 
-def stackplot(ax, df, colors_dict, y_stack_pos, y_stack_neg):
+def stackplot(ax, df, y_stack_pos, y_stack_neg, colors_dict=colors_dict):
     # pos_stack and neg_stack determine the stack order
     colors=[]
     labels=[]
@@ -93,15 +96,15 @@ def lineplot(ax, df, colors_dict, y_line):
         ax.plot(df.index, df[i], color=colors_dict[i], label=i)
 
 
-def plot_dispatch(ax, df, colors_dict, labels_dict, start_date, end_date,
+def plot_dispatch(ax, df, start_date, end_date,
                   y_stack_pos, y_stack_neg, y_line, bus_name, demand_name):
-    df = map_labels(df, labels_dict, bus_name=bus_name, demand_name=demand_name)
+    df = map_labels(df, bus_name=bus_name, demand_name=demand_name)
     if not (start_date is None and end_date is None):
         df = filter_timeseries(df, start_date, end_date)
 
-    stackplot(ax, df, colors_dict=colors_dict,
-              y_stack_pos=y_stack_pos, y_stack_neg=y_stack_neg)
-    lineplot(ax, df, colors_dict=colors_dict, y_line=y_line)
+    stackplot(ax, df,
+              y_stack_pos, y_stack_neg)
+    #lineplot(ax, df, colors_dict=colors_dict, y_line=y_line)
 
 
 def eng_format(ax, df, unit, conv_number):

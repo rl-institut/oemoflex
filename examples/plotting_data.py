@@ -8,18 +8,12 @@ input_data = r'C:\Users\meinm\Documents\Git\oemof-B3-Ergebnisdaten\03_postproces
 data = pd.read_csv(input_data, header=[0,1,2], parse_dates=[0], index_col=[0])
 
 
-colors_yaml = open('colors.yaml', "r")
-colors_dict = yaml.load(colors_yaml, Loader=yaml.FullLoader)
-labels_yaml = open('labels.yaml', "r")
-labels_dict = yaml.load(labels_yaml, Loader=yaml.FullLoader)
-
-
 fig, ax = plt.subplots(figsize=(12,5))
 data = plots.eng_format(ax, data, 'W', 1000)
 
 start_date = '2019-12-01 00:00:00'
 end_date = '2019-12-13 23:00:00'
-plots.plot_dispatch(ax, data, colors_dict, labels_dict, start_date=start_date, end_date=end_date,
+plots.plot_dispatch(ax, data, start_date=start_date, end_date=end_date,
                     y_stack_pos=['Biomass', 'CH4', 'Wind', 'PV', 'BAT discharge', 'Import'],
                     y_stack_neg=['Export', 'BAT charge'], y_line=['Demand'],
                     bus_name='BB-electricity', demand_name='BB-electricity-demand')
