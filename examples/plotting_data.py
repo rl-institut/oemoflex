@@ -1,5 +1,4 @@
 import pandas as pd
-import yaml
 import matplotlib.pyplot as plt
 import oemoflex.tools.plots as plots
 

@@ -8,7 +8,7 @@ import oemoflex.tools.helpers as helpers
 colors_dict = helpers.load_yaml('colors.yaml')
 labels_dict = helpers.load_yaml('labels.yaml')
 
-def map_labels(df, bus_name, demand_name, labels_dict=labels_dict):
+def map_labels(df, labels_dict=labels_dict): # demand_name,
     r"""
     Changes the column names and makes electricity consumers negative except demand.
 
@@ -30,11 +30,7 @@ def map_labels(df, bus_name, demand_name, labels_dict=labels_dict):
     """
     df.columns = df.columns.to_flat_index()
     for i in df.columns:
-        if i[0] == bus_name and not (i[1] == demand_name):
-            df[i] = df[i] * -1
-            df.rename(columns={i: labels_dict[i]}, inplace=True)
-        else:
-            df.rename(columns={i: labels_dict[i]}, inplace=True)
+        df.rename(columns={i: labels_dict[i]}, inplace=True)
 
     return df
 
@@ -98,13 +94,21 @@ def lineplot(ax, df, colors_dict, y_line):
 
 def plot_dispatch(ax, df, start_date, end_date,
                   y_stack_pos, y_stack_neg, y_line, bus_name, demand_name):
-    df = map_labels(df, bus_name=bus_name, demand_name=demand_name)
+    
+    # identify consumers, which shall be plotted negative
+    df.columns = df.columns.to_flat_index()
+    for i in df.columns:
+        if i[0] == bus_name and not (i[1] == demand_name):
+            df[i] = df[i] * -1
+
+    df = map_labels(df)
+
     if not (start_date is None and end_date is None):
         df = filter_timeseries(df, start_date, end_date)
 
     stackplot(ax, df,
               y_stack_pos, y_stack_neg)
-    #lineplot(ax, df, colors_dict=colors_dict, y_line=y_line)
+    lineplot(ax, df, colors_dict=colors_dict, y_line=y_line)
 
 
 def eng_format(ax, df, unit, conv_number):
