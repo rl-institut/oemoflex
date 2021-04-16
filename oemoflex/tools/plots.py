@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import EngFormatter
-#from pandas.plotting import register_matplotlib_converters
-#register_matplotlib_converters()
 import oemoflex.tools.helpers as helpers
 
 
@@ -12,23 +10,19 @@ labels_dict = helpers.load_yaml('labels.yaml')
 
 def map_labels(df, labels_dict=labels_dict):
     r"""
-    Changes the column names and makes electricity consumers negative except demand.
+    Renames columns
 
     Parameters
     ---------------
-    'df' : pandas.DataFrame
-        Dataframe with electricity data.
-    'labels_dict' : dictionary
+    df : pandas.DataFrame
+        Dataframe with data.
+    labels_dict : dictionary
         Contains old and new column names. The new column names are used for the labels in the plot.
-    'bus_name' : string
-        Name of the bus to identify columns where electricty goes from the bus to a consumer.
-    'demand_name' : string
-        Name of the demand bus to identify the column where demand is the consumer.
 
     Returns
     ----------
-    'df' : pandas.DataFrame
-        Edited dataframe with new column names and negative sign for consumer columns.
+    df : pandas.DataFrame
+        Edited dataframe with new column names.
     """
     df.columns = df.columns.to_flat_index()
     for i in df.columns:
@@ -40,19 +34,21 @@ def map_labels(df, labels_dict=labels_dict):
 def filter_timeseries(df, start_date=None, end_date=None):
     r"""
     Filters a dataframe with a timeseries from a start date to an end date.
+    If start_date or end_date are not given, filtering is done from the first
+    available date or to the last available date.
 
     Parameters
     ---------------
-    'df' : pandas.DataFrame
+    df : pandas.DataFrame
         Dataframe with timeseries.
-    'start_date' : string
+    start_date : string
         String with the start date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
-    'end_date' : string
+    end_date : string
         String with the end date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
 
     Returns
     ----------
-    'df_filtered' : pandas.DataFrame
+    df_filtered : pandas.DataFrame
         Filtered dataframe.
     """
     assert isinstance(df.index, pd.DatetimeIndex), "Index should be DatetimeIndex"
@@ -63,6 +59,20 @@ def filter_timeseries(df, start_date=None, end_date=None):
 
 
 def stackplot(ax, df, colors_dict=colors_dict):
+    r"""
+    Plots data as a stackplot. The stacking order is determined by the order
+    of labels in the colors_dict. It is stacked beginning with the x-axis as
+    the bottom.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    colors_dict : dictionary
+        Dictionary with labels as keys and colourcodes as keys.
+    """
     # y is a list which gets the correct stack order from colors file
     colors=[]
     labels=[]
@@ -82,6 +92,18 @@ def stackplot(ax, df, colors_dict=colors_dict):
 
 
 def lineplot(ax, df, colors_dict=colors_dict):
+    r"""
+    Plots data as a lineplot.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    colors_dict : dictionary
+        Dictionary with labels as keys and colourcodes as keys.
+    """
     for i in df.columns:
         ax.plot(df.index, df[i], color=colors_dict[i], label=i)
 
@@ -101,7 +123,7 @@ def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None)
     df_demand = (df[demand_name] * -1).to_frame()
     df.drop(columns=[demand_name], inplace=True)
 
-    # plot stackplot
+    # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos=[]
     y_stack_neg=[]
     for index, value in (df < 0).any().items():
@@ -120,6 +142,25 @@ def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None)
 
 
 def eng_format(ax, df, unit, conv_number):
+    r"""
+    Applies the EngFormatter to y-axis.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    unit : string
+        Unit which is plotted on y-axis
+    conv_number : int
+        Conversion number to convert data to given unit.
+
+    Returns
+    ----------
+    df : pandas.DataFrame
+        Adjusted dataframe to unit.
+    """
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
     df[df.select_dtypes(include=['number']).columns] *= conv_number
