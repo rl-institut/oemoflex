@@ -34,7 +34,7 @@ def map_labels(df, labels_dict=labels_dict): # demand_name,
 
     return df
 
-def filter_timeseries(df, start_date, end_date):
+def filter_timeseries(df, start_date=None, end_date=None):
     r"""
     Filters a dataframe with a timeseries from a start date to an end date.
 
@@ -92,9 +92,9 @@ def lineplot(ax, df, colors_dict, y_line):
         ax.plot(df.index, df[i], color=colors_dict[i], label=i)
 
 
-def plot_dispatch(ax, df, start_date, end_date,
-                  y_stack_pos, y_stack_neg, y_line, bus_name, demand_name):
-    
+def plot_dispatch(ax, df, y_stack_pos, y_stack_neg, y_line, bus_name, demand_name,
+                  start_date=None, end_date=None):
+
     # identify consumers, which shall be plotted negative
     df.columns = df.columns.to_flat_index()
     for i in df.columns:
@@ -103,8 +103,7 @@ def plot_dispatch(ax, df, start_date, end_date,
 
     df = map_labels(df)
 
-    if not (start_date is None and end_date is None):
-        df = filter_timeseries(df, start_date, end_date)
+    df = filter_timeseries(df, start_date, end_date)
 
     stackplot(ax, df,
               y_stack_pos, y_stack_neg)
