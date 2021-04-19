@@ -11,7 +11,8 @@ def read(fname):
 setup(
     name='oemoflex',
     version='0.0.0',
-    description='',
+    description='A flexible model structure for creating and analysing multi-regional'
+                'sector-integrated energysystem models featuring many flexibility options',
     long_description=read('README.md'),
     packages=find_packages(),
     package_data={
