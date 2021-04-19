@@ -14,7 +14,13 @@ setup(
     description='',
     long_description=read('README.md'),
     packages=find_packages(),
-    include_package_data=True,
+    package_data={
+        'oemoflex': [
+            "*.yml",
+            "*.csv",
+            os.path.join("component_attrs", "*.csv"),
+        ],
+    },
     package_dir={'oemoflex': 'oemoflex'},
     install_requires=[
         'pyyaml',
