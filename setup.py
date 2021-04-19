@@ -15,7 +15,7 @@ setup(
     long_description=read('README.md'),
     packages=find_packages(),
     package_data={
-        'oemoflex': [
+        'oemoflex.model': [
             "*.yml",
             "*.csv",
             os.path.join("component_attrs", "*.csv"),
