@@ -14,6 +14,7 @@ setup(
     description='',
     long_description=read('README.md'),
     packages=find_packages(),
+    include_package_data=True,
     package_dir={'oemoflex': 'oemoflex'},
     install_requires=[
         'pyyaml',
