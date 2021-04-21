@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
+import os
 from matplotlib.ticker import EngFormatter
 import oemoflex.tools.helpers as helpers
 
+dir_name = os.path.abspath(os.path.dirname(__file__))
 
-colors_dict = helpers.load_yaml('colors.yaml')
-labels_dict = helpers.load_yaml('labels.yaml')
+colors_dict = helpers.load_yaml(os.path.join(dir_name,'colors.yaml'))
+labels_dict = helpers.load_yaml(os.path.join(dir_name,'labels.yaml'))
 
 
 def map_labels(df, labels_dict=labels_dict):
