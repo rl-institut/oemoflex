@@ -166,17 +166,17 @@ class ResultsDataPackage(DataFramePackage):
 
         rel_paths = {}
 
-        data_scal, rel_paths_scal = self.get_scalars(self, es)
+        # data_scal, rel_paths_scal = self.get_scalars(self, es)
 
         data_seq, rel_paths_seq = self.get_sequences(self, es)
 
         data.update(data_seq)
 
-        data.update(data_scal)
+        # data.update(data_scal)
 
         rel_paths.update(rel_paths_seq)
 
-        rel_paths.update(rel_paths_scal)
+        # rel_paths.update(rel_paths_scal)
 
         return data, rel_paths
 
