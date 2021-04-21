@@ -13,7 +13,7 @@ data = plots.eng_format(ax, data, 'W', 1000)
 start_date = '2019-12-01 00:00:00'
 end_date = '2019-12-13 23:00:00'
 plots.plot_dispatch(ax = ax, df=data, start_date=start_date, end_date=end_date,
-                    bus_name='BB-electricity', demand_name='Demand')
+                    bus_name='BB-electricity', demand_name='BB-electricity-demand')
 
 # ymin, ymax: es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
 plt.legend(loc='best')

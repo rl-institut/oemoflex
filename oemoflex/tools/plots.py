@@ -10,7 +10,8 @@ labels_dict = helpers.load_yaml('labels.yaml')
 
 def map_labels(df, labels_dict=labels_dict):
     r"""
-    Renames columns
+    Renames columns according to the specifications in the label_dict. The data has multilevel column names. Thus,
+    the labels_dict need a tuple as key. The value is used as the new column name.
 
     Parameters
     ---------------
@@ -109,19 +110,22 @@ def lineplot(ax, df, colors_dict=colors_dict):
 
 
 def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None):
-    # identify consumers, which shall be plotted negative
+
+    df = filter_timeseries(df, start_date, end_date)
+
+    # identify consumers, which shall be plotted negative and
+    # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
     for i in df.columns:
         if i[0] == bus_name:
             df[i] = df[i] * -1
+        if i[1] == demand_name:
+            df_demand = (df[i] * -1).to_frame()
+            df.drop(columns=[i], inplace=True)
 
+    # rename column names
     df = map_labels(df)
-
-    df = filter_timeseries(df, start_date, end_date)
-
-    # isolate column with demand and make the data positive again
-    df_demand = (df[demand_name] * -1).to_frame()
-    df.drop(columns=[demand_name], inplace=True)
+    df_demand = map_labels(df_demand)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos=[]
