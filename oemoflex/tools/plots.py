@@ -1,13 +1,19 @@
 import numpy as np
 import pandas as pd
 import os
+from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
 import oemoflex.tools.helpers as helpers
 
 dir_name = os.path.abspath(os.path.dirname(__file__))
 
-colors_dict = helpers.load_yaml(os.path.join(dir_name,'colors.yaml'))
 labels_dict = helpers.load_yaml(os.path.join(dir_name,'labels.yaml'))
+
+colors_csv = pd.read_csv(os.path.join(dir_name, 'colors.csv'), header=[0], index_col=[0])
+colors_csv = colors_csv.T
+colors_odict = OrderedDict()
+for i in colors_csv.columns:
+    colors_odict[i] = colors_csv.loc['Color',i]
 
 
 def map_labels(df, labels_dict=labels_dict):
@@ -61,10 +67,10 @@ def filter_timeseries(df, start_date=None, end_date=None):
     return df_filtered
 
 
-def stackplot(ax, df, colors_dict=colors_dict):
+def stackplot(ax, df, colors_odict=colors_odict):
     r"""
     Plots data as a stackplot. The stacking order is determined by the order
-    of labels in the colors_dict. It is stacked beginning with the x-axis as
+    of labels in the colors_odict. It is stacked beginning with the x-axis as
     the bottom.
 
     Parameters
@@ -73,28 +79,28 @@ def stackplot(ax, df, colors_dict=colors_dict):
         Axis on which data is plotted.
     df : pandas.DataFrame
         Dataframe with data.
-    colors_dict : dictionary
-        Dictionary with labels as keys and colourcodes as keys.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
     """
     # y is a list which gets the correct stack order from colors file
     colors=[]
     labels=[]
     y = []
 
-    order = list(colors_dict)
+    order = list(colors_odict)
 
     for i in order:
         if i not in df.columns:
             continue
         labels.append(i)
-        colors.append(colors_dict[i])
+        colors.append(colors_odict[i])
         y.append(df[i])
 
     y = np.vstack(y)
     ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_dict=colors_dict):
+def lineplot(ax, df, colors_odict=colors_odict):
     r"""
     Plots data as a lineplot.
 
@@ -104,11 +110,11 @@ def lineplot(ax, df, colors_dict=colors_dict):
         Axis on which data is plotted.
     df : pandas.DataFrame
         Dataframe with data.
-    colors_dict : dictionary
-        Dictionary with labels as keys and colourcodes as keys.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
     """
     for i in df.columns:
-        ax.plot(df.index, df[i], color=colors_dict[i], label=i)
+        ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
 def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None):
@@ -125,7 +131,7 @@ def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None)
             df_demand = (df[i] * -1).to_frame()
             df.drop(columns=[i], inplace=True)
 
-    # rename column names
+    # rename column names to match labels
     df = map_labels(df)
     df_demand = map_labels(df_demand)
 
