@@ -18,8 +18,9 @@ for i in colors_csv.columns:
 
 def map_labels(df, labels_dict=labels_dict):
     r"""
-    Renames columns according to the specifications in the label_dict. The data has multilevel column names. Thus,
-    the labels_dict need a tuple as key. The value is used as the new column name.
+    Renames columns according to the specifications in the label_dict. The data has multilevel
+    column names. Thus, the labels_dict need a tuple as key. The value is used as the new column
+    name.
 
     Parameters
     ---------------
