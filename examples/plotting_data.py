@@ -25,7 +25,6 @@ plots.plot_dispatch(
     demand_name="BB-electricity-demand",
 )
 
-# ymin, ymax: es gibt noch Fehlerwerte in den Daten (extrem große kurze Produktion)
 plt.legend(loc="best")
 plt.tight_layout()
 plt.show()

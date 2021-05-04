@@ -35,8 +35,7 @@ def map_labels(df, labels_dict=labels_dict):
         Edited dataframe with new column names.
     """
     df.columns = df.columns.to_flat_index()
-    for i in df.columns:
-        df.rename(columns={i: labels_dict[i]}, inplace=True)
+    df.rename(columns=labels_dict, inplace=True)
 
     return df
 
