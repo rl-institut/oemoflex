@@ -127,7 +127,7 @@ def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None)
     for i in df.columns:
         if i[0] == bus_name:
             df[i] = df[i] * -1
-        if i[1] == demand_name:
+        if "demand" in i[1]:
             df_demand = (df[i] * -1).to_frame()
             df.drop(columns=[i], inplace=True)
 

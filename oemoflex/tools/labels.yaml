@@ -10,3 +10,16 @@
 !!python/tuple ['BB-solar-pv', 'BB-electricity', 'flow']: PV
 !!python/tuple ['BB-wind-onshore', 'BB-electricity', 'flow']: Wind
 !!python/tuple ['BE-BB', 'BB-electricity', 'flow']: Import
+
+!!python/tuple ['from', 'to', 'type']: Timestamp
+!!python/tuple ['BE-biomass-st', 'BE-electricity', 'flow']: Biomass
+!!python/tuple ['BE-ch4-gt', 'BE-electricity', 'flow']: CH4
+!!python/tuple ['BE-electricity', 'BE-electricity-curtailment', 'flow']: Curtailment
+!!python/tuple ['BE-electricity', 'BE-electricity-demand', 'flow']: Demand
+!!python/tuple ['BE-electricity', 'BE-electricity-liion-battery', 'flow']: BAT charge
+!!python/tuple ['BE-electricity', 'BE-BB', 'flow']: Export
+!!python/tuple ['BE-electricity-liion-battery', 'BE-electricity', 'flow']: BAT discharge
+!!python/tuple ['BE-electricity-shortage', 'BE-electricity', 'flow']: Shortage
+!!python/tuple ['BE-solar-pv', 'BE-electricity', 'flow']: PV
+!!python/tuple ['BE-wind-onshore', 'BE-electricity', 'flow']: Wind
+!!python/tuple ['BE-BB', 'BE-electricity', 'flow']: Import
