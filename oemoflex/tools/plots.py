@@ -117,7 +117,7 @@ def lineplot(ax, df, colors_odict=colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None):
+def plot_dispatch(ax, df, bus_name, start_date=None, end_date=None):
 
     df = filter_timeseries(df, start_date, end_date)
 
