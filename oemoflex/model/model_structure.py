@@ -79,6 +79,7 @@ def create_default_data(
             component_attrs_file,
             select_regions,
             datetimeindex,
+            dummy_sequences=dummy_sequences,
         )
 
         def get_profile_rel_path(name):
