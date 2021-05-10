@@ -72,26 +72,28 @@ def create_default_data(
 
     rel_paths = {key: os.path.join('data', elements_subdir, key + '.csv') for key in data.keys()}
 
-    profile_data = create_component_sequences(
-        component_attrs_file,
-        select_regions,
-        datetimeindex,
-        dummy_sequences=False, dummy_value=0,
-    )
+    for component in components:
+        component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
 
-    def get_profile_rel_path(name):
+        profile_data = create_component_sequences(
+            component_attrs_file,
+            select_regions,
+            datetimeindex,
+        )
 
-        file_name = name.replace('-profile', '_profile') + '.csv'
+        def get_profile_rel_path(name):
 
-        path = os.path.join('data', sequences_subdir, file_name)
+            file_name = name.replace('-profile', '_profile') + '.csv'
 
-        return path
+            path = os.path.join('data', sequences_subdir, file_name)
 
-    rel_paths.update(
-        {key: get_profile_rel_path(key) for key in profile_data.keys()}
-    )
+            return path
 
-    data.update(profile_data)
+        rel_paths.update(
+            {key: get_profile_rel_path(key) for key in profile_data.keys()}
+        )
+
+        data.update(profile_data)
 
     return data, rel_paths
 
