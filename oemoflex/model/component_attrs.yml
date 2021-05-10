@@ -1,0 +1,170 @@
+biomass-gt:
+  carrier: biomass
+  tech: gt
+  type: conversion
+  from_bus: biomass
+  to_bus: electricity
+
+ch4-boiler:
+  carrier: ch4
+  tech: boiler
+  type: conversion
+  from_bus: ch4
+  to_bus: heat
+
+ch4-bpchp:
+  carrier: ch4
+  tech: bpchp
+  type: backpressure
+  fuel_bus: ch4
+  electricity_bus: electricity
+  heat_bus: heat
+
+ch4-excess:
+  carrier: ch4
+  tech: excess
+  type: excess
+  bus: ch4
+
+ch4-extchp:
+  carrier: ch4
+  tech: extchp
+  type: extraction
+  fuel_bus: ch4
+  electricity_bus: electricity
+  heat_bus: heat
+
+ch4-gt:
+  carrier: ch4
+  tech: gt
+  type: conversion
+  from_bus: ch4
+  to_bus: electricity
+
+electricity-bev:
+  carrier: electricity
+  tech: bev
+  type: bev
+  bus: electricity
+
+electricity-curtailment:
+  carrier: electricity
+  tech: curtailment
+  type: excess
+  bus: electricity
+
+electricity-demand:
+  carrier: electricity
+  tech: demand
+  type: load
+  bus: electricity
+  profile: electricity-demand-profile
+
+electricity-h2_cavern:
+  carrier: ch4
+  tech: h2_cavern
+  type: assymetric_storage
+  bus: electricity
+
+electricity-heatpump:
+  carrier: electricity
+  tech: heatpump
+  type: conversion
+  from_bus: electricity
+  to_bus: heat
+
+electricity-liion_battery:
+  carrier: electricity
+  tech: liion_battery
+  type: storage
+  bus: electricity
+
+electricity-pth:
+  carrier: electricity
+  tech: pth
+  type: conversion
+  from_bus: electricity
+  to_bus: heat
+
+electricity-shortage:
+  carrier: electricity
+  tech: shortage
+  type: shortage
+  bus: electricity
+
+electricity-transmission:
+  carrier: electricity
+  tech: transmission
+  type: link
+  from_bus: electricity
+  to_bus: electricity
+
+h2-gt:
+  carrier: h2
+  tech: gt
+  type: conversion
+  from_bus: h2
+  to_bus: electricity
+
+heat-demand:
+  carrier: heat
+  tech: demand
+  type: load
+  bus: heat
+
+heat-excess:
+  carrier: heat
+  tech: excess
+  type: excess
+  bus: heat
+
+heat-shortage:
+  carrier: heat
+  tech: shortage
+  type: shortage
+  bus: heat
+
+heat-storage:
+  carrier: heat
+  tech: storage
+  type: storage
+  bus: heat
+
+hydro-reservoir:
+  carrier: hydro
+  tech: reservoir
+  type: reservoir
+  bus: electricity
+  profile: hydro-reservoir_profile
+
+hydro-ror:
+  carrier: hydro
+  tech: ror
+  type: volatile
+  bus: electricity
+
+solar-pv:
+  carrier: solar
+  tech: pv
+  type: volatile
+  bus: electricity
+
+uranium-nuclear_st:
+  carrier: uranium
+  tech: nuclear_st
+  type: conversion
+  from_bus: uranium
+  to_bus: electricity
+
+wind-offshore:
+  carrier: wind
+  tech: offshore
+  type: volatile
+  from_bus: ch4
+  bus: electricity
+
+wind-onshore:
+  carrier: wind
+  tech: onshore
+  type: volatile
+  bus: electricity
