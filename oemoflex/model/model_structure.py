@@ -58,19 +58,27 @@ def create_default_data(
 
     data = {}
 
+    # Create bus df
     bus_df = create_bus_element(busses_file, select_busses, select_regions)
 
     data['bus'] = bus_df
 
+    # Create component dfs
     for component in components:
         component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
 
-        df = create_component_element(component_attrs_file, select_regions, select_links)
-
-        # Write to target directory
-        data[component] = df
+        data[component] = create_component_element(component_attrs_file, select_regions, select_links)
 
     rel_paths = {key: os.path.join('data', elements_subdir, key + '.csv') for key in data.keys()}
+
+    # Create profile dfs
+    def get_profile_rel_path(name):
+
+        file_name = name.replace('-profile', '_profile') + '.csv'
+
+        path = os.path.join('data', sequences_subdir, file_name)
+
+        return path
 
     for component in components:
         component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
@@ -82,19 +90,11 @@ def create_default_data(
             dummy_sequences=dummy_sequences,
         )
 
-        def get_profile_rel_path(name):
-
-            file_name = name.replace('-profile', '_profile') + '.csv'
-
-            path = os.path.join('data', sequences_subdir, file_name)
-
-            return path
+        data.update(profile_data)
 
         rel_paths.update(
             {key: get_profile_rel_path(key) for key in profile_data.keys()}
         )
-
-        data.update(profile_data)
 
     return data, rel_paths
 
