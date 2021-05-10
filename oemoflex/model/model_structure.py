@@ -256,6 +256,6 @@ def create_component_sequences(
 
         profile_data[profile_name] = profile_df
 
-        print(f"Created {dummy_msg} profile.")
+        print(f"Created {dummy_msg} profile: '{profile_name}'.")
 
     return profile_data
