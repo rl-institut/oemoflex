@@ -160,7 +160,6 @@ wind-offshore:
   carrier: wind
   tech: offshore
   type: volatile
-  from_bus: ch4
   bus: electricity
 
 wind-onshore:
