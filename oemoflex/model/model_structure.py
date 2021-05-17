@@ -13,8 +13,7 @@ def create_default_data(
         select_busses=None,
         dummy_sequences=False,
         busses_file=os.path.join(module_path, 'busses.csv'),
-        components_file=os.path.join(module_path, 'components.csv'),
-        component_attrs_dir=os.path.join(module_path, 'component_attrs'),
+        component_attrs_file=os.path.join(module_path, 'component_attrs.yml'),
         elements_subdir='elements',
         sequences_subdir='sequences',
 ):
@@ -41,35 +40,31 @@ def create_default_data(
     -------
     None
     """
-    components_file = os.path.join(module_path, components_file)
+    component_attrs = os.path.join(module_path, component_attrs_file)
 
-    # TODO Better put this as another field into the components.csv as well?
-    component_attrs_dir = os.path.join(module_path, component_attrs_dir)
+    defined_components = component_attrs.keys()
 
-    components = pd.read_csv(components_file).name.values
+    defined_busses = pd.read_csv(busses_file)
 
-    if select_components is not None:
-        undefined_components = set(select_components).difference(set(components))
+    select_busses = select_nodes(select_busses, defined_busses)
 
-        assert not undefined_components,\
-            f"Selected components {undefined_components} are not in components."
-
-        components = [c for c in components if c in select_components]
+    select_components = select_nodes(select_components, defined_components)
 
     data = {}
 
-    # Create bus df
-    bus_df = create_bus_element(busses_file, select_busses, select_regions)
+    rel_paths = {}
 
-    data['bus'] = bus_df
+    # Create bus df
+    data['bus'] = create_bus_element(select_busses, select_regions)
 
     # Create component dfs
-    for component in components:
-        component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
+    for component in select_components:
 
-        data[component] = create_component_element(component_attrs_file, select_regions, select_links)
+        specs = component_attrs[component]
 
-    rel_paths = {key: os.path.join('data', elements_subdir, key + '.csv') for key in data.keys()}
+        data[component] = create_component_element(specs, select_regions, select_links)
+
+        rel_paths[component] = os.path.join('data', elements_subdir, component + '.csv')
 
     # Create profile dfs
     def get_profile_rel_path(name):
@@ -80,11 +75,12 @@ def create_default_data(
 
         return path
 
-    for component in components:
-        component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
+    for component in select_components:
+
+        specs = component_attrs[component]
 
         profile_data = create_component_sequences(
-            component_attrs_file,
+            specs,
             select_regions,
             datetimeindex,
             dummy_sequences=dummy_sequences,
@@ -97,6 +93,19 @@ def create_default_data(
         )
 
     return data, rel_paths
+
+
+def select_nodes(selected_nodes, defined_nodes):
+    if selected_nodes is not None:
+        undefined_nodes = set(selected_nodes).difference(set(defined_nodes))
+
+        assert not undefined_nodes, \
+            f"Selected nodes {undefined_nodes} are not defined."
+
+    else:
+        selected_nodes = defined_nodes
+
+    return selected_nodes
 
 
 def create_bus_element(busses_file, select_busses, select_regions):
