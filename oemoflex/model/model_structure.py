@@ -73,31 +73,31 @@ def create_default_data(
 
         rel_paths[component] = os.path.join('data', elements_subdir, component + '.csv')
 
-    # Create profile dfs
-    def get_profile_rel_path(name):
-
-        file_name = name.replace('-profile', '_profile') + '.csv'
-
-        path = os.path.join('data', sequences_subdir, file_name)
-
-        return path
-
-    for component in select_components:
-
-        specs = component_attrs[component]
-
-        profile_data = create_component_sequences(
-            specs,
-            select_regions,
-            datetimeindex,
-            dummy_sequences=dummy_sequences,
-        )
-
-        data.update(profile_data)
-
-        rel_paths.update(
-            {key: get_profile_rel_path(key) for key in profile_data.keys()}
-        )
+    # # Create profile dfs
+    # def get_profile_rel_path(name):
+    #
+    #     file_name = name.replace('-profile', '_profile') + '.csv'
+    #
+    #     path = os.path.join('data', sequences_subdir, file_name)
+    #
+    #     return path
+    #
+    # for component in select_components:
+    #
+    #     specs = component_attrs[component]
+    #
+    #     profile_data = create_component_sequences(
+    #         specs,
+    #         select_regions,
+    #         datetimeindex,
+    #         dummy_sequences=dummy_sequences,
+    #     )
+    #
+    #     data.update(profile_data)
+    #
+    #     rel_paths.update(
+    #         {key: get_profile_rel_path(key) for key in profile_data.keys()}
+    #     )
 
     return data, rel_paths
 
@@ -167,26 +167,48 @@ def create_component_element(component_attrs, select_regions, select_links):
 
     """
     # Collect default values and suffices for the component
-    defaults = component_attrs.loc[component_attrs['default'].notna(), 'default'].to_dict()
+    foreign_keys = component_attrs['foreign_keys']
 
-    suffices = component_attrs.loc[component_attrs['suffix'].notna(), 'suffix'].to_dict()
+    def pop_keys(dictionary, keys):
+        popped = {}
 
-    comp_data = {key: None for key in component_attrs.index}
+        for key in keys:
+            popped[key] = dictionary.pop(key)
+
+        return popped
+
+    simple = ['carrier', 'type', 'tech']
+
+    simple_keys = pop_keys(component_attrs, simple)
+
+    defaults = {}
+    if 'defaults' in component_attrs:
+        defaults = component_attrs['defaults']
+
+    facade_attrs = pd.read_csv(
+        os.path.join(module_path, 'facade_attrs', simple_keys['type'] + '.csv'),
+        index_col=0,
+        header=0
+    )
+
+    comp_data = {key: None for key in facade_attrs.index}
+
+    comp_data.update(simple_keys)
 
     # Create dict for component data
-    if defaults['type'] == 'link':
+    if simple_keys['type'] == 'link':
         # TODO: Check the diverging conventions of '-' and '_' and think about unifying.
         comp_data['region'] = [link.replace('-', '_') for link in select_links]
         comp_data['name'] = select_links
-        comp_data['from_bus'] = [link.split('-')[0] + suffices['from_bus'] for link in select_links]
-        comp_data['to_bus'] = [link.split('-')[1] + suffices['to_bus'] for link in select_links]
+        comp_data['from_bus'] = [link.split('-')[0] + foreign_keys['from_bus'] for link in select_links]
+        comp_data['to_bus'] = [link.split('-')[1] + foreign_keys['to_bus'] for link in select_links]
 
     else:
         comp_data['region'] = select_regions
-        comp_data['name'] = [region + suffices['name'] for region in select_regions]
+        comp_data['name'] = ['-'.join([region, simple_keys['carrier'], simple_keys['tech']]) for region in select_regions]
 
-        for key, value in suffices.items():
-            comp_data[key] = [region + value for region in select_regions]
+        for key, value in foreign_keys.items():
+            comp_data[key] = [region + '-' + value for region in select_regions]
 
     for key, value in defaults.items():
         comp_data[key] = value
