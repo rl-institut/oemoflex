@@ -2,6 +2,8 @@ import os
 
 import pandas as pd
 
+from oemoflex.tools.helpers import load_yaml
+
 module_path = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -40,22 +42,27 @@ def create_default_data(
     -------
     None
     """
-    component_attrs = os.path.join(module_path, component_attrs_file)
+    # load definitions
+    component_attrs = load_yaml(component_attrs_file)
 
     defined_components = component_attrs.keys()
 
-    defined_busses = pd.read_csv(busses_file)
+    defined_busses = pd.read_csv(busses_file, index_col='carrier')
 
+    # select busses and components or choose all if selection is None
     select_busses = select_nodes(select_busses, defined_busses)
 
     select_components = select_nodes(select_components, defined_components)
 
+    # Create empty dictionaries for the dataframes and their relative paths in the datapackage.
     data = {}
 
     rel_paths = {}
 
     # Create bus df
     data['bus'] = create_bus_element(select_busses, select_regions)
+
+    rel_paths['bus'] = os.path.join('data', elements_subdir, 'bus' + '.csv')
 
     # Create component dfs
     for component in select_components:
@@ -108,7 +115,7 @@ def select_nodes(selected_nodes, defined_nodes):
     return selected_nodes
 
 
-def create_bus_element(busses_file, select_busses, select_regions):
+def create_bus_element(select_busses, select_regions):
     r"""
 
     Parameters
@@ -121,17 +128,12 @@ def create_bus_element(busses_file, select_busses, select_regions):
     bus_df : pd.DataFrame
         Bus element DataFrame
     """
-    busses = pd.read_csv(busses_file, index_col='carrier')
-
-    if select_busses:
-        busses = busses.loc[select_busses]
-
     regions = []
     carriers = []
     balanced = []
 
     for region in select_regions:
-        for carrier, row in busses.iterrows():
+        for carrier, row in select_busses.iterrows():
             regions.append(region)
             carriers.append(region + '-' + carrier)
             balanced.append(row['balanced'])
@@ -148,7 +150,7 @@ def create_bus_element(busses_file, select_busses, select_regions):
     return bus_df
 
 
-def create_component_element(component_attrs_file, select_regions, select_links):
+def create_component_element(component_attrs, select_regions, select_links):
     r"""
     Loads file for component attribute specs and returns a pd.DataFrame with the right regions,
     links, names, references to profiles and default values.
@@ -164,12 +166,6 @@ def create_component_element(component_attrs_file, select_regions, select_links)
         DataFrame for the given component with default values filled.
 
     """
-    try:
-        component_attrs = pd.read_csv(component_attrs_file, index_col=0)
-
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"There is no file {component_attrs_file}") from e
-
     # Collect default values and suffices for the component
     defaults = component_attrs.loc[component_attrs['default'].notna(), 'default'].to_dict()
 
