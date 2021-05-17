@@ -22,7 +22,6 @@ plots.plot_dispatch(
     start_date=start_date,
     end_date=end_date,
     bus_name="BB-electricity",
-    demand_name="BB-electricity-demand",
 )
 
 plt.legend(loc="best")

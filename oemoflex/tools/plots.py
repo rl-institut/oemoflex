@@ -117,7 +117,7 @@ def lineplot(ax, df, colors_odict=colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(ax, df, bus_name, start_date=None, end_date=None):
+def plot_dispatch(ax, df, bus_name, start_date=None, end_date=None, demand_name="demand"):
 
     df = filter_timeseries(df, start_date, end_date)
 
@@ -127,7 +127,7 @@ def plot_dispatch(ax, df, bus_name, start_date=None, end_date=None):
     for i in df.columns:
         if i[0] == bus_name:
             df[i] = df[i] * -1
-        if "demand" in i[1]:
+        if demand_name in i[1]:
             df_demand = (df[i] * -1).to_frame()
             df.drop(columns=[i], inplace=True)
 
