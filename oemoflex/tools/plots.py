@@ -5,6 +5,8 @@ from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
 import oemoflex.tools.helpers as helpers
 
+pd.plotting.register_matplotlib_converters()
+
 dir_name = os.path.abspath(os.path.dirname(__file__))
 
 labels_dict = helpers.load_yaml(os.path.join(dir_name,'labels.yaml'))
