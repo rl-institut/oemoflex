@@ -1,4 +1,5 @@
 import os
+from shutil import rmtree
 
 from oemof.tools.helpers import extend_basic_path
 
@@ -46,6 +47,9 @@ def test_edp_setup_default():
         regions=regions,
         links=links,
     )
+
+    if rmtree(basepath):
+        os.remove(basepath)
 
     edp.to_csv_dir(basepath)
 
