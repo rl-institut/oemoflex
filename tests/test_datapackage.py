@@ -1,4 +1,9 @@
+import os
+
+from oemof.tools.helpers import extend_basic_path
+
 from oemoflex.model.datapackage import DataFramePackage, EnergyDataPackage
+from oemoflex.tools.helpers import check_if_csv_dirs_equal
 
 
 def test_datapackage():
@@ -22,24 +27,26 @@ def test_edp():
 
 def test_edp_setup_default():
 
-    name = 'test_edp'
-    basepath = './test_edp',
-    datetimeindex = None
-    components = None
-    busses = None
-    regions = None
-    links = None
+    here = os.path.dirname(__file__)
+    defaultpath = os.path.join(here, '_files', 'default_edp')
+    tmp = extend_basic_path('tmp')
 
-    EnergyDataPackage.setup_default(
+    name = 'test_edp'
+    basepath = os.path.join(tmp, name)
+    datetimeindex = None
+    regions = ['A', 'B']
+    links = ['A-B']
+
+    edp = EnergyDataPackage.setup_default(
         name=name,
+        components=None,
+        busses=None,
         basepath=basepath,
         datetimeindex=datetimeindex,
-        components=components,
-        busses=busses,
         regions=regions,
         links=links,
     )
 
-    assert name == name
+    edp.to_csv_dir(basepath)
 
-    assert basepath == basepath
+    check_if_csv_dirs_equal(basepath, defaultpath)

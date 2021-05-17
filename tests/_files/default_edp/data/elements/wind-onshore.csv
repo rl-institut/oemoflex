@@ -1,0 +1,3 @@
+region,name,type,carrier,tech,bus,capacity,capacity_cost,expandable,marginal_cost,profile,output_parameters
+A,A-wind-onshore,volatile,wind,onshore,A-electricity,,,,0,A-wind-onshore-profile,{}
+B,B-wind-onshore,volatile,wind,onshore,B-electricity,,,,0,B-wind-onshore-profile,{}
