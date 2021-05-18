@@ -48,8 +48,8 @@ def test_edp_setup_default():
         links=links,
     )
 
-    if rmtree(basepath):
-        os.remove(basepath)
+    if os.path.exists(basepath):
+        rmtree(basepath)
 
     edp.to_csv_dir(basepath)
 
