@@ -200,8 +200,8 @@ def create_component_element(component_attrs, select_regions, select_links):
         # TODO: Check the diverging conventions of '-' and '_' and think about unifying.
         comp_data['region'] = [link.replace('-', '_') for link in select_links]
         comp_data['name'] = select_links
-        comp_data['from_bus'] = [link.split('-')[0] + foreign_keys['from_bus'] for link in select_links]
-        comp_data['to_bus'] = [link.split('-')[1] + foreign_keys['to_bus'] for link in select_links]
+        comp_data['from_bus'] = [link.split('-')[0] + '-' + foreign_keys['from_bus'] for link in select_links]
+        comp_data['to_bus'] = [link.split('-')[1] + '-' + foreign_keys['to_bus'] for link in select_links]
 
     else:
         comp_data['region'] = select_regions
