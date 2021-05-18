@@ -73,31 +73,31 @@ def create_default_data(
 
         rel_paths[component] = os.path.join('data', elements_subdir, component + '.csv')
 
-    # # Create profile dfs
-    # def get_profile_rel_path(name):
-    #
-    #     file_name = name.replace('-profile', '_profile') + '.csv'
-    #
-    #     path = os.path.join('data', sequences_subdir, file_name)
-    #
-    #     return path
-    #
-    # for component in select_components:
-    #
-    #     specs = component_attrs[component]
-    #
-    #     profile_data = create_component_sequences(
-    #         specs,
-    #         select_regions,
-    #         datetimeindex,
-    #         dummy_sequences=dummy_sequences,
-    #     )
-    #
-    #     data.update(profile_data)
-    #
-    #     rel_paths.update(
-    #         {key: get_profile_rel_path(key) for key in profile_data.keys()}
-    #     )
+    # Create profile dfs
+    def get_profile_rel_path(name):
+
+        file_name = name.replace('-profile', '_profile') + '.csv'
+
+        path = os.path.join('data', sequences_subdir, file_name)
+
+        return path
+
+    for component in select_components:
+
+        specs = component_attrs[component]
+
+        profile_data = create_component_sequences(
+            specs,
+            select_regions,
+            datetimeindex,
+            dummy_sequences=dummy_sequences,
+        )
+
+        data.update(profile_data)
+
+        rel_paths.update(
+            {key: get_profile_rel_path(key) for key in profile_data.keys()}
+        )
 
     return data, rel_paths
 
@@ -219,18 +219,21 @@ def create_component_element(component_attrs, select_regions, select_links):
 
 
 def create_component_sequences(
-        component_attrs_file, select_regions, datetimeindex,
+        component_attrs, select_regions, datetimeindex,
         dummy_sequences=False, dummy_value=0,
 ):
     r"""
 
     Parameters
     ----------
-    component_attrs_file : path
-        Path to file describing the components' attributes
+    component_attrs : dict
+        Dictionary describing the components' attributes
 
-    destination : path
+    select_regions : path
         Path where sequences are saved.
+
+    datetimeindex : pd.DateTimeIndex
+        Timeindex of the sequences
 
     dummy_sequences : bool
         If True, create a short timeindex and dummy values.
@@ -240,25 +243,12 @@ def create_component_sequences(
 
     Returns
     -------
-    None
+    profile_data : dict
+        Dictionary containing profile DataFrames.
     """
-    try:
-        component_attrs = pd.read_csv(component_attrs_file, index_col=0)
+    foreign_keys = component_attrs['foreign_keys']
 
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"There is no file {component_attrs_file}") from e
-
-    suffices = component_attrs.loc[component_attrs['suffix'].notna(), 'suffix'].to_dict()
-
-    def remove_prefix(string, prefix):
-        if string.startswith(prefix):
-            return string[len(prefix):]
-
-    def remove_suffix(string, suffix):
-        if string.endswith(suffix):
-            return string[:-len(suffix)]
-
-    profile_names = {k: remove_prefix(v, '-') for k, v in suffices.items() if 'profile' in v}
+    profile_names = {k: v for k, v in foreign_keys.items() if 'profile' in v}
 
     profile_data = {}
 
