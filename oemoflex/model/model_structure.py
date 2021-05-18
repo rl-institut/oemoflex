@@ -26,21 +26,43 @@ def create_default_data(
 
     Parameters
     ----------
-    destination : str (dir path)
-        target directory where to put the prepared CSVs
+    select_regions : list
+        List of regions.
 
-    components_file : str (file path)
-        CSV where to read the components from
+    select_links : list
+        List of links.
 
-    component_attrs_dir : str (dir path)
-        CSV where to read the components' attributes from
+    datetimeindex : pd.DateTimeIndex
+        Timeindex for sequences.
 
     select_components : list
-        List of default elements to create
+        List of components.
+
+    select_busses : list
+        List of busses.
+
+    dummy_sequences : True/False
+        Create dummy sequences.
+
+    busses_file : path
+        Path to a CSV file that defines the busses
+
+    component_attrs_file : path
+        Path to a YAML file that defines the component_attributes
+
+    elements_subdir : str
+        oemof.tabular definition.
+
+    sequences_subdir : str
+        oemof.tabular definition.
 
     Returns
     -------
-    None
+    data : dict
+        Dictionary containing pd.DataFrames for elements and sequences
+
+    rel_paths : dict
+        Dictionary containing relative file paths.
     """
     # load definitions
     component_attrs = load_yaml(component_attrs_file)
@@ -152,13 +174,13 @@ def create_bus_element(select_busses, select_regions):
 
 def create_component_element(component_attrs, select_regions, select_links):
     r"""
-    Loads file for component attribute specs and returns a pd.DataFrame with the right regions,
+    Takes dictionary for component attribute specs and returns a pd.DataFrame with the regions,
     links, names, references to profiles and default values.
 
     Parameters
     ----------
-    component_attrs_file : path
-        Path to file with component attribute specifications.
+    component_attrs : dict
+        Dcitionary with component attribute specifications.
 
     Returns
     -------
