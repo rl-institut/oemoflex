@@ -1,3 +1,0 @@
-region,name,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,output_parameters
-A,A-uranium-nuclear-st,conversion,uranium,nuclear-st,A-uranium,A-electricity,,,,,0,,{}
-B,B-uranium-nuclear-st,conversion,uranium,nuclear-st,B-uranium,B-electricity,,,,,0,,{}

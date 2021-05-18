@@ -209,6 +209,7 @@ hydro-ror:
     bus: electricity
     profile: hydro-ror-profile
   defaults:
+    marginal_cost: 0
     output_parameters: "{}"
 
 solar-pv:
