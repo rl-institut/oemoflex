@@ -146,6 +146,12 @@ class EnergyDataPackage(DataFramePackage):
             path=self.basepath,
         )
 
+    def parametrize(self, frame, column, values):
+
+        assert column in self.data[frame].columns, f"Column '{column}' is not defined!"
+
+        self.data[frame].loc[:, column] = values
+
 
 class ResultsDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
