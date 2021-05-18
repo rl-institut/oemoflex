@@ -54,3 +54,26 @@ def test_edp_setup_default():
     edp.to_csv_dir(basepath)
 
     check_if_csv_dirs_equal(basepath, defaultpath)
+
+
+def test_edp_setup_default_select():
+
+    tmp = extend_basic_path('tmp')
+
+    name = 'test_edp'
+    components = ['electricity-heatpump', 'ch4-boiler']
+    busses = ['ch4', 'electricity', 'heat']
+    basepath = os.path.join(tmp, name)
+    datetimeindex = None
+    regions = ['A', 'B']
+    links = ['A-B']
+
+    EnergyDataPackage.setup_default(
+        name=name,
+        components=components,
+        busses=busses,
+        basepath=basepath,
+        datetimeindex=datetimeindex,
+        regions=regions,
+        links=links,
+    )

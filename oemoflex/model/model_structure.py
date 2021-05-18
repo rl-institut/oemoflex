@@ -71,10 +71,11 @@ def create_default_data(
 
     defined_busses = pd.read_csv(busses_file, index_col='carrier')
 
-    # select busses and components or choose all if selection is None
-    select_busses = select_nodes(select_busses, defined_busses)
+    # TODO: Use only the busses necessary or defined.
+    select_busses = select_from_df(select_busses, defined_busses)
 
-    select_components = select_nodes(select_components, defined_components)
+    # select components or choose all if selection is None
+    select_components = select_from_list(select_components, defined_components)
 
     # Create empty dictionaries for the dataframes and their relative paths in the datapackage.
     data = {}
@@ -124,17 +125,29 @@ def create_default_data(
     return data, rel_paths
 
 
-def select_nodes(selected_nodes, defined_nodes):
-    if selected_nodes is not None:
-        undefined_nodes = set(selected_nodes).difference(set(defined_nodes))
+def select_from_df(select_busses, defined_busses):
+    if select_busses:
+        try:
+            select_busses = defined_busses.loc[select_busses]
+        except:
+            print(f"Selected busses not defined.")
+    else:
+        select_busses = defined_busses
+
+    return select_busses
+
+
+def select_from_list(selected_components, defined_components):
+    if selected_components is not None:
+        undefined_nodes = set(selected_components).difference(set(defined_components))
 
         assert not undefined_nodes, \
             f"Selected nodes {undefined_nodes} are not defined."
 
     else:
-        selected_nodes = defined_nodes
+        selected_components = defined_components
 
-    return selected_nodes
+    return selected_components
 
 
 def create_bus_element(select_busses, select_regions):
