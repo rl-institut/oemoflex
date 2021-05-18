@@ -146,13 +146,11 @@ class EnergyDataPackage(DataFramePackage):
             path=self.basepath,
         )
 
-    def parametrize(self, component, **kwargs):
+    def parametrize(self, frame, column, values):
 
-        for key, value in kwargs.items():
+        assert column in self.data[frame].columns, f"Column '{column}' is not defined!"
 
-            assert key in self.data[component].columns, f"Column {key} is not defined!"
-
-            self.data[component].loc[:, key] = value
+        self.data[frame].loc[:, column] = values
 
 
 class ResultsDataPackage(DataFramePackage):
