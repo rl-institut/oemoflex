@@ -1,3 +1,4 @@
+import copy
 import os
 
 import pandas as pd
@@ -100,6 +101,12 @@ class DataFramePackage:
             os.makedirs(root)
 
         data.to_csv(path)
+
+    def copy(self):
+
+        _dp = copy.deepcopy(self)
+
+        return _dp
 
 
 class EnergyDataPackage(DataFramePackage):

@@ -1,4 +1,3 @@
-import copy
 import os
 
 
@@ -20,12 +19,12 @@ class VariationGenerator:
 
     def create_var(self, dp, changes):
 
-        _dp = copy.deepcopy(dp)
+        _dp = dp.copy()
 
         changes = changes.to_dict()
 
         for (resource, var_name), var_value in changes.items():
 
-            _dp.data[resource].loc[:, var_name] = var_value
+            _dp.parametrize(frame=resource, column=var_name, values=var_value)
 
         return _dp
