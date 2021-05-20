@@ -120,7 +120,25 @@ def lineplot(ax, df, colors_odict=colors_odict):
 
 
 def plot_dispatch(ax, df, bus_name, start_date=None, end_date=None, demand_name="demand"):
+    r"""
+    Plots data as a dispatch plot. The demand is plotted as a line plot and
+    suppliers and other consumers are plottes with a stackplot.
 
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    bus_name : string
+        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
+    start_date : string
+        String with the start date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
+    end_date : string
+        String with the end date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
+    demand_name: string
+        Name of the bus representing the demand.
+    """
     df = filter_timeseries(df, start_date, end_date)
 
     # identify consumers, which shall be plotted negative and
