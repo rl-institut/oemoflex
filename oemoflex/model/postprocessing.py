@@ -295,6 +295,10 @@ def get_losses(summed_flows, var_name):
 
     outputs = get_outputs(summed_flows)
 
+    inputs = inputs.groupby('target').sum()
+
+    outputs = outputs.groupby('source').sum()
+
     losses = substract_output_from_input(inputs, outputs, var_name)
 
     return losses
@@ -665,7 +669,7 @@ def run_postprocessing(es):
         summed_flows,
         storage_losses,
         # TODO: Fix transmission loss calculation. Returns 4 separate values as of now.
-        # transmission_losses,
+        transmission_losses,
         capacity,
         storage_capacity,
         invested_capacity,
@@ -675,7 +679,6 @@ def run_postprocessing(es):
         summed_emissions,
         summed_emission_costs,
         # total system cost,
-        # total system emissions,
     ]
 
     all_scalars = pd.concat(all_scalars, 0)
