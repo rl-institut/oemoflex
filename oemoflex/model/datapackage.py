@@ -71,7 +71,7 @@ class DataFramePackage:
 
             for file in files:
                 if file.endswith(file_ext):
-                    name = file.strip(file_ext)
+                    name = os.path.splitext(file)[0]
                     rel_paths[name] = os.path.join(rel_path, file)
 
         return rel_paths
