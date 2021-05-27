@@ -295,6 +295,10 @@ def get_losses(summed_flows, var_name):
 
     outputs = get_outputs(summed_flows)
 
+    inputs = inputs.groupby('target').sum()
+
+    outputs = outputs.groupby('source').sum()
+
     losses = substract_output_from_input(inputs, outputs, var_name)
 
     return losses
@@ -631,51 +635,47 @@ def run_postprocessing(es):
 
     summed_marginal_costs = get_outputs(summed_variable_costs)
 
-    # Get flows with emissions
-    carriers_with_emissions = 'ch4'
-
-    inputs = get_inputs(summed_flows)
-
-    flows_with_emissions = filter_series_by_component_attr(inputs, carrier=carriers_with_emissions)
-
-    # Get emissions
-    specific_emissions = 1  # TODO: Replace with real data
-
-    summed_emissions = flows_with_emissions * specific_emissions
-
-    summed_emissions = set_index_level(
-        summed_emissions,
-        level='var_name',
-        value='summed_emissions'
-    )
-
-    # Get emission costs
-    emission_costs = 1  # TODO: Replace this with real data
-
-    summed_emission_costs = summed_emissions * emission_costs
-
-    summed_emission_costs = set_index_level(
-        summed_emission_costs,
-        level='var_name',
-        value='summed_emission_costs'
-    )
+    # # Get flows with emissions
+    # carriers_with_emissions = 'ch4'
+    #
+    # specific_emissions = 1  # TODO: Replace with real data
+    #
+    # inputs = get_inputs(summed_flows)
+    #
+    # flows_with_emissions = filter_series_by_component_attr(inputs, carrier=carriers_with_emissions)
+    #
+    # # Get emissions
+    #
+    # summed_emissions = flows_with_emissions * specific_emissions
+    #
+    # summed_emissions = set_index_level(
+    #     summed_emissions,
+    #     level='var_name',
+    #     value='summed_emissions'
+    # )
+    #
+    # # Get emission costs
+    # emission_costs = 1  # TODO: Replace this with real data
+    #
+    # summed_emission_costs = summed_emissions * emission_costs
+    #
+    # summed_emission_costs = set_index_level(
+    #     summed_emission_costs,
+    #     level='var_name',
+    #     value='summed_emission_costs'
+    # )
 
     # Combine all results
     all_scalars = [
         summed_flows,
         storage_losses,
-        # TODO: Fix transmission loss calculation. Returns 4 separate values as of now.
-        # transmission_losses,
+        transmission_losses,
         capacity,
         storage_capacity,
         invested_capacity,
         invested_storage_capacity,
         summed_carrier_costs,
         summed_marginal_costs,
-        summed_emissions,
-        summed_emission_costs,
-        # total system cost,
-        # total system emissions,
     ]
 
     all_scalars = pd.concat(all_scalars, 0)
@@ -693,5 +693,3 @@ def run_postprocessing(es):
     all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
 
     return all_scalars
-
-
