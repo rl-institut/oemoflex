@@ -76,4 +76,6 @@ es_restored.restore(optimized)
 
 results_dp = ResultsDataPackage.from_energysytem(es_restored)
 
+results_dp.set_scenario_name('simple_model')
+
 results_dp.to_csv_dir(postprocessed)

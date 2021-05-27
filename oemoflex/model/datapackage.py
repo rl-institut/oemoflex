@@ -225,3 +225,17 @@ class ResultsDataPackage(DataFramePackage):
             rel_paths_scal = {'scalars': 'scalars.csv'}
 
         return data_scal, rel_paths_scal
+
+    def set_scenario_name(self, scenario_name):
+        r"""
+        Prepends the given scenario name to the scalar results' index.
+
+        Parameters
+        ----------
+        scenario_name : str
+            Name of the scenario
+        """
+        def prepend_index(df, level_name, values):
+            return pd.concat([df], keys=[values], names=[level_name])
+
+        self.data['scalars'] = prepend_index(self.data['scalars'], 'scenario', scenario_name)
