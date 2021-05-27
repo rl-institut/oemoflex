@@ -1,0 +1,3 @@
+region,name,type,carrier,tech,bus,capacity,storage_capacity,efficiency_charging,efficiency_discharging,efficiency_v2g,marginal_cost,availability,amount,drive_power,min_storage_level,max_storage_level,input_parameters,output_parameters
+A,A-electricity-bev,bev,electricity,bev,A-electricity,,,1,1,1,,A-availability-profile,,A-drive_power-profile,A-min_storage_level-profile,A-max_storage_level-profile,{},{}
+B,B-electricity-bev,bev,electricity,bev,B-electricity,,,1,1,1,,B-availability-profile,,B-drive_power-profile,B-min_storage_level-profile,B-max_storage_level-profile,{},{}
