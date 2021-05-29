@@ -101,6 +101,37 @@ class DataFramePackage:
 
         data.to_csv(path)
 
+    def separate_stacked_frame(self, stacked_frame, group_by):
+
+        assert stacked_frame in self.data, "Cannot group by component if stacked frame is " \
+                                           "missing."
+
+        scalars = self.data.pop(stacked_frame)
+
+        self.rel_paths.pop(stacked_frame)
+
+        component_dfs = group_by_element(scalars, group_by=group_by)
+
+        self.data.update(component_dfs)
+
+        self.rel_paths.update({
+            key: os.path.join('elements', key + '.csv') for key in component_dfs.keys()
+        })
+
+    def stack_frames(self, frame_names, target_name):
+
+        assert frame_names, "Cannot stack scalars if frames are not in ."
+
+        elements = {}
+        for name in frame_names:
+            elements[name] = self.data.pop(name)
+
+            self.rel_paths.pop(name)
+
+        self.data[target_name] = stack_elements(elements)
+
+        self.rel_paths[target_name] = target_name + '.csv'
+
 
 class EnergyDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
@@ -234,21 +265,10 @@ class ResultsDataPackage(DataFramePackage):
 
     def to_element_dfs(self):
 
-        assert 'scalars' in self.data, "Cannot group by component if stacked scalars are missing." \
-                                       "Maybe ResultsDatapackage already contains element " \
-                                       "DataFrames?"
-        
-        scalars = self.data.pop('scalars')
-
-        self.rel_paths.pop('scalars')
-
-        component_dfs = group_by_element(scalars)
-
-        self.data.update(component_dfs)
-
-        self.rel_paths.update({
-            key: os.path.join('elements', key + '.csv') for key in component_dfs.keys()
-        })
+        self.separate_stacked_frame(
+            stacked_frame='scalars',
+            group_by=['carrier', 'tech']
+        )
 
     def to_stacked_scalars(self):
 
@@ -258,24 +278,14 @@ class ResultsDataPackage(DataFramePackage):
 
         element_names = [key for key, rel_path in self.rel_paths.items() if is_element(rel_path)]
 
-        assert element_names, "Cannot stack scalars if element dataframes are missing. Maybe " \
-                              "ResultsDatapackage already contains scalars in stacked format?"
+        self.stack_frames(
+            frame_names=element_names,
+            target_name='scalars'
+        )
 
-
-        elements = {}
-        for name in element_names:
-            elements[name] = self.data.pop(name)
-
-            self.rel_paths.pop(name)
-
-        self.data['scalars'] = stack_elements(elements)
-
-        self.rel_paths['scalars'] = 'scalars.csv'
-
-
-def group_by_element(scalars):
+def group_by_element(scalars, group_by):
     elements = {}
-    for group, df in scalars.groupby(['carrier', 'tech']):
+    for group, df in scalars.groupby(group_by):
         name = '-'.join(group)
 
         df = df.reset_index()
