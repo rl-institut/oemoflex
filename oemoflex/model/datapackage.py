@@ -210,6 +210,8 @@ class ResultsDataPackage(DataFramePackage):
 
         all_scalars = run_postprocessing(es)
 
+        all_scalars = all_scalars[sorted(all_scalars.columns)]
+
         data_scal = {'scalars': all_scalars}
 
         rel_paths_scal = {'scalars': 'scalars.csv'}
@@ -313,6 +315,14 @@ def stack_elements(element_dfs):
 
     scalars = pd.concat(scalars)
 
-    scalars.set_index(index_names, inplace=True)
+    if 'scenario' in scalars.columns:
+        index = ['scenario', 'name', 'var_name']
+
+    else:
+        index = ['name', 'var_name']
+
+    scalars.set_index(index, inplace=True)
+
+    scalars = scalars[sorted(scalars.columns)]
 
     return scalars
