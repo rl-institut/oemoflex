@@ -1,3 +1,3 @@
-region,name,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,output_parameters
-A,A-ch4-boiler,conversion,ch4,boiler,A-ch4,A-heat,,,,,,,{}
-B,B-ch4-boiler,conversion,ch4,boiler,B-ch4,B-heat,,,,,,,{}
+name,region,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,output_parameters
+A-ch4-boiler,A,conversion,ch4,boiler,A-ch4,A-heat,,,,,,,{}
+B-ch4-boiler,B,conversion,ch4,boiler,B-ch4,B-heat,,,,,,,{}

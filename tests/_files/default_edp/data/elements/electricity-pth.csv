@@ -1,3 +1,3 @@
-region,name,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,output_parameters
-A,A-electricity-pth,conversion,electricity,pth,A-electricity,A-heat,,,,,,,{}
-B,B-electricity-pth,conversion,electricity,pth,B-electricity,B-heat,,,,,,,{}
+name,region,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,output_parameters
+A-electricity-pth,A,conversion,electricity,pth,A-electricity,A-heat,,,,,,,{}
+B-electricity-pth,B,conversion,electricity,pth,B-electricity,B-heat,,,,,,,{}

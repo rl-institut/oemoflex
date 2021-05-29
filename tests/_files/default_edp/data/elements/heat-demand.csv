@@ -1,3 +1,3 @@
-region,name,type,carrier,tech,bus,amount,profile
-A,A-heat-demand,load,heat,demand,A-heat,,A-heat-demand-profile
-B,B-heat-demand,load,heat,demand,B-heat,,B-heat-demand-profile
+name,region,type,carrier,tech,bus,amount,profile
+A-heat-demand,A,load,heat,demand,A-heat,,A-heat-demand-profile
+B-heat-demand,B,load,heat,demand,B-heat,,B-heat-demand-profile
