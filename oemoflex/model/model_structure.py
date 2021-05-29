@@ -180,7 +180,7 @@ def create_bus_element(select_busses, select_regions):
         'balanced': balanced
     })
 
-    bus_df = bus_df.set_index('region')
+    bus_df = bus_df.set_index('name')
 
     return bus_df
 
@@ -248,7 +248,7 @@ def create_component_element(component_attrs, select_regions, select_links):
     for key, value in defaults.items():
         comp_data[key] = value
 
-    component_df = pd.DataFrame(comp_data).set_index('region')
+    component_df = pd.DataFrame(comp_data).set_index('name')
 
     return component_df
 
