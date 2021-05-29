@@ -278,8 +278,12 @@ def group_by_element(scalars):
 
         df = df.reset_index()
 
+        index = df.columns
+
+        index = list(index.drop('var_name').drop('var_value'))
+
         df = df.pivot(
-            index=['name', 'region', 'type', 'carrier', 'tech'],
+            index=index,
             columns='var_name',
             values='var_value'
         )
@@ -295,19 +299,20 @@ def stack_elements(element_dfs):
 
     for key, df in element_dfs.items():
 
+        index_names = df.index.names
+
         df.reset_index(inplace=True)
 
         df = df.melt(
-            ['name', 'region', 'carrier', 'tech', 'type'],
-            var_name='var_name', value_name='var_value'
+            index_names,
+            var_name='var_name',
+            value_name='var_value'
         )
-        
+
         scalars.append(df)
 
     scalars = pd.concat(scalars)
-    
-    scalars = scalars[['name', 'var_name', 'var_value', 'region', 'type', 'carrier', 'tech']]
 
-    scalars.set_index(['name', 'var_name'], inplace=True)
+    scalars.set_index(index_names, inplace=True)
 
     return scalars
