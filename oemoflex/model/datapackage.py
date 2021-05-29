@@ -118,7 +118,7 @@ class DataFramePackage:
             key: os.path.join('elements', key + '.csv') for key in component_dfs.keys()
         })
 
-    def stack_frames(self, frame_names, target_name):
+    def stack_frames(self, frame_names, target_name, unstacked_vars, index_vars):
 
         assert frame_names, "Cannot stack scalars if frames are not in ."
 
@@ -128,7 +128,7 @@ class DataFramePackage:
 
             self.rel_paths.pop(name)
 
-        self.data[target_name] = stack_elements(elements)
+        self.data[target_name] = stack_elements(elements, unstacked_vars, index_vars)
 
         self.rel_paths[target_name] = target_name + '.csv'
 
@@ -280,7 +280,9 @@ class ResultsDataPackage(DataFramePackage):
 
         self.stack_frames(
             frame_names=element_names,
-            target_name='scalars'
+            target_name='scalars',
+            unstacked_vars=['scenario', 'name', 'region', 'carrier', 'tech', 'type'],
+            index_vars=['scenario', 'name', 'var_name']
         )
 
 def group_by_element(scalars, group_by):
@@ -305,18 +307,16 @@ def group_by_element(scalars, group_by):
     return elements
 
 
-def stack_elements(element_dfs):
+def stack_elements(element_dfs, unstacked_vars, index_vars):
 
     scalars = []
 
     for key, df in element_dfs.items():
 
-        index_names = df.index.names
-
         df.reset_index(inplace=True)
 
         df = df.melt(
-            index_names,
+            unstacked_vars,
             var_name='var_name',
             value_name='var_value'
         )
@@ -325,13 +325,7 @@ def stack_elements(element_dfs):
 
     scalars = pd.concat(scalars)
 
-    if 'scenario' in scalars.columns:
-        index = ['scenario', 'name', 'var_name']
-
-    else:
-        index = ['name', 'var_name']
-
-    scalars.set_index(index, inplace=True)
+    scalars.set_index(index_vars, inplace=True)
 
     scalars = scalars[sorted(scalars.columns)]
 
