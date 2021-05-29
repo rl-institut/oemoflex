@@ -101,34 +101,34 @@ class DataFramePackage:
 
         data.to_csv(path)
 
-    def separate_stacked_frame(self, stacked_frame, group_by):
+    def separate_stacked_frame(self, frame_name, group_by):
 
-        assert stacked_frame in self.data, "Cannot group by component if stacked frame is " \
-                                           "missing."
+        assert frame_name in self.data, "Cannot group by component if stacked frame is " \
+                                        "missing."
 
-        scalars = self.data.pop(stacked_frame)
+        frame_to_separate = self.data.pop(frame_name)
 
-        self.rel_paths.pop(stacked_frame)
+        self.rel_paths.pop(frame_name)
 
-        component_dfs = group_by_element(scalars, group_by=group_by)
+        separate_dfs = group_by_pivot(frame_to_separate, group_by=group_by)
 
-        self.data.update(component_dfs)
+        self.data.update(separate_dfs)
 
         self.rel_paths.update({
-            key: os.path.join('elements', key + '.csv') for key in component_dfs.keys()
+            key: os.path.join('elements', key + '.csv') for key in separate_dfs.keys()
         })
 
     def stack_frames(self, frame_names, target_name, unstacked_vars, index_vars):
 
         assert frame_names, "Cannot stack scalars if frames are not in ."
 
-        elements = {}
+        frames_to_stack = {}
         for name in frame_names:
-            elements[name] = self.data.pop(name)
+            frames_to_stack[name] = self.data.pop(name)
 
             self.rel_paths.pop(name)
 
-        self.data[target_name] = stack_elements(elements, unstacked_vars, index_vars)
+        self.data[target_name] = stack_frames(frames_to_stack, unstacked_vars, index_vars)
 
         self.rel_paths[target_name] = target_name + '.csv'
 
@@ -285,9 +285,9 @@ class ResultsDataPackage(DataFramePackage):
             index_vars=['scenario', 'name', 'var_name']
         )
 
-def group_by_element(scalars, group_by):
+def group_by_pivot(stacked_frame, group_by):
     elements = {}
-    for group, df in scalars.groupby(group_by):
+    for group, df in stacked_frame.groupby(group_by):
         name = '-'.join(group)
 
         df = df.reset_index()
@@ -307,11 +307,11 @@ def group_by_element(scalars, group_by):
     return elements
 
 
-def stack_elements(element_dfs, unstacked_vars, index_vars):
+def stack_frames(frames_to_stack, unstacked_vars, index_vars):
 
-    scalars = []
+    stacked = []
 
-    for key, df in element_dfs.items():
+    for key, df in frames_to_stack.items():
 
         df.reset_index(inplace=True)
 
@@ -321,12 +321,12 @@ def stack_elements(element_dfs, unstacked_vars, index_vars):
             value_name='var_value'
         )
 
-        scalars.append(df)
+        stacked.append(df)
 
-    scalars = pd.concat(scalars)
+    stacked_frame = pd.concat(stacked)
 
-    scalars.set_index(index_vars, inplace=True)
+    stacked_frame.set_index(index_vars, inplace=True)
 
-    scalars = scalars[sorted(scalars.columns)]
+    scalars = stacked_frame[sorted(stacked_frame.columns)]
 
     return scalars
