@@ -286,6 +286,8 @@ class ResultsDataPackage(DataFramePackage):
         """
         def prepend_index(df, level_name, values):
             return pd.concat([df], keys=[values], names=[level_name])
+        
+        assert 'scalars' in self.data, "Scenario name can only be set when scalars are stacked."
 
         self.data['scalars'] = prepend_index(self.data['scalars'], 'scenario', scenario_name)
 
