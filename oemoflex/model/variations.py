@@ -7,9 +7,16 @@ class VariationGenerator:
 
         self.base_datapackage = datapackage
 
-    def create_variations(self, variations, destination):
+    def create_variations(self, variation_df, destination):
 
-        for id, changes in variations.iterrows():
+        assert variation_df.index.name == 'variation_id', \
+            "The variations defined in variation_df must be indexed with 'variation_id'"
+
+        assert variation_df.columns.names == ['component', 'var_name'], \
+            "The variations defined in variation_df must have columns specifying" \
+            "'component and 'var_name'."
+
+        for id, changes in variation_df.iterrows():
 
             dp = self.create_var(self.base_datapackage, changes)
 

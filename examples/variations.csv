@@ -1,5 +1,6 @@
-,heat-demand
-variation,amount
-0,10
-1,15
-2,20
+component,heat-demand,ch4-boiler
+var_name,amount,efficiency
+variation_id,
+0,10,0.2
+1,15,0.3
+2,20,0.2
