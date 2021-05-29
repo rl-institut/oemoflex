@@ -5,7 +5,7 @@ from frictionless import Package
 
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.inferring import infer
-from oemoflex.model.postprocessing import run_postprocessing, group_by_element
+from oemoflex.model.postprocessing import run_postprocessing
 import oemof.tabular.tools.postprocessing as tabular_pp
 
 
@@ -206,23 +206,13 @@ class ResultsDataPackage(DataFramePackage):
 
         return bus_results, rel_paths
 
-    def get_scalars(self, es, by_element=False):
+    def get_scalars(self, es):
 
         all_scalars = run_postprocessing(es)
 
-        if by_element:
+        data_scal = {'scalars': all_scalars}
 
-            data_scal = group_by_element(all_scalars)
-
-            rel_paths_scal = {
-                key: os.path.join('scalars', key + '.csv') for key in data_scal.keys()
-            }
-
-        else:
-
-            data_scal = {'scalars': all_scalars}
-
-            rel_paths_scal = {'scalars': 'scalars.csv'}
+        rel_paths_scal = {'scalars': 'scalars.csv'}
 
         return data_scal, rel_paths_scal
 
@@ -239,3 +229,85 @@ class ResultsDataPackage(DataFramePackage):
             return pd.concat([df], keys=[values], names=[level_name])
 
         self.data['scalars'] = prepend_index(self.data['scalars'], 'scenario', scenario_name)
+
+    def to_element_dfs(self):
+
+        assert 'scalars' in self.data, "Cannot group by component if stacked scalars are missing." \
+                                       "Maybe ResultsDatapackage already contains element " \
+                                       "DataFrames?"
+        
+        scalars = self.data.pop('scalars')
+
+        self.rel_paths.pop('scalars')
+
+        component_dfs = group_by_element(scalars)
+
+        self.data.update(component_dfs)
+
+        self.rel_paths.update({
+            key: os.path.join('elements', key + '.csv') for key in component_dfs.keys()
+        })
+
+    def to_stacked_scalars(self):
+
+        def is_element(rel_path):
+            directory = os.path.split(rel_path)[0]
+            return directory == 'elements'
+
+        element_names = [key for key, rel_path in self.rel_paths.items() if is_element(rel_path)]
+
+        assert element_names, "Cannot stack scalars if element dataframes are missing. Maybe " \
+                              "ResultsDatapackage already contains scalars in stacked format?"
+
+
+        elements = {}
+        for name in element_names:
+            elements[name] = self.data.pop(name)
+
+            self.rel_paths.pop(name)
+
+        self.data['scalars'] = stack_elements(elements)
+
+        self.rel_paths['scalars'] = 'scalars.csv'
+
+
+def group_by_element(scalars):
+    elements = {}
+    for group, df in scalars.groupby(['carrier', 'tech']):
+        name = '-'.join(group)
+
+        df = df.reset_index()
+
+        df = df.pivot(
+            index=['name', 'region', 'type', 'carrier', 'tech'],
+            columns='var_name',
+            values='var_value'
+        )
+
+        elements[name] = df
+
+    return elements
+
+
+def stack_elements(element_dfs):
+
+    scalars = []
+
+    for key, df in element_dfs.items():
+
+        df.reset_index(inplace=True)
+
+        df = df.melt(
+            ['name', 'region', 'carrier', 'tech', 'type'],
+            var_name='var_name', value_name='var_value'
+        )
+        
+        scalars.append(df)
+
+    scalars = pd.concat(scalars)
+    
+    scalars = scalars[['name', 'var_name', 'var_value', 'region', 'type', 'carrier', 'tech']]
+
+    scalars.set_index(['name', 'var_name'], inplace=True)
+
+    return scalars

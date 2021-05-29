@@ -518,24 +518,6 @@ def add_component_info(scalars):
     return scalars
 
 
-def group_by_element(scalars):
-    elements = {}
-    for group, df in scalars.groupby(['carrier', 'tech']):
-        name = '-'.join(group)
-
-        df = df.reset_index()
-
-        df = df.pivot(
-            index=['name', 'type', 'carrier', 'tech'],
-            columns='var_name',
-            values='var_value'
-        )
-
-        elements[name] = df
-
-    return elements
-
-
 def sort_scalars(scalars):
 
     scalars = scalars.sort_values(by=['carrier', 'tech', 'var_name'])
