@@ -101,7 +101,7 @@ class DataFramePackage:
 
         data.to_csv(path)
 
-    def separate_stacked_frame(self, frame_name, group_by):
+    def separate_stacked_frame(self, frame_name, target_dir, group_by):
 
         assert frame_name in self.data, "Cannot group by component if stacked frame is " \
                                         "missing."
@@ -115,7 +115,7 @@ class DataFramePackage:
         self.data.update(separate_dfs)
 
         self.rel_paths.update({
-            key: os.path.join('elements', key + '.csv') for key in separate_dfs.keys()
+            key: os.path.join(target_dir, key + '.csv') for key in separate_dfs.keys()
         })
 
     def stack_frames(self, frame_names, target_name, unstacked_vars, index_vars):
@@ -182,6 +182,32 @@ class EnergyDataPackage(DataFramePackage):
         assert column in self.data[frame].columns, f"Column '{column}' is not defined!"
 
         self.data[frame].loc[:, column] = values
+
+    def stack_components(self):
+
+        def is_element(rel_path):
+            directory = os.path.split(rel_path)[0]
+            return 'elements' in directory
+
+        component_names = [
+            key for key, rel_path in self.rel_paths.items()
+            if is_element(rel_path)
+               and not key == 'bus'
+        ]
+
+        self.stack_frames(
+            component_names,
+            target_name=os.path.join('data', 'elements', 'component'),
+            unstacked_vars=['name', 'region', 'carrier', 'tech', 'type'],
+            index_vars=['name', 'var_name']
+        )
+
+    def unstack_components(self):
+
+        self.separate_stacked_frame(
+            frame_name=os.path.join('data', 'elements', 'component'),
+            target_dir=os.path.join('data', 'elements'),
+            group_by=['carrier', 'tech'])
 
 
 class ResultsDataPackage(DataFramePackage):
@@ -266,7 +292,8 @@ class ResultsDataPackage(DataFramePackage):
     def to_element_dfs(self):
 
         self.separate_stacked_frame(
-            stacked_frame='scalars',
+            frame_name='scalars',
+            target_dir='elements',
             group_by=['carrier', 'tech']
         )
 
