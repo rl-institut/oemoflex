@@ -72,7 +72,7 @@ class DataFramePackage:
 
             for file in files:
                 if file.endswith(file_ext):
-                    name = file.strip(file_ext)
+                    name = os.path.splitext(file)[0]
                     rel_paths[name] = os.path.join(rel_path, file)
 
         return rel_paths
@@ -179,17 +179,17 @@ class ResultsDataPackage(DataFramePackage):
 
         rel_paths = {}
 
-        # data_scal, rel_paths_scal = self.get_scalars(self, es)
+        data_scal, rel_paths_scal = self.get_scalars(self, es)
 
         data_seq, rel_paths_seq = self.get_sequences(self, es)
 
         data.update(data_seq)
 
-        # data.update(data_scal)
+        data.update(data_scal)
 
         rel_paths.update(rel_paths_seq)
 
-        # rel_paths.update(rel_paths_scal)
+        rel_paths.update(rel_paths_scal)
 
         return data, rel_paths
 
@@ -213,13 +213,36 @@ class ResultsDataPackage(DataFramePackage):
 
         return bus_results, rel_paths
 
-    def get_scalars(self, es):
-        # TODO: Import functions for scalar postprocessing from separate module.
+    def get_scalars(self, es, by_element=False):
 
         all_scalars = run_postprocessing(es)
 
-        data_scal = group_by_element(all_scalars)
+        if by_element:
 
-        rel_paths_scal = {key: os.path.join('scalars', key + '.csv') for key in data_scal.keys()}
+            data_scal = group_by_element(all_scalars)
+
+            rel_paths_scal = {
+                key: os.path.join('scalars', key + '.csv') for key in data_scal.keys()
+            }
+
+        else:
+
+            data_scal = {'scalars': all_scalars}
+
+            rel_paths_scal = {'scalars': 'scalars.csv'}
 
         return data_scal, rel_paths_scal
+
+    def set_scenario_name(self, scenario_name):
+        r"""
+        Prepends the given scenario name to the scalar results' index.
+
+        Parameters
+        ----------
+        scenario_name : str
+            Name of the scenario
+        """
+        def prepend_index(df, level_name, values):
+            return pd.concat([df], keys=[values], names=[level_name])
+
+        self.data['scalars'] = prepend_index(self.data['scalars'], 'scenario', scenario_name)
