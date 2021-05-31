@@ -16,6 +16,8 @@ def create_default_data(
         dummy_sequences=False,
         bus_attrs_file=os.path.join(module_path, 'busses.yml'),
         component_attrs_file=os.path.join(module_path, 'component_attrs.yml'),
+        bus_attrs_update=None,
+        component_attrs_update=None,
         elements_subdir='elements',
         sequences_subdir='sequences',
 ):
@@ -68,6 +70,13 @@ def create_default_data(
     component_attrs = load_yaml(component_attrs_file)
 
     bus_attrs = load_yaml(bus_attrs_file)
+
+    # update
+    if component_attrs_update:
+        component_attrs.update(component_attrs_update)
+
+    if bus_attrs_update:
+        bus_attrs.update(bus_attrs_update)
 
     # TODO: Use only the busses necessary or defined.
     selected_bus_attrs = select_from_node_attrs(bus_attrs, select_busses)
