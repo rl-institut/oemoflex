@@ -14,8 +14,10 @@ def create_default_data(
         select_components=None,
         select_busses=None,
         dummy_sequences=False,
-        busses_file=os.path.join(module_path, 'busses.csv'),
+        bus_attrs_file=os.path.join(module_path, 'busses.yml'),
         component_attrs_file=os.path.join(module_path, 'component_attrs.yml'),
+        bus_attrs_update=None,
+        component_attrs_update=None,
         elements_subdir='elements',
         sequences_subdir='sequences',
 ):
@@ -45,7 +47,7 @@ def create_default_data(
         Create dummy sequences.
 
     busses_file : path
-        Path to a CSV file that defines the busses
+        Path to a YAML file that defines the busses
 
     component_attrs_file : path
         Path to a YAML file that defines the component_attributes
@@ -64,18 +66,23 @@ def create_default_data(
     rel_paths : dict
         Dictionary containing relative file paths.
     """
-    # load definitions
+    # load component and bus specifications
     component_attrs = load_yaml(component_attrs_file)
 
-    defined_components = component_attrs.keys()
+    bus_attrs = load_yaml(bus_attrs_file)
 
-    defined_busses = pd.read_csv(busses_file, index_col='carrier')
+    # update
+    if component_attrs_update:
+        component_attrs.update(component_attrs_update)
+
+    if bus_attrs_update:
+        bus_attrs.update(bus_attrs_update)
 
     # TODO: Use only the busses necessary or defined.
-    select_busses = select_from_df(select_busses, defined_busses)
+    selected_bus_attrs = select_from_node_attrs(bus_attrs, select_busses)
 
     # select components or choose all if selection is None
-    select_components = select_from_list(select_components, defined_components)
+    selected_component_attrs = select_from_node_attrs(component_attrs, select_components)
 
     # Create empty dictionaries for the dataframes and their relative paths in the datapackage.
     data = {}
@@ -83,16 +90,14 @@ def create_default_data(
     rel_paths = {}
 
     # Create bus df
-    data['bus'] = create_bus_element(select_busses, select_regions)
+    data['bus'] = create_bus_element(selected_bus_attrs, select_regions)
 
     rel_paths['bus'] = os.path.join('data', elements_subdir, 'bus' + '.csv')
 
     # Create component dfs
-    for component in select_components:
+    for component, attrs in selected_component_attrs.items():
 
-        specs = component_attrs[component]
-
-        data[component] = create_component_element(specs, select_regions, select_links)
+        data[component] = create_component_element(attrs, select_regions, select_links)
 
         rel_paths[component] = os.path.join('data', elements_subdir, component + '.csv')
 
@@ -105,12 +110,10 @@ def create_default_data(
 
         return path
 
-    for component in select_components:
-
-        specs = component_attrs[component]
+    for component, attrs in selected_component_attrs.items():
 
         profile_data = create_component_sequences(
-            specs,
+            attrs,
             select_regions,
             datetimeindex,
             dummy_sequences=dummy_sequences,
@@ -125,32 +128,28 @@ def create_default_data(
     return data, rel_paths
 
 
-def select_from_df(select_busses, defined_busses):
-    if select_busses:
-        try:
-            select_busses = defined_busses.loc[select_busses]
-        except:
-            print(f"Selected busses not defined.")
-    else:
-        select_busses = defined_busses
+def select_from_node_attrs(node_attrs, select_nodes):
+    def filter_dict_keys_by_list(dictionary, lst):
+        result = {}
+        for key in lst:
+            result[key] = dictionary[key]
+        return result
 
-    return select_busses
-
-
-def select_from_list(selected_components, defined_components):
-    if selected_components is not None:
-        undefined_nodes = set(selected_components).difference(set(defined_components))
+    if select_nodes is not None:
+        undefined_nodes = set(select_nodes).difference(set(node_attrs))
 
         assert not undefined_nodes, \
             f"Selected nodes {undefined_nodes} are not defined."
 
+        selected_components = filter_dict_keys_by_list(node_attrs, select_nodes)
+
     else:
-        selected_components = defined_components
+        selected_components = node_attrs
 
     return selected_components
 
 
-def create_bus_element(select_busses, select_regions):
+def create_bus_element(bus_attrs, select_regions):
     r"""
 
     Parameters
@@ -168,10 +167,10 @@ def create_bus_element(select_busses, select_regions):
     balanced = []
 
     for region in select_regions:
-        for carrier, row in select_busses.iterrows():
+        for carrier, attrs in bus_attrs.items():
             regions.append(region)
             carriers.append(region + '-' + carrier)
-            balanced.append(row['balanced'])
+            balanced.append(attrs['balanced'])
 
     bus_df = pd.DataFrame({
         'region': regions,
@@ -187,7 +186,7 @@ def create_bus_element(select_busses, select_regions):
 
 def create_component_element(component_attrs, select_regions, select_links):
     r"""
-    Takes dictionary for component attribute specs and returns a pd.DataFrame with the regions,
+    Takes dictionary for component attributes and returns a pd.DataFrame with the regions,
     links, names, references to profiles and default values.
 
     Parameters

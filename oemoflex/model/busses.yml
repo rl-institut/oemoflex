@@ -1,0 +1,15 @@
+electricity:
+  balanced:
+    True
+
+heat:
+  balanced:
+    True
+
+ch4:
+  balanced:
+    False
+
+uranium:
+  balanced:
+    False
