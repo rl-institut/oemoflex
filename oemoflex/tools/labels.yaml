@@ -1,25 +1,14 @@
 !!python/tuple ['from', 'to', 'type']: Timestamp
-!!python/tuple ['BB-biomass-st', 'BB-electricity', 'flow']: Biomass
-!!python/tuple ['BB-ch4-gt', 'BB-electricity', 'flow']: CH4
-!!python/tuple ['BB-electricity', 'BB-electricity-curtailment', 'flow']: Curtailment
-!!python/tuple ['BB-electricity', 'BB-electricity-demand', 'flow']: Demand
-!!python/tuple ['BB-electricity', 'BB-electricity-liion-battery', 'flow']: BAT charge
-!!python/tuple ['BB-electricity', 'BE-BB', 'flow']: Export
-!!python/tuple ['BB-electricity-liion-battery', 'BB-electricity', 'flow']: BAT discharge
-!!python/tuple ['BB-electricity-shortage', 'BB-electricity', 'flow']: Shortage
-!!python/tuple ['BB-solar-pv', 'BB-electricity', 'flow']: PV
-!!python/tuple ['BB-wind-onshore', 'BB-electricity', 'flow']: Wind
-!!python/tuple ['BE-BB', 'BB-electricity', 'flow']: Import
+!!python/tuple ['region-biomass-st', 'region-electricity', 'flow']: Biomass
+!!python/tuple ['region-ch4-gt', 'region-electricity', 'flow']: CH4
+!!python/tuple ['region-electricity', 'region-electricity-curtailment', 'flow']: Curtailment
+!!python/tuple ['region-electricity', 'region-electricity-demand', 'flow']: Demand
+!!python/tuple ['region-electricity', 'region-electricity-liion-battery', 'flow']: BAT charge
+!!python/tuple ['region-electricity-liion-battery', 'region-electricity', 'flow']: BAT discharge
+!!python/tuple ['region-electricity-shortage', 'region-electricity', 'flow']: Shortage
+!!python/tuple ['region-solar-pv', 'region-electricity', 'flow']: PV
+!!python/tuple ['region-wind-onshore', 'region-electricity', 'flow']: Wind
 
-!!python/tuple ['from', 'to', 'type']: Timestamp
-!!python/tuple ['BE-biomass-st', 'BE-electricity', 'flow']: Biomass
-!!python/tuple ['BE-ch4-gt', 'BE-electricity', 'flow']: CH4
-!!python/tuple ['BE-electricity', 'BE-electricity-curtailment', 'flow']: Curtailment
-!!python/tuple ['BE-electricity', 'BE-electricity-demand', 'flow']: Demand
-!!python/tuple ['BE-electricity', 'BE-electricity-liion-battery', 'flow']: BAT charge
-!!python/tuple ['BE-electricity', 'BE-BB', 'flow']: Export
-!!python/tuple ['BE-electricity-liion-battery', 'BE-electricity', 'flow']: BAT discharge
-!!python/tuple ['BE-electricity-shortage', 'BE-electricity', 'flow']: Shortage
-!!python/tuple ['BE-solar-pv', 'BE-electricity', 'flow']: PV
-!!python/tuple ['BE-wind-onshore', 'BE-electricity', 'flow']: Wind
-!!python/tuple ['BE-BB', 'BE-electricity', 'flow']: Import
+# wird aktuell nicht mehr gebraucht
+#!!python/tuple ['A-B-electricity-transmission', 'region-electricity', 'flow']: Import
+#!!python/tuple ['region-electricity', 'A-B-electricity-transmission', 'flow']: Export
