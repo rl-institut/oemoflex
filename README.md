@@ -28,7 +28,7 @@ optimization problem.
 ## Docs
 
 Online documentation is hosted by readthedocs and can be found 
-[here]()https://oemoflex.readthedocs.io/en/latest/). The docs are currently under construction. 
+[here](https://oemoflex.readthedocs.io/en/latest/). The docs are currently under construction. 
 
 To build the docs simply go to the `docs` folder
 
