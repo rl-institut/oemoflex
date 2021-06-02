@@ -77,19 +77,50 @@ def map_labels(df, labels_dict):
     """
     # rename columns
     df.columns = df.columns.to_flat_index()
-    df.rename(columns=labels_dict, inplace=True)
 
-    # rename columns with electricity transmission
-    for column_name in df.columns:
-        if isinstance(column_name, tuple):
-            if "electricity-transmission" in column_name[0]:
-                df.rename(columns={column_name:"Import"}, inplace=True)
-            elif "electricity-transmission" in column_name[1]:
-                df.rename(columns={column_name:"Export"}, inplace=True)
-            else:
-                print("No electricity transmission. Check data.")
+    df.columns = map_columns(df.columns, labels_dict)
 
     return df
+
+
+def map_columns(columns, labels_dict):
+
+    def map_tuple(tuple, dictionary):
+
+        mapped = None
+
+        for key, value in dictionary.items():
+
+            if concrete_in_generic(tuple, key):
+                mapped = value
+
+            else:
+                continue
+
+        if not mapped:
+            raise KeyError(f"Mappling {col}")
+
+        return mapped
+
+    def concrete_in_generic(concrete_tuple, generic_tuple):
+        for concrete, generic in zip(concrete_tuple, generic_tuple):
+            if generic in concrete:
+                continue
+
+            else:
+                return False
+
+        return True
+
+    renamed_columns = list()
+
+    for col in columns:
+
+        renamed_col = map_tuple(col, labels_dict)
+
+        renamed_columns.append(renamed_col)
+
+    return renamed_columns
 
 
 def group_transmission(df):
@@ -225,9 +256,9 @@ def plot_dispatch(
             df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    specific_labels_dict = adapt_labels_data(bus_name)
-    df = map_labels(df, specific_labels_dict)
-    df_demand = map_labels(df_demand, specific_labels_dict)
+    # specific_labels_dict = adapt_labels_data(bus_name)
+    df = map_labels(df, general_labels_dict)
+    df_demand = map_labels(df_demand, general_labels_dict)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
