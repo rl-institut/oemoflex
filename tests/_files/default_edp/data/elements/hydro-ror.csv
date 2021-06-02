@@ -1,3 +1,3 @@
-name,region,type,carrier,tech,bus,capacity,capacity_cost,expandable,marginal_cost,profile,output_parameters
-A-hydro-ror,A,volatile,hydro,ror,A-electricity,,,,0,A-hydro-ror-profile,{}
-B-hydro-ror,B,volatile,hydro,ror,B-electricity,,,,0,B-hydro-ror-profile,{}
+name,bus,capacity,capacity_cost,carrier,expandable,marginal_cost,output_parameters,profile,region,tech,type
+A-hydro-ror,A-electricity,,,hydro,,0,{},A-hydro-ror-profile,A,ror,volatile
+B-hydro-ror,B-electricity,,,hydro,,0,{},B-hydro-ror-profile,B,ror,volatile

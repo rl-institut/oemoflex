@@ -1,3 +1,3 @@
-name,region,type,carrier,tech,bus,capacity_turbine,capacity_pump,storage_capacity,initial_storage_level,efficiency_turbine,efficiency_pump,marginal_cost,profile,output_parameters
-A-hydro-reservoir,A,reservoir,hydro,reservoir,A-electricity,,,,,,,,A-hydro-reservoir_profile,{}
-B-hydro-reservoir,B,reservoir,hydro,reservoir,B-electricity,,,,,,,,B-hydro-reservoir_profile,{}
+name,bus,capacity_pump,capacity_turbine,carrier,efficiency_pump,efficiency_turbine,initial_storage_level,marginal_cost,output_parameters,profile,region,storage_capacity,tech,type
+A-hydro-reservoir,A-electricity,,,hydro,,,,,{},A-hydro-reservoir_profile,A,,reservoir,reservoir
+B-hydro-reservoir,B-electricity,,,hydro,,,,,{},B-hydro-reservoir_profile,B,,reservoir,reservoir

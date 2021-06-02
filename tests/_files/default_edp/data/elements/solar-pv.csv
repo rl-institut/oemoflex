@@ -1,3 +1,3 @@
-name,region,type,carrier,tech,bus,capacity,capacity_cost,expandable,marginal_cost,profile,output_parameters
-A-solar-pv,A,volatile,solar,pv,A-electricity,,,,0,A-solar-pv-profile,{}
-B-solar-pv,B,volatile,solar,pv,B-electricity,,,,0,B-solar-pv-profile,{}
+name,bus,capacity,capacity_cost,carrier,expandable,marginal_cost,output_parameters,profile,region,tech,type
+A-solar-pv,A-electricity,,,solar,,0,{},A-solar-pv-profile,A,pv,volatile
+B-solar-pv,B-electricity,,,solar,,0,{},B-solar-pv-profile,B,pv,volatile
