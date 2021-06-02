@@ -6,7 +6,7 @@ import oemoflex.tools.plots as plots
 # import data and yaml files
 here = os.path.abspath(os.path.dirname(__file__))
 input_path = os.path.join(
-    here, "simple_model", "postprocessed", "sequences", "bus", "BB-electricity.csv" #"03_postprocessed", "simple_model", "sequences", "bus", "BB-electricity.csv"
+    here, "03_postprocessed", "simple_model", "sequences", "bus", "BB-electricity.csv"
 )
 data = pd.read_csv(input_path, header=[0, 1, 2], parse_dates=[0], index_col=[0])
 
