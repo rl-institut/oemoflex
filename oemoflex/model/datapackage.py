@@ -331,6 +331,13 @@ def group_by_pivot(stacked_frame, group_by):
             values='var_value'
         )
 
+        # set index and sort columns for comparability
+        df = df.reset_index()
+
+        df = df.set_index('name')
+
+        df = df[sorted(df.columns)]
+
         elements[name] = df
 
     return elements

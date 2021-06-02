@@ -248,7 +248,10 @@ def create_component_element(component_attrs, select_regions, select_links):
     for key, value in defaults.items():
         comp_data[key] = value
 
+    # sort the columns for comparability
     component_df = pd.DataFrame(comp_data).set_index('name')
+
+    component_df = component_df[sorted(component_df.columns)]
 
     return component_df
 
