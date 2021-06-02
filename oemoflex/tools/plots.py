@@ -98,7 +98,7 @@ def map_columns(columns, labels_dict):
                 continue
 
         if not mapped:
-            raise KeyError(f"Mappling {col}")
+            raise KeyError(f"No mapping defined for {col}.")
 
         return mapped
 
