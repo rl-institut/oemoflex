@@ -121,6 +121,7 @@ class EnergyDataPackage(DataFramePackage):
             busses,
             regions,
             links,
+            **kwargs
     ):
 
         data, rel_paths = create_default_data(
@@ -129,6 +130,7 @@ class EnergyDataPackage(DataFramePackage):
             datetimeindex=datetimeindex,
             select_components=components,
             select_busses=busses,
+            **kwargs
         )
 
         return cls(
