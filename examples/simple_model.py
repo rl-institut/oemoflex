@@ -21,27 +21,35 @@ edp = EnergyDataPackage.setup_default(
     basepath=preprocessed,
     datetimeindex=pd.date_range("1/1/2016", periods=24 * 10, freq="H"),
     components=[
-        'ch4-boiler',
-        'heat-demand'
+        'ch4-gt',
+        'biomass-gt',
+        'electricity-demand'
     ],
     busses=[
         'ch4',
-        'heat',
+        'biomass',
+        'electricity',
     ],
     regions=['A', 'B'],
     links=['A-B'],
 )
 
 # parametrize
-edp.data['heat-demand']['amount'] = 100
+edp.parametrize('electricity-demand', 'amount', 100)
 
-edp.data['ch4-boiler']['capacity'] = [200, 300]
+edp.parametrize('biomass-gt', 'capacity', [50, 20])
 
-edp.data['ch4-boiler']['efficiency'] = 0.9
+edp.parametrize('biomass-gt', 'efficiency', 0.4)
 
-edp.data['ch4-boiler']['marginal_cost'] = 30
+edp.parametrize('ch4-gt', 'carrier_cost', 30)
 
-edp.data['heat-demand-profile'].loc[:, :] = [[1, 1]] * 240
+edp.parametrize('ch4-gt', 'capacity', [150, 130])
+
+edp.parametrize('ch4-gt', 'efficiency', 0.6)
+
+edp.parametrize('ch4-gt', 'carrier_cost', 60)
+
+edp.data['electricity-demand-profile'].loc[:, :] = [[1, 1]] * 240
 
 # save to csv
 edp.to_csv_dir(preprocessed)
