@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 import pandas as pd
 from oemof.solph import EnergySystem, Model
 from oemof.outputlib.processing import parameter_as_dict
@@ -34,22 +34,27 @@ edp = EnergyDataPackage.setup_default(
     links=['A-B'],
 )
 
-# parametrize
-edp.parametrize('electricity-demand', 'amount', 100)
+# parametrize scalars
+edp.parametrize('electricity-demand', 'amount', 10)
 
-edp.parametrize('biomass-gt', 'capacity', [50, 20])
+edp.parametrize('biomass-gt', 'capacity', [12, 12])
 
 edp.parametrize('biomass-gt', 'efficiency', 0.4)
 
 edp.parametrize('ch4-gt', 'carrier_cost', 30)
 
-edp.parametrize('ch4-gt', 'capacity', [150, 130])
+edp.parametrize('ch4-gt', 'capacity', [10, 12])
 
 edp.parametrize('ch4-gt', 'efficiency', 0.6)
 
 edp.parametrize('ch4-gt', 'carrier_cost', 60)
 
-edp.data['electricity-demand-profile'].loc[:, :] = [[1, 1]] * 240
+# parametrize timeseries
+profile = 1 + np.sin(np.linspace(0, 2 * np.pi, 240))
+
+edp.parametrize('electricity-demand-profile', 'A-electricity-demand-profile', profile)
+
+edp.parametrize('electricity-demand-profile', 'B-electricity-demand-profile', profile)
 
 # save to csv
 edp.to_csv_dir(preprocessed)
