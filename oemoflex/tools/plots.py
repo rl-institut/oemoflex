@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import plotly.graph_objects as go
 from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
 import oemoflex.tools.helpers as helpers
@@ -98,6 +99,50 @@ def stackplot(ax, df, colors_odict=colors_odict):
 
     y = np.vstack(y)
     ax.stackplot(df.index, y, colors=colors, labels=labels)
+
+
+def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
+
+    # identify consumers, which shall be plotted negative and
+    # isolate column with demand and make its data positive again
+    df.columns = df.columns.to_flat_index()
+    for i in df.columns:
+        if i[0] == bus_name:
+            df[i] = df[i] * -1
+        if i[1] == demand_name:
+            df_demand = (df[i] * -1).to_frame()
+            df.drop(columns=[i], inplace=True)
+
+    # rename column names to match labels
+    df = map_labels(df)
+
+    traces = list()
+
+    df = df[[c for c in df.columns if not isinstance(c, tuple)]]
+
+    for key, values in df.iteritems():
+
+        traces.append(
+            dict(
+                x=df.index,
+                y=values,
+                mode='lines',
+                stackgroup='one',
+                line=dict(
+                    width=1
+                ),
+                name=key,
+                # fill_color=colors_odict[key]
+            )
+        )
+
+    layout = dict(font=dict(family='Aleo'))
+
+    fig = dict(data=traces, layout=layout)
+
+    fig = go.Figure(fig)
+
+    return fig
 
 
 def lineplot(ax, df, colors_odict=colors_odict):

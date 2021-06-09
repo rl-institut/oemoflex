@@ -28,3 +28,15 @@ plots.plot_dispatch(
 plt.legend(loc="best")
 plt.tight_layout()
 plt.show()
+
+fig = plots.plot_dispatch_plotly(
+    df=data,
+    bus_name="BB-electricity",
+    demand_name="BB-electricity-demand",
+)
+
+fig.write_html(
+    file=os.path.join(here, 'dispatch_interactive.html'),
+    # include_plotlyjs=False,
+    # full_html=False
+)
