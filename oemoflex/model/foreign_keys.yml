@@ -25,6 +25,7 @@
 ]
 
 'from_to_bus': [
+    'biomass-gt',
     'electricity-transmission',
     'ch4-gt',
     'uranium-nuclear-st',
