@@ -272,7 +272,9 @@ def plot_dispatch(
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
     stackplot(ax, df[y_stack_pos])
-    stackplot(ax, df[y_stack_neg])
+    # check whether the list y_stack_neg is filled
+    if y_stack_neg != []:
+        stackplot(ax, df[y_stack_neg])
 
     # plot lineplot (demand)
     lineplot(ax, df_demand)
