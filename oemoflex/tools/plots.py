@@ -20,43 +20,6 @@ for i in colors_csv.columns:
     colors_odict[i] = colors_csv.loc["Color", i]
 
 
-def adapt_labels_data(bus_name, labels_dict=general_labels_dict):
-    r"""
-    The generic labels_dict needs to be adapted to the specific region which is investigated
-    in order to rename the multilevel column names.
-
-    Parameters
-    ---------------
-    bus_name : string
-        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
-    labels_dict : dictionary
-        Contains generic template to rename the given column names of the postprocessed data.
-
-    Returns
-    ----------
-    specific_labels_dict : dictionary
-        Contains region specific old and new column names. The new column names are used for the labels in the plot.
-    """
-    labels_dict = labels_dict.copy()
-    # identify region
-    region = bus_name.split("-")[0]
-    # adapt keys of labels_dict to specific region
-    general_keys = labels_dict.keys()
-    specific_keys = {}
-
-    for general_key in general_keys:
-        specific_key = list(general_key)
-        for i in range(0, len(specific_key)):
-            specific_key[i] = specific_key[i].replace("region", region)
-        specific_key = tuple(specific_key)
-        specific_keys[general_key] = specific_key
-
-    for general_key in specific_keys:
-        labels_dict[specific_keys[general_key]] = labels_dict.pop(general_key)
-
-    return labels_dict
-
-
 def map_labels(df, labels_dict):
     r"""
     Renames columns according to the specifications in the label_dict. The data has multilevel
@@ -78,15 +41,44 @@ def map_labels(df, labels_dict):
     # rename columns
     df.columns = df.columns.to_flat_index()
 
-    df.columns = map_columns(df.columns, labels_dict)
+    df.columns = rename_by_string_matching(df.columns, labels_dict)
 
     return df
 
 
-def map_columns(columns, labels_dict):
+def rename_by_string_matching(columns, labels_dict):
+    r"""
+    The generic labels_dict needs to be adapted to the specific region which is investigated
+    in order to rename the multilevel column names.
 
+    Parameters
+    ---------------
+    columns : pandas.Index
+        Column names which need to be adapted to a concise name.
+    labels_dict : dictionary
+        Contains old and new column names. The new column names are used for the labels in the plot.
+
+    Returns
+    ----------
+    renamed_columns : list
+        List with new column names.
+    """
     def map_tuple(tuple, dictionary):
+        r"""
+        The corresponding value of the tuple which is supposed to be a key in the dictionary is retrieved.
 
+        Parameters
+        ---------------
+        tuple : tuple
+            Multilevel column name as tuple which needs to be adapted to a concise name.
+        dictionary : dictionary
+            Contains old and new column names. The new column names are used for the labels in the plot.
+
+        Returns
+        ----------
+        mapped : string
+            String with new column name.
+        """
         mapped = None
 
         for key, value in dictionary.items():
@@ -103,6 +95,22 @@ def map_columns(columns, labels_dict):
         return mapped
 
     def concrete_in_generic(concrete_tuple, generic_tuple):
+        r"""
+        It is checked if the concrete_tuple is contained in the generic_tuple which is a key of
+        the labels_dict. Thus, it is checked if a multilevel column name is contained in the labels_dict.
+
+        Parameters
+        ---------------
+        concrete_tuple : tuple
+            Column names which need to be adapted to a concise name.
+        generic_tuple : tuple
+            Contains old and new column names. The new column names are used for the labels in the plot.
+
+        Returns
+        ----------
+        True or False : Boolean
+            Boolean whether concrete_tuple is contained in generic_tuple.
+        """
         for concrete, generic in zip(concrete_tuple, generic_tuple):
             if generic in concrete:
                 continue
@@ -256,7 +264,6 @@ def plot_dispatch(
             df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    # specific_labels_dict = adapt_labels_data(bus_name)
     df = map_labels(df, general_labels_dict)
     df_demand = map_labels(df_demand, general_labels_dict)
 
