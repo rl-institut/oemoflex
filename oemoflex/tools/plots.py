@@ -131,11 +131,11 @@ def rename_by_string_matching(columns, labels_dict):
     return renamed_columns
 
 
-def group_transmission(df):
+def group_agg_by_column(df):
     r"""
-    Columns with the same name are grouped together and aggregated. This is needed to
-    group the Import and Export columns if there are multiple because the region has
-    electricity transmission with multiple other regions.
+    Columns with the same name are grouped together and aggregated.
+    e.g. needed to group the Import and Export columns if there are
+    multiple because the region has electricity transmission with multiple other regions.
 
     Parameters
     ---------------
@@ -268,7 +268,7 @@ def plot_dispatch(
     df_demand = map_labels(df_demand, general_labels_dict)
 
     # group transmission busses by import and export
-    df = group_transmission(df)
+    df = group_agg_by_column(df)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
