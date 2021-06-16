@@ -3,7 +3,9 @@ A,A-electricity,bus,True
 A,A-heat,bus,True
 A,A-ch4,bus,False
 A,A-uranium,bus,False
+A,A-biomass,bus,False
 B,B-electricity,bus,True
 B,B-heat,bus,True
 B,B-ch4,bus,False
 B,B-uranium,bus,False
+B,B-biomass,bus,False
