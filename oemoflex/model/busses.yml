@@ -13,3 +13,7 @@ ch4:
 uranium:
   balanced:
     False
+
+biomass:
+  balanced:
+    False
