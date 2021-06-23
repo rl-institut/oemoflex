@@ -273,8 +273,25 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
 
     return fig
 
+
+def replace_near_zeros(df):
+    tolerance = 1e-3
+    df[abs(df) < tolerance] = 0.0
+    return df
+
+def assign_stackgroup(key, values):
+    if all(values <= 0):
+        stackgroup = "negative"
+    elif all(values >= 0):
+        stackgroup = "positive"
+    elif all(values == 0):
+        stackgroup = "positive"
+    else:
+        raise ValueError(key," has both, negative and positive values. But it should only have either one")
+    return stackgroup
+
+
 def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
-    df[df<0]=0
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
@@ -291,6 +308,8 @@ def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
 
     # group columns with the same name, e.g. transmission busses by import and export
     df = group_agg_by_column(df)
+    # check columns on numeric values which are practical zero and replace them with 0.0
+    df = replace_near_zeros(df)
 
     # plotly figure
     fig = go.Figure()
@@ -298,10 +317,7 @@ def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
     # plot stacked generators and consumers
     df = df[[c for c in df.columns if not isinstance(c, tuple)]]
     for key, values in df.iteritems():
-        if any(values < 0):
-            stackgroup="negative"
-        else:
-            stackgroup="positive"
+        stackgroup = assign_stackgroup(key, values)
 
         fig.add_trace(go.Scatter(
             x=df.index,
@@ -414,15 +430,21 @@ def plot_dispatch(
 
     # group columns with the same name, e.g. transmission busses by import and export
     df = group_agg_by_column(df)
+    # check columns on numeric values which are practical zero and replace them with 0.0
+    df = replace_near_zeros(df)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
     y_stack_neg = []
-    for index, value in (df < 0).any().items():
-        if value == True:
-            y_stack_neg.append(index)
-        else:
-            y_stack_pos.append(index)
+
+    # assign data to positive or negative stackplot
+    for key, values in df.iteritems():
+        stackgroup = assign_stackgroup(key, values)
+        if stackgroup == "negative":
+            y_stack_neg.append(key)
+        elif stackgroup == "positive":
+            y_stack_pos.append(key)
+
     for i in y_stack_pos:
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
