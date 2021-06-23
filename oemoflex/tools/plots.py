@@ -235,8 +235,7 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
     traces = list()
 
     df = df[[c for c in df.columns if not isinstance(c, tuple)]]
-    print(df)
-    print(df_demand)
+
     for key, values in df.iteritems():
 
         traces.append(
