@@ -325,7 +325,35 @@ def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
         name=df_demand.columns[0],
     ))
 
-    fig.update_layout(hovermode="x unified", font=dict(family='Aleo'))
+    fig.update_layout(hovermode="x unified", font=dict(family='Aleo'),
+                      xaxis=dict(
+                          rangeselector=dict(
+                              buttons=list([
+                                  dict(count=1,
+                                       label="1m",
+                                       step="month",
+                                       stepmode="backward"),
+                                  dict(count=6,
+                                       label="6m",
+                                       step="month",
+                                       stepmode="backward"),
+                                  dict(count=1,
+                                       label="YTD",
+                                       step="year",
+                                       stepmode="todate"),
+                                  dict(count=1,
+                                       label="1y",
+                                       step="year",
+                                       stepmode="backward"),
+                                  dict(step="all")
+                              ])
+                          ),
+                          rangeslider=dict(
+                              visible=True
+                          ),
+                          type="date"
+                      )
+                      )
 
     return fig
 
