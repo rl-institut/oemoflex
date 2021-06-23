@@ -234,9 +234,8 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
 
     traces = list()
 
+    # plot generators and consumers
     df = df[[c for c in df.columns if not isinstance(c, tuple)]]
-    print(df)
-    print(df_demand)
     for key, values in df.iteritems():
 
         traces.append(
@@ -244,7 +243,7 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
                 x=df.index,
                 y=values,
                 mode='lines',
-                stackgroup='one',
+                stackgroup='positive',
                 line=dict(
                     width=1, color=colors_odict[key]
                 ),
@@ -274,6 +273,61 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
 
     return fig
 
+def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
+
+    # identify consumers, which shall be plotted negative and
+    # isolate column with demand and make its data positive again
+    df.columns = df.columns.to_flat_index()
+    for i in df.columns:
+        if i[0] == bus_name:
+            df[i] = df[i] * -1
+        if i[1] == demand_name:
+            df_demand = (df[i] * -1).to_frame()
+            df.drop(columns=[i], inplace=True)
+
+    # rename column names to match labels
+    df = map_labels(df, general_labels_dict)
+    df_demand = map_labels(df_demand, general_labels_dict)
+
+    # group transmission busses by import and export
+    df = group_agg_by_column(df)
+
+    # plotly figure
+    fig = go.Figure()
+
+    # plot stacked generators and consumers
+    df = df[[c for c in df.columns if not isinstance(c, tuple)]]
+    for key, values in df.iteritems():
+        if any(values < 0):
+            stackgroup="negative"
+        else:
+            stackgroup="positive"
+
+        fig.add_trace(go.Scatter(
+            x=df.index,
+            y=values,
+            mode='lines',
+            stackgroup=stackgroup,
+            line=dict(
+                width=0, color=colors_odict[key]
+            ),
+            name=key,
+        ))
+
+    # plot demand line
+    fig.add_traces(go.Scatter(
+        x=df_demand.index,
+        y=df_demand.iloc[:, 0],
+        mode='lines',
+        line=dict(
+            width=2, color=colors_odict[df_demand.columns[0]]
+        ),
+        name=df_demand.columns[0],
+    ))
+
+    fig.update_layout(hovermode="x unified", font=dict(family='Aleo'))
+
+    return fig
 
 def lineplot(ax, df, colors_odict=colors_odict):
     r"""
