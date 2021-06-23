@@ -274,7 +274,7 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
     return fig
 
 def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
-
+    df[df<0]=0
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
