@@ -289,7 +289,7 @@ def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
     df = map_labels(df, general_labels_dict)
     df_demand = map_labels(df_demand, general_labels_dict)
 
-    # group transmission busses by import and export
+    # group columns with the same name, e.g. transmission busses by import and export
     df = group_agg_by_column(df)
 
     # plotly figure
@@ -412,7 +412,7 @@ def plot_dispatch(
     df = map_labels(df, general_labels_dict)
     df_demand = map_labels(df_demand, general_labels_dict)
 
-    # group transmission busses by import and export
+    # group columns with the same name, e.g. transmission busses by import and export
     df = group_agg_by_column(df)
 
     # plot stackplot, differentiate between positive and negative stacked data
