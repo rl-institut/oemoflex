@@ -28,8 +28,8 @@ plt.show()
 
 fig = plots.plot_dispatch_plotly(
     df=data,
-    bus_name="BB-electricity",
-    demand_name="BB-electricity-demand",
+    bus_name="A-electricity",
+    demand_name="A-electricity-demand",
 )
 
 fig.write_html(

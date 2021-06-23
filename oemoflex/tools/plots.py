@@ -226,7 +226,11 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
             df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    df = map_labels(df)
+    df = map_labels(df, general_labels_dict)
+    df_demand = map_labels(df_demand, general_labels_dict)
+
+    # group transmission busses by import and export
+    df = group_agg_by_column(df)
 
     traces = list()
 
