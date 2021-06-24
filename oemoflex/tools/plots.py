@@ -174,7 +174,7 @@ def replace_near_zeros(df):
     return df
 
 
-def preprocessing(df, bus_name, demand_name):
+def prepare_dispatch_data(df, bus_name, demand_name):
     r"""
     The data in df is split into a DataFrame with consumers and generators and a DataFrame which only
     contains the demand data. Consumer data is made negative. The multilevel column names are replaced
@@ -193,9 +193,9 @@ def preprocessing(df, bus_name, demand_name):
     Returns
     ----------
     df : pandas.DataFrame
-        DataFrame with preprocessed data of consumers and generators.
+        DataFrame with prepared data for dispatch plotting of consumers and generators.
     df_demand: pandas.DataFrame
-        DataFrame with preprocessed data of demand.
+        DataFrame with prepared data for dispatch plotting of demand.
     """
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
@@ -301,8 +301,8 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
-    # data preprocessing
-    df, df_demand = preprocessing(df, bus_name, demand_name)
+    # prepare dispatch data
+    df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
 
     # make sure to obey order as definded in colors_odict
     order = list(colors_odict)
@@ -438,8 +438,8 @@ def plot_dispatch(
     """
     df = filter_timeseries(df, start_date, end_date)
 
-    # data preprocessing
-    df, df_demand = preprocessing(df, bus_name, demand_name)
+    # prepare dispatch data
+    df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
