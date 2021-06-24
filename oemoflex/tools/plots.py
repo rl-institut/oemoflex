@@ -321,15 +321,14 @@ def assign_stackgroup(key, values):
 
     return stackgroup
 
-
-def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
+def preprocessing(df, bus_name, demand_name):
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
     for i in df.columns:
         if i[0] == bus_name:
             df[i] = df[i] * -1
-        if i[1] == demand_name:
+        if demand_name in i[1]:
             df_demand = (df[i] * -1).to_frame()
             df.drop(columns=[i], inplace=True)
 
@@ -341,6 +340,12 @@ def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
     df = group_agg_by_column(df)
     # check columns on numeric values which are practical zero and replace them with 0.0
     df = replace_near_zeros(df)
+
+    return df, df_demand
+
+def plot_dispatch_plotly2(df, bus_name, demand_name = "demand", colors_odict=colors_odict):
+    # data preprocessing
+    df, df_demand = preprocessing(df, bus_name, demand_name)
 
     # make sure to obey order as definded in colors_odict
     order = list(colors_odict)
@@ -452,24 +457,8 @@ def plot_dispatch(
     """
     df = filter_timeseries(df, start_date, end_date)
 
-    # identify consumers, which shall be plotted negative and
-    # isolate column with demand and make its data positive again
-    df.columns = df.columns.to_flat_index()
-    for i in df.columns:
-        if i[0] == bus_name:
-            df[i] = df[i] * -1
-        if demand_name in i[1]:
-            df_demand = (df[i] * -1).to_frame()
-            df.drop(columns=[i], inplace=True)
-
-    # rename column names to match labels
-    df = map_labels(df, general_labels_dict)
-    df_demand = map_labels(df_demand, general_labels_dict)
-
-    # group columns with the same name, e.g. transmission busses by import and export
-    df = group_agg_by_column(df)
-    # check columns on numeric values which are practical zero and replace them with 0.0
-    df = replace_near_zeros(df)
+    # data preprocessing
+    df, df_demand = preprocessing(df, bus_name, demand_name)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
