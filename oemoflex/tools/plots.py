@@ -342,6 +342,13 @@ def plot_dispatch_plotly2(df, bus_name, demand_name, colors_odict=colors_odict):
     # check columns on numeric values which are practical zero and replace them with 0.0
     df = replace_near_zeros(df)
 
+    # make sure to obey order as definded in colors_odict
+    order = list(colors_odict)
+    for i in order:
+        if i not in df.columns:
+            order.remove(i)
+    df = df[order]
+
     # plotly figure
     fig = go.Figure()
 
