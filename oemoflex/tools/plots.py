@@ -153,6 +153,49 @@ def group_agg_by_column(df):
     return df_grouped
 
 
+def replace_near_zeros(df):
+    r"""
+    Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
+    All values which are smaller than a defined tolerance are replaced by 0.0.
+
+    Parameters
+    ---------------
+    df : pandas.DataFrame
+        Dataframe with data.
+
+    Returns
+    ----------
+    df : pandas.DataFrame
+        DataFrame with replaced near zeros.
+    """
+    tolerance = 1e-3
+    df[abs(df) < tolerance] = 0.0
+    return df
+
+
+def preprocessing(df, bus_name, demand_name):
+    # identify consumers, which shall be plotted negative and
+    # isolate column with demand and make its data positive again
+    df.columns = df.columns.to_flat_index()
+    for i in df.columns:
+        if i[0] == bus_name:
+            df[i] = df[i] * -1
+        if demand_name in i[1]:
+            df_demand = (df[i] * -1).to_frame()
+            df.drop(columns=[i], inplace=True)
+
+    # rename column names to match labels
+    df = map_labels(df, general_labels_dict)
+    df_demand = map_labels(df_demand, general_labels_dict)
+
+    # group columns with the same name, e.g. transmission busses by import and export
+    df = group_agg_by_column(df)
+    # check columns on numeric values which are practical zero and replace them with 0.0
+    df = replace_near_zeros(df)
+
+    return df, df_demand
+
+
 def filter_timeseries(df, start_date=None, end_date=None):
     r"""
     Filters a dataframe with a timeseries from a start date to an end date.
@@ -180,37 +223,33 @@ def filter_timeseries(df, start_date=None, end_date=None):
     return df_filtered
 
 
-def stackplot(ax, df, colors_odict=colors_odict):
+def assign_stackgroup(key, values):
     r"""
-    Plots data as a stackplot. The stacking order is determined by the order
-    of labels in the colors_odict. It is stacked beginning with the x-axis as
-    the bottom.
+    This function decides if data is supposed to be plotted on the positive or negative side of the
+    stackplot. If values has both negative and positive values, a value error is raised.
 
     Parameters
     ---------------
-    ax : matplotlib.AxesSubplot
-        Axis on which data is plotted.
-    df : pandas.DataFrame
-        Dataframe with data.
-    colors_odict : collections.OrderedDictionary
-        Ordered dictionary with labels as keys and colourcodes as values.
+    key : string
+        Column name.
+    values: pandas.Series
+        Values of column.
+
+    Returns
+    ----------
+    stackgroup : string
+        String with keyword positive or negative.
     """
-    # y is a list which gets the correct stack order from colors file
-    colors = []
-    labels = []
-    y = []
+    if all(values <= 0):
+        stackgroup = "negative"
+    elif all(values >= 0):
+        stackgroup = "positive"
+    elif all(values == 0):
+        stackgroup = "positive"
+    else:
+        raise ValueError(key," has both, negative and positive values. But it should only have either one")
 
-    order = list(colors_odict)
-
-    for i in order:
-        if i not in df.columns:
-            continue
-        labels.append(i)
-        colors.append(colors_odict[i])
-        y.append(df[i])
-
-    y = np.vstack(y)
-    ax.stackplot(df.index, y, colors=colors, labels=labels)
+    return stackgroup
 
 
 def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
@@ -273,75 +312,6 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
 
     return fig
 
-
-def replace_near_zeros(df):
-    r"""
-    Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
-    All values which are smaller than a defined tolerance are replaced by 0.0.
-
-    Parameters
-    ---------------
-    df : pandas.DataFrame
-        Dataframe with data.
-
-    Returns
-    ----------
-    df : pandas.DataFrame
-        DataFrame with replaced near zeros.
-    """
-    tolerance = 1e-3
-    df[abs(df) < tolerance] = 0.0
-    return df
-
-def assign_stackgroup(key, values):
-    r"""
-    This function decides if data is supposed to be plotted on the positive or negative side of the
-    stackplot. If values has both negative and positive values, a value error is raised.
-
-    Parameters
-    ---------------
-    key : string
-        Column name.
-    values: pandas.Series
-        Values of column.
-
-    Returns
-    ----------
-    stackgroup : string
-        String with keyword positive or negative.
-    """
-    if all(values <= 0):
-        stackgroup = "negative"
-    elif all(values >= 0):
-        stackgroup = "positive"
-    elif all(values == 0):
-        stackgroup = "positive"
-    else:
-        raise ValueError(key," has both, negative and positive values. But it should only have either one")
-
-    return stackgroup
-
-def preprocessing(df, bus_name, demand_name):
-    # identify consumers, which shall be plotted negative and
-    # isolate column with demand and make its data positive again
-    df.columns = df.columns.to_flat_index()
-    for i in df.columns:
-        if i[0] == bus_name:
-            df[i] = df[i] * -1
-        if demand_name in i[1]:
-            df_demand = (df[i] * -1).to_frame()
-            df.drop(columns=[i], inplace=True)
-
-    # rename column names to match labels
-    df = map_labels(df, general_labels_dict)
-    df_demand = map_labels(df_demand, general_labels_dict)
-
-    # group columns with the same name, e.g. transmission busses by import and export
-    df = group_agg_by_column(df)
-    # check columns on numeric values which are practical zero and replace them with 0.0
-    df = replace_near_zeros(df)
-
-    return df, df_demand
 
 def plot_dispatch_plotly2(df, bus_name, demand_name = "demand", colors_odict=colors_odict):
     # data preprocessing
@@ -415,6 +385,40 @@ def plot_dispatch_plotly2(df, bus_name, demand_name = "demand", colors_odict=col
                       )
 
     return fig
+
+
+def stackplot(ax, df, colors_odict=colors_odict):
+    r"""
+    Plots data as a stackplot. The stacking order is determined by the order
+    of labels in the colors_odict. It is stacked beginning with the x-axis as
+    the bottom.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
+    """
+    # y is a list which gets the correct stack order from colors file
+    colors = []
+    labels = []
+    y = []
+
+    order = list(colors_odict)
+
+    for i in order:
+        if i not in df.columns:
+            continue
+        labels.append(i)
+        colors.append(colors_odict[i])
+        y.append(df[i])
+
+    y = np.vstack(y)
+    ax.stackplot(df.index, y, colors=colors, labels=labels)
+
 
 def lineplot(ax, df, colors_odict=colors_odict):
     r"""
