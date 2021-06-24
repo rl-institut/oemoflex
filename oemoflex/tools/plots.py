@@ -64,6 +64,7 @@ def rename_by_string_matching(columns, labels_dict):
     renamed_columns : list
         List with new column names.
     """
+
     def map_tuple(tuple, dictionary):
         r"""
         The corresponding value of the tuple which is supposed to be a key in the dictionary is retrieved.
@@ -174,6 +175,28 @@ def replace_near_zeros(df):
 
 
 def preprocessing(df, bus_name, demand_name):
+    r"""
+    The data in df is split into a DataFrame with consumers and generators and a DataFrame which only
+    contains the demand data. Consumer data is made negative. The multilevel column names are replaced
+    by more simple names. Columns the same name are grouped together. Really small numerical values which
+    are practically zero are replaced with 0.0.
+
+    Parameters
+    ---------------
+    df : pandas.DataFrame
+        Dataframe with data.
+    bus_name : string
+        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
+    demand_name: string
+        Name of the bus representing the demand.
+
+    Returns
+    ----------
+    df : pandas.DataFrame
+        DataFrame with preprocessed data of consumers and generators.
+    df_demand: pandas.DataFrame
+        DataFrame with preprocessed data of demand.
+    """
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
@@ -247,7 +270,10 @@ def assign_stackgroup(key, values):
     elif all(values == 0):
         stackgroup = "positive"
     else:
-        raise ValueError(key," has both, negative and positive values. But it should only have either one")
+        raise ValueError(
+            key,
+            " has both, negative and positive values. But it should only have either one",
+        )
 
     return stackgroup
 
@@ -281,11 +307,9 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
             dict(
                 x=df.index,
                 y=values,
-                mode='lines',
-                stackgroup='positive',
-                line=dict(
-                    width=1, color=colors_odict[key]
-                ),
+                mode="lines",
+                stackgroup="positive",
+                line=dict(width=1, color=colors_odict[key]),
                 name=key,
                 # fill_color=colors_odict[key]
             )
@@ -294,17 +318,15 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
     traces.append(
         dict(
             x=df_demand.index,
-            y=df_demand.iloc[:,0],
-            mode='lines',
-            line=dict(
-                width=1, color=colors_odict[df_demand.columns[0]]
-            ),
+            y=df_demand.iloc[:, 0],
+            mode="lines",
+            line=dict(width=1, color=colors_odict[df_demand.columns[0]]),
             name=df_demand.columns[0],
             # fill_color=colors_odict[key]
         )
     )
 
-    layout = dict(font=dict(family='Aleo'))
+    layout = dict(font=dict(family="Aleo"))
 
     fig = dict(data=traces, layout=layout)
 
@@ -313,7 +335,29 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
     return fig
 
 
-def plot_dispatch_plotly2(df, bus_name, demand_name = "demand", colors_odict=colors_odict):
+def plot_dispatch_plotly2(
+    df, bus_name, demand_name="demand", colors_odict=colors_odict
+):
+    r"""
+    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line plot and
+    suppliers and other consumers are plotted with a stackplot.
+
+    Parameters
+    ---------------
+    df : pandas.DataFrame
+        Dataframe with data.
+    bus_name : string
+        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
+    demand_name: string
+        Name of the bus representing the demand.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
+
+    Returns
+    ----------
+    fig : plotly.graph_objs._figure.Figure
+        Interactive plotly dispatch plot
+    """
     # data preprocessing
     df, df_demand = preprocessing(df, bus_name, demand_name)
 
@@ -332,57 +376,47 @@ def plot_dispatch_plotly2(df, bus_name, demand_name = "demand", colors_odict=col
     for key, values in df.iteritems():
         stackgroup = assign_stackgroup(key, values)
 
-        fig.add_trace(go.Scatter(
-            x=df.index,
-            y=values,
-            mode='lines',
-            stackgroup=stackgroup,
-            line=dict(
-                width=0, color=colors_odict[key]
-            ),
-            name=key,
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=df.index,
+                y=values,
+                mode="lines",
+                stackgroup=stackgroup,
+                line=dict(width=0, color=colors_odict[key]),
+                name=key,
+            )
+        )
 
     # plot demand line
-    fig.add_traces(go.Scatter(
-        x=df_demand.index,
-        y=df_demand.iloc[:, 0],
-        mode='lines',
-        line=dict(
-            width=2, color=colors_odict[df_demand.columns[0]]
-        ),
-        name=df_demand.columns[0],
-    ))
+    fig.add_traces(
+        go.Scatter(
+            x=df_demand.index,
+            y=df_demand.iloc[:, 0],
+            mode="lines",
+            line=dict(width=2, color=colors_odict[df_demand.columns[0]]),
+            name=df_demand.columns[0],
+        )
+    )
 
-    fig.update_layout(hovermode="x unified", font=dict(family='Aleo'),
-                      xaxis=dict(
-                          rangeselector=dict(
-                              buttons=list([
-                                  dict(count=1,
-                                       label="1m",
-                                       step="month",
-                                       stepmode="backward"),
-                                  dict(count=6,
-                                       label="6m",
-                                       step="month",
-                                       stepmode="backward"),
-                                  dict(count=1,
-                                       label="YTD",
-                                       step="year",
-                                       stepmode="todate"),
-                                  dict(count=1,
-                                       label="1y",
-                                       step="year",
-                                       stepmode="backward"),
-                                  dict(step="all")
-                              ])
-                          ),
-                          rangeslider=dict(
-                              visible=True
-                          ),
-                          type="date"
-                      )
-                      )
+    fig.update_layout(
+        hovermode="x unified",
+        font=dict(family="Aleo"),
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list(
+                    [
+                        dict(count=1, label="1m", step="month", stepmode="backward"),
+                        dict(count=6, label="6m", step="month", stepmode="backward"),
+                        dict(count=1, label="YTD", step="year", stepmode="todate"),
+                        dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(step="all"),
+                    ]
+                )
+            ),
+            rangeslider=dict(visible=True),
+            type="date",
+        ),
+    )
 
     return fig
 
@@ -442,7 +476,7 @@ def plot_dispatch(
 ):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
-    suppliers and other consumers are plottes with a stackplot.
+    suppliers and other consumers are plotted with a stackplot.
 
     Parameters
     ---------------
