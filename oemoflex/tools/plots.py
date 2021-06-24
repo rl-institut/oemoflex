@@ -278,64 +278,7 @@ def assign_stackgroup(key, values):
     return stackgroup
 
 
-def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
-
-    # identify consumers, which shall be plotted negative and
-    # isolate column with demand and make its data positive again
-    df.columns = df.columns.to_flat_index()
-    for i in df.columns:
-        if i[0] == bus_name:
-            df[i] = df[i] * -1
-        if i[1] == demand_name:
-            df_demand = (df[i] * -1).to_frame()
-            df.drop(columns=[i], inplace=True)
-
-    # rename column names to match labels
-    df = map_labels(df, general_labels_dict)
-    df_demand = map_labels(df_demand, general_labels_dict)
-
-    # group transmission busses by import and export
-    df = group_agg_by_column(df)
-
-    traces = list()
-
-    # plot generators and consumers
-    df = df[[c for c in df.columns if not isinstance(c, tuple)]]
-    for key, values in df.iteritems():
-
-        traces.append(
-            dict(
-                x=df.index,
-                y=values,
-                mode="lines",
-                stackgroup="positive",
-                line=dict(width=1, color=colors_odict[key]),
-                name=key,
-                # fill_color=colors_odict[key]
-            )
-        )
-    # plot demand line
-    traces.append(
-        dict(
-            x=df_demand.index,
-            y=df_demand.iloc[:, 0],
-            mode="lines",
-            line=dict(width=1, color=colors_odict[df_demand.columns[0]]),
-            name=df_demand.columns[0],
-            # fill_color=colors_odict[key]
-        )
-    )
-
-    layout = dict(font=dict(family="Aleo"))
-
-    fig = dict(data=traces, layout=layout)
-
-    fig = go.Figure(fig)
-
-    return fig
-
-
-def plot_dispatch_plotly2(
+def plot_dispatch_plotly(
     df, bus_name, demand_name="demand", colors_odict=colors_odict
 ):
     r"""
