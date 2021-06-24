@@ -275,11 +275,41 @@ def plot_dispatch_plotly(df, bus_name, demand_name, colors_odict=colors_odict):
 
 
 def replace_near_zeros(df):
+    r"""
+    Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
+    All values which are smaller than a defined tolerance are replaced by 0.0.
+
+    Parameters
+    ---------------
+    df : pandas.DataFrame
+        Dataframe with data.
+
+    Returns
+    ----------
+    df : pandas.DataFrame
+        DataFrame with replaced near zeros.
+    """
     tolerance = 1e-3
     df[abs(df) < tolerance] = 0.0
     return df
 
 def assign_stackgroup(key, values):
+    r"""
+    This function decides if data is supposed to be plotted on the positive or negative side of the
+    stackplot. If values has both negative and positive values, a value error is raised.
+
+    Parameters
+    ---------------
+    key : string
+        Column name.
+    values: pandas.Series
+        Values of column.
+
+    Returns
+    ----------
+    stackgroup : string
+        String with keyword positive or negative.
+    """
     if all(values <= 0):
         stackgroup = "negative"
     elif all(values >= 0):
@@ -288,6 +318,7 @@ def assign_stackgroup(key, values):
         stackgroup = "positive"
     else:
         raise ValueError(key," has both, negative and positive values. But it should only have either one")
+
     return stackgroup
 
 
