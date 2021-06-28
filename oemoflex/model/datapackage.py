@@ -118,7 +118,7 @@ class DataFramePackage:
             key: os.path.join(target_dir, key + '.csv') for key in separate_dfs.keys()
         })
 
-    def stack_frames(self, frame_names, target_name, unstacked_vars, index_vars):
+    def stack_frames(self, frame_names, target_name, target_dir, unstacked_vars, index_vars):
 
         assert frame_names, "Cannot stack scalars if frames are not in ."
 
@@ -130,7 +130,7 @@ class DataFramePackage:
 
         self.data[target_name] = stack_frames(frames_to_stack, unstacked_vars, index_vars)
 
-        self.rel_paths[target_name] = target_name + '.csv'
+        self.rel_paths[target_name] = os.path.join(target_dir, target_name + '.csv')
 
 
 class EnergyDataPackage(DataFramePackage):
@@ -197,7 +197,8 @@ class EnergyDataPackage(DataFramePackage):
 
         self.stack_frames(
             component_names,
-            target_name=os.path.join('data', 'elements', 'component'),
+            target_name='component',
+            target_dir=os.path.join('data', 'elements'),
             unstacked_vars=['name', 'region', 'carrier', 'tech', 'type'],
             index_vars=['name', 'var_name']
         )
@@ -205,7 +206,7 @@ class EnergyDataPackage(DataFramePackage):
     def unstack_components(self):
 
         self.separate_stacked_frame(
-            frame_name=os.path.join('data', 'elements', 'component'),
+            frame_name='component',
             target_dir=os.path.join('data', 'elements'),
             group_by=['carrier', 'tech'])
 
@@ -310,6 +311,7 @@ class ResultsDataPackage(DataFramePackage):
         self.stack_frames(
             frame_names=element_names,
             target_name='scalars',
+            target_dir='',
             unstacked_vars=['scenario', 'name', 'region', 'carrier', 'tech', 'type'],
             index_vars=['scenario', 'name', 'var_name']
         )
