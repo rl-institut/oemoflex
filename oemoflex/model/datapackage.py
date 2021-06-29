@@ -55,7 +55,15 @@ class DataFramePackage:
         """
         for name, data in self.data.items():
             path = self.rel_paths[name]
+
             full_path = os.path.join(destination, path)
+
+            dir_full_path = os.path.expanduser(os.path.dirname(full_path))
+
+            if not os.path.exists(dir_full_path):
+
+                os.makedirs(dir_full_path)
+
             self._write_resource(data, full_path)
 
     @staticmethod
