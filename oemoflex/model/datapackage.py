@@ -109,7 +109,7 @@ class DataFramePackage:
 
         data.to_csv(path)
 
-    def separate_stacked_frame(self, frame_name, target_dir, group_by):
+    def _separate_stacked_frame(self, frame_name, target_dir, group_by):
 
         assert frame_name in self.data, "Cannot group by component if stacked frame is " \
                                         "missing."
@@ -126,7 +126,7 @@ class DataFramePackage:
             key: os.path.join(target_dir, key + '.csv') for key in separate_dfs.keys()
         })
 
-    def stack_frames(self, frame_names, target_name, target_dir, unstacked_vars, index_vars):
+    def _stack_frames(self, frame_names, target_name, target_dir, unstacked_vars, index_vars):
 
         assert frame_names, "Cannot stack scalars if frames are not in ."
 
@@ -203,7 +203,7 @@ class EnergyDataPackage(DataFramePackage):
                and not key == 'bus'
         ]
 
-        self.stack_frames(
+        self._stack_frames(
             component_names,
             target_name='component',
             target_dir=os.path.join('data', 'elements'),
@@ -213,7 +213,7 @@ class EnergyDataPackage(DataFramePackage):
 
     def unstack_components(self):
 
-        self.separate_stacked_frame(
+        self._separate_stacked_frame(
             frame_name='component',
             target_dir=os.path.join('data', 'elements'),
             group_by=['carrier', 'tech'])
@@ -302,7 +302,7 @@ class ResultsDataPackage(DataFramePackage):
 
     def to_element_dfs(self):
 
-        self.separate_stacked_frame(
+        self._separate_stacked_frame(
             frame_name='scalars',
             target_dir='elements',
             group_by=['carrier', 'tech']
@@ -316,7 +316,7 @@ class ResultsDataPackage(DataFramePackage):
 
         element_names = [key for key, rel_path in self.rel_paths.items() if is_element(rel_path)]
 
-        self.stack_frames(
+        self._stack_frames(
             frame_names=element_names,
             target_name='scalars',
             target_dir='',
