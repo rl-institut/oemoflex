@@ -308,11 +308,12 @@ def plot_dispatch_plotly(
     df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
 
     # make sure to obey order as definded in colors_odict
-    order = list(colors_odict)
-    for i in order:
+    generic_order = list(colors_odict)
+    concrete_order = generic_order.copy()
+    for i in generic_order:
         if i not in df.columns:
-            order.remove(i)
-    df = df[order]
+            concrete_order.remove(i)
+    df = df[concrete_order]
 
     # plotly figure
     fig = go.Figure()

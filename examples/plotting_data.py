@@ -26,7 +26,7 @@ plt.legend(loc="best")
 plt.tight_layout()
 plt.show()
 
-fig = plots.plot_dispatch_plotly2(
+fig = plots.plot_dispatch_plotly(
     df=data,
     bus_name="A-electricity",
     demand_name="A-electricity-demand",
