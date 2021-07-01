@@ -12,7 +12,7 @@ data = pd.read_csv(input_path, header=[0, 1, 2], parse_dates=[0], index_col=[0])
 
 
 fig, ax = plt.subplots(figsize=(12, 5))
-data = plots.eng_format(ax, data, "W", 1000)
+ax, data = plots.eng_format(ax, data, "W", 1000)
 
 start_date = "2019-12-01 00:00:00"
 end_date = "2019-12-13 23:00:00"
@@ -30,6 +30,8 @@ fig = plots.plot_dispatch_plotly(
     df=data,
     bus_name="A-electricity",
     demand_name="A-electricity-demand",
+    unit="W",
+    conv_number=1000
 )
 
 fig.write_html(
