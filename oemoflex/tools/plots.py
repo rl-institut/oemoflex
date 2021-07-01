@@ -497,5 +497,5 @@ def eng_format(ax, df, unit, conv_number):
     """
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
-    df[df.select_dtypes(include=["number"]).columns] *= conv_number
+    df *= conv_number
     return ax, df
