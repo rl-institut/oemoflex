@@ -603,17 +603,20 @@ def run_postprocessing(es):
     )
 
     # Collect existing (exogenous) capacity (units of power) and storage capacity (units of energy)
-    # Keep in mind - this has an index of the form (component, None). It is not attributed to a flow
+    # Keep in mind - this has an index of the form (component, None).
+    # It is not attributed to a flow
     capacity = filter_by_var_name(scalar_params, "capacity")
 
     from_to_capacity = filter_by_var_name(scalar_params, "from_to_capacity")
 
     to_from_capacity = filter_by_var_name(scalar_params, "to_from_capacity")
 
-    # Keep in mind - this has an index of the form (component, None). It is not attributed to a flow
+    # Keep in mind - this has an index of the form (component, None).
+    # It is not attributed to a flow
     storage_capacity = filter_by_var_name(scalar_params, "storage_capacity")
 
-    # Collect invested (endogenous) capacity (units of power) and storage capacity (units of energy)
+    # Collect invested (endogenous) capacity (units of power) and
+    # storage capacity (units of energy)
 
     invested_capacity = None
 
@@ -643,7 +646,8 @@ def run_postprocessing(es):
     #
     # inputs = get_inputs(summed_flows)
     #
-    # flows_with_emissions = filter_series_by_component_attr(inputs, carrier=carriers_with_emissions)
+    # flows_with_emissions = filter_series_by_component_attr(inputs,
+    #                                                        carrier=carriers_with_emissions)
     #
     # # Get emissions
     #
