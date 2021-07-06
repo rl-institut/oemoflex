@@ -31,7 +31,8 @@ def map_labels(df, labels_dict):
     df : pandas.DataFrame
         Dataframe with data.
     labels_dict : dictionary
-        Contains old and new column names. The new column names are used for the labels in the plot.
+        Contains old and new column names. The new column names are used for the labels in the
+        plot.
 
     Returns
     ----------
@@ -56,7 +57,8 @@ def rename_by_string_matching(columns, labels_dict):
     columns : pandas.Index
         Column names which need to be adapted to a concise name.
     labels_dict : dictionary
-        Contains old and new column names. The new column names are used for the labels in the plot.
+        Contains old and new column names. The new column names are used for the labels in the
+        plot.
 
     Returns
     ----------
@@ -66,14 +68,16 @@ def rename_by_string_matching(columns, labels_dict):
 
     def map_tuple(tuple, dictionary):
         r"""
-        The corresponding value of the tuple which is supposed to be a key in the dictionary is retrieved.
+        The corresponding value of the tuple which is supposed to be a key in the dictionary is
+        retrieved.
 
         Parameters
         ---------------
         tuple : tuple
             Multilevel column name as tuple which needs to be adapted to a concise name.
         dictionary : dictionary
-            Contains old and new column names. The new column names are used for the labels in the plot.
+            Contains old and new column names. The new column names are used for the labels in the
+            plot.
 
         Returns
         ----------
@@ -98,14 +102,16 @@ def rename_by_string_matching(columns, labels_dict):
     def concrete_in_generic(concrete_tuple, generic_tuple):
         r"""
         It is checked if the concrete_tuple is contained in the generic_tuple which is a key of
-        the labels_dict. Thus, it is checked if a multilevel column name is contained in the labels_dict.
+        the labels_dict. Thus, it is checked if a multilevel column name is contained in the
+        labels_dict.
 
         Parameters
         ---------------
         concrete_tuple : tuple
             Column names which need to be adapted to a concise name.
         generic_tuple : tuple
-            Contains old and new column names. The new column names are used for the labels in the plot.
+            Contains old and new column names. The new column names are used for the labels in the
+            plot.
 
         Returns
         ----------
