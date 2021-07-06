@@ -584,9 +584,11 @@ def run_postprocessing(es):
     summed_flows = sum_flows(sequences)
 
     # Collect the annual sum of renewable energy
-    summed_flows_re = filter_series_by_component_attr(
-        summed_flows, tech=["wind", "solar"]
-    )
+    # scalars in summed_flows_re not generic and therefore
+    # not used in the following but held here as an alternative.
+    # summed_flows_re = filter_series_by_component_attr(
+    #     summed_flows, tech=["wind", "solar"]
+    # )
 
     # Calculate storage losses
     summed_flows_storage = filter_series_by_component_attr(summed_flows, type="storage")
