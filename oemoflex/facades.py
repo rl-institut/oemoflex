@@ -17,8 +17,8 @@ class Source(solph.Source):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.carrier = kwargs.get('carrier', None)
-        self.tech = kwargs.get('tech', None)
+        self.carrier = kwargs.get("carrier", None)
+        self.tech = kwargs.get("tech", None)
 
 
 class Transformer(solph.Transformer):
@@ -33,39 +33,34 @@ class Transformer(solph.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.carrier = kwargs.get('carrier', None)
-        self.tech = kwargs.get('tech', None)
+        self.carrier = kwargs.get("carrier", None)
+        self.tech = kwargs.get("tech", None)
 
 
 class Facade(facades.Facade):
-
     def _nominal_value(self):
-        """ Returns None if self.expandable ist True otherwise it returns
+        """Returns None if self.expandable ist True otherwise it returns
         the capacities
         """
         if self.expandable is True:
             return None
 
         if isinstance(self, Link):
-            return {
-                "from_to": self.from_to_capacity,
-                "to_from": self.to_from_capacity}
+            return {"from_to": self.from_to_capacity, "to_from": self.to_from_capacity}
 
         if isinstance(self, AsymmetricStorage):
             return {
                 "charge": self.capacity_charge,
-                "discharge": self.capacity_discharge}
+                "discharge": self.capacity_discharge,
+            }
 
         return self.capacity
 
 
 class AsymmetricStorage(GenericStorage, Facade):
-
     def __init__(self, *args, **kwargs):
 
-        super().__init__(
-            _facade_requires_=["bus", "carrier", "tech"], *args, **kwargs
-        )
+        super().__init__(_facade_requires_=["bus", "carrier", "tech"], *args, **kwargs)
 
         self.storage_capacity = kwargs.get("storage_capacity", 0)
 
@@ -113,9 +108,16 @@ class AsymmetricStorage(GenericStorage, Facade):
 
         # self.investment = self._investment()
         if self.expandable is True:
-            if any([self.capacity_cost_charge,
-                    self.capacity_cost_discharge,
-                    self.storage_capacity_cost]) is None:
+            if (
+                any(
+                    [
+                        self.capacity_cost_charge,
+                        self.capacity_cost_discharge,
+                        self.storage_capacity_cost,
+                    ]
+                )
+                is None
+            ):
                 msg = (
                     "If you set `expandable` to True you need to set "
                     "attribute `storage_capacity_cost`,"
@@ -142,7 +144,9 @@ class AsymmetricStorage(GenericStorage, Facade):
             fo = Flow(
                 investment=Investment(
                     ep_costs=self.capacity_cost_discharge,
-                    maximum=getattr(self, "capacity_potential_discharge", float("+inf")),
+                    maximum=getattr(
+                        self, "capacity_potential_discharge", float("+inf")
+                    ),
                     existing=getattr(self, "capacity_discharge", 0),
                 ),
                 # Attach marginal cost to Flow out
@@ -171,7 +175,7 @@ class AsymmetricStorage(GenericStorage, Facade):
 
 
 class Bev(GenericStorage, Facade):
-    r""" A fleet of Battery electric vehicles with vehicle-to-grid.
+    r"""A fleet of Battery electric vehicles with vehicle-to-grid.
 
     Note that the investment option is not available for this facade at
     the current development state.
@@ -311,16 +315,14 @@ class Bev(GenericStorage, Facade):
         self.outflow_conversion_factor = sequence(self.efficiency_discharging)
 
         if self.expandable:
-            raise NotImplementedError(
-                "Investment for bev class is not implemented."
-            )
+            raise NotImplementedError("Investment for bev class is not implemented.")
 
         internal_bus = Bus(label=self.label + "-internal_bus")
 
         vehicle_to_grid = Transformer(
             carrier=self.carrier,
             tech=self.tech,
-            label=self.label + '-vehicle_to_grid',
+            label=self.label + "-vehicle_to_grid",
             inputs={internal_bus: Flow()},
             outputs={
                 self.bus: Flow(
@@ -336,9 +338,9 @@ class Bev(GenericStorage, Facade):
         drive_power = Sink(
             label=self.label + "-drive_power",
             inputs={
-                internal_bus: Flow(nominal_value=self.amount,
-                                   actual_value=self.drive_power,
-                                   fixed=True)
+                internal_bus: Flow(
+                    nominal_value=self.amount, actual_value=self.drive_power, fixed=True
+                )
             },
         )
 
@@ -352,17 +354,13 @@ class Bev(GenericStorage, Facade):
             }
         )
 
-        self.outputs.update(
-            {
-                internal_bus: Flow()
-            }
-        )
+        self.outputs.update({internal_bus: Flow()})
 
         self.subnodes = (internal_bus, drive_power, vehicle_to_grid)
 
 
 class ReservoirWithPump(GenericStorage, Facade):
-    r""" A Reservoir storage unit, that is initially half full.
+    r"""A Reservoir storage unit, that is initially half full.
 
     Note that the investment option is not available for this facade at
     the current development state.
@@ -486,40 +484,33 @@ class ReservoirWithPump(GenericStorage, Facade):
                 "Investment for reservoir class is not implemented."
             )
 
-        internal_bus = Bus(label=self.label + '-internal_bus')
+        internal_bus = Bus(label=self.label + "-internal_bus")
 
         pump = Transformer(
-            label=self.label + '-pump',
+            label=self.label + "-pump",
             inputs={
                 self.bus: Flow(
-                    nominal_value=self.capacity_pump,
-                    **self.input_parameters
+                    nominal_value=self.capacity_pump, **self.input_parameters
                 )
             },
             outputs={internal_bus: Flow()},
             conversion_factors={internal_bus: self.efficiency_pump},
             carrier=self.carrier,
-            tech=self.tech
+            tech=self.tech,
         )
 
         inflow = Source(
             label=self.label + "-inflow",
             outputs={
                 internal_bus: Flow(
-                    nominal_value=self.capacity_turbine,
-                    max=self.profile,
-                    fixed=False
+                    nominal_value=self.capacity_turbine, max=self.profile, fixed=False
                 )
             },
             carrier=self.carrier,
-            tech=self.tech
+            tech=self.tech,
         )
 
-        self.inputs.update(
-            {
-                internal_bus: Flow()
-            }
-        )
+        self.inputs.update({internal_bus: Flow()})
 
         self.outputs.update(
             {
@@ -534,7 +525,9 @@ class ReservoirWithPump(GenericStorage, Facade):
         self.subnodes = (inflow, internal_bus, pump)
 
 
-class ExtractionTurbine(ExtractionTurbineCHP, Facade):  # pylint: disable=too-many-ancestors
+class ExtractionTurbine(
+    ExtractionTurbineCHP, Facade
+):  # pylint: disable=too-many-ancestors
     r""" Combined Heat and Power (extraction) unit with one input and
     two outputs.
 
@@ -641,9 +634,7 @@ class ExtractionTurbine(ExtractionTurbineCHP, Facade):  # pylint: disable=too-ma
                 ]
             }
         )
-        super().__init__(
-            conversion_factor_full_condensation={}, *args, **kwargs
-        )
+        super().__init__(conversion_factor_full_condensation={}, *args, **kwargs)
 
         self.fuel_bus = kwargs.get("fuel_bus")
 
@@ -657,7 +648,9 @@ class ExtractionTurbine(ExtractionTurbineCHP, Facade):  # pylint: disable=too-ma
 
         self.capacity = kwargs.get("capacity")
 
-        self.fuel_capacity = self.capacity / self.condensing_efficiency  # noqa: E501  # pylint: disable=access-member-before-definition  # done with kwargs.update()
+        self.fuel_capacity = (
+            self.capacity / self.condensing_efficiency
+        )  # noqa: E501  # pylint: disable=access-member-before-definition  # done with kwargs.update()
 
         self.condensing_efficiency = sequence(self.condensing_efficiency)
 

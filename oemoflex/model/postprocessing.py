@@ -23,7 +23,9 @@ def get_sequences(dict):
     """
     _dict = copy.deepcopy(dict)
 
-    seq = {key: value['sequences'] for key, value in _dict.items() if 'sequences' in value}
+    seq = {
+        key: value["sequences"] for key, value in _dict.items() if "sequences" in value
+    }
 
     return seq
 
@@ -44,7 +46,9 @@ def get_scalars(dict):
     """
     _dict = copy.deepcopy(dict)
 
-    scalars = {key: value['scalars'] for key, value in _dict.items() if 'scalars' in value}
+    scalars = {
+        key: value["scalars"] for key, value in _dict.items() if "scalars" in value
+    }
 
     return scalars
 
@@ -187,10 +191,7 @@ def sequences_to_df(dict):
     result = pd.concat(dict.values(), 1)
 
     # adapted from oemof.solph.views' node() function
-    tuples = {
-        key: [c for c in value.columns]
-        for key, value in dict.items()
-    }
+    tuples = {key: [c for c in value.columns] for key, value in dict.items()}
 
     tuples = [tuple((*k, m) for m in v) for k, v in tuples.items()]
 
@@ -198,7 +199,7 @@ def sequences_to_df(dict):
 
     result.columns = pd.MultiIndex.from_tuples(tuples)
 
-    result.columns.names = ('source', 'target', 'var_name')
+    result.columns.names = ("source", "target", "var_name")
 
     return result
 
@@ -214,10 +215,7 @@ def scalars_to_df(dict):
         return None
 
     # adapted from oemof.solph.views' node() function
-    tuples = {
-        key: [c for c in value.index]
-        for key, value in dict.items()
-    }
+    tuples = {key: [c for c in value.index] for key, value in dict.items()}
 
     tuples = [tuple((*k, m) for m in v) for k, v in tuples.items()]
 
@@ -225,7 +223,7 @@ def scalars_to_df(dict):
 
     result.index = pd.MultiIndex.from_tuples(tuples)
 
-    result.index.names = ('source', 'target', 'var_name')
+    result.index.names = ("source", "target", "var_name")
 
     return result
 
@@ -235,7 +233,7 @@ def sum_flows(df):
     Takes a multi-indexed DataFrame and returns the sum of
     the flows.
     """
-    is_flow = df.columns.get_level_values(2) == 'flow'
+    is_flow = df.columns.get_level_values(2) == "flow"
 
     df = df.loc[:, is_flow]
 
@@ -248,39 +246,40 @@ def substract_output_from_input(inputs, outputs, var_name):
     r"""
     Calculates the differences of output from input.
     """
+
     def reduce_component_index(series, level):
 
         _series = series.copy()
 
-        _series.name = 'var_value'
+        _series.name = "var_value"
 
         _df = pd.DataFrame(_series)
 
         _df.reset_index(inplace=True)
 
-        _df = _df[[level, 'var_value']]
+        _df = _df[[level, "var_value"]]
 
         _df.set_index(level, inplace=True)
 
         return _df
 
-    _inputs = reduce_component_index(inputs, 'target')
+    _inputs = reduce_component_index(inputs, "target")
 
-    _outputs = reduce_component_index(outputs, 'source')
+    _outputs = reduce_component_index(outputs, "source")
 
     losses = _inputs - _outputs
 
-    losses.index.name = 'source'
+    losses.index.name = "source"
 
     losses.reset_index(inplace=True)
 
-    losses['target'] = np.nan
+    losses["target"] = np.nan
 
-    losses['var_name'] = var_name
+    losses["var_name"] = var_name
 
-    losses.set_index(['source', 'target', 'var_name'], inplace=True)
+    losses.set_index(["source", "target", "var_name"], inplace=True)
 
-    losses = losses['var_value']  # Switching back to series.
+    losses = losses["var_value"]  # Switching back to series.
     # TODO: Use DataFrame or Series more consistently.
 
     return losses
@@ -295,9 +294,9 @@ def get_losses(summed_flows, var_name):
 
     outputs = get_outputs(summed_flows)
 
-    inputs = inputs.groupby('target').sum()
+    inputs = inputs.groupby("target").sum()
 
-    outputs = outputs.groupby('source').sum()
+    outputs = outputs.groupby("source").sum()
 
     losses = substract_output_from_input(inputs, outputs, var_name)
 
@@ -352,25 +351,18 @@ def multiply_var_with_param(var, param):
 
 def get_summed_variable_costs(summed_flows, scalar_params):
 
-    variable_costs = (
-        filter_by_var_name(scalar_params, 'variable_costs')
-        .unstack(2)['variable_costs']
-    )
+    variable_costs = filter_by_var_name(scalar_params, "variable_costs").unstack(2)[
+        "variable_costs"
+    ]
 
     variable_costs = variable_costs.loc[variable_costs != 0]
 
-    summed_flows = (
-        summed_flows
-        .unstack(2)
-        .loc[:, 'flow']
-    )
+    summed_flows = summed_flows.unstack(2).loc[:, "flow"]
 
     summed_variable_costs = multiply_var_with_param(summed_flows, variable_costs)
 
     summed_variable_costs = set_index_level(
-        summed_variable_costs,
-        level='var_name',
-        value='summed_variable_costs'
+        summed_variable_costs, level="var_name", value="summed_variable_costs"
     )
 
     return summed_variable_costs
@@ -426,7 +418,6 @@ def filter_by_var_name(series, var_name):
 
 
 def map_var_names(scalars):
-
     def get_component_id(id):
 
         component_id = get_component_id_in_tuple((id[0], id[1]))
@@ -437,14 +428,14 @@ def map_var_names(scalars):
         bus = get_bus_from_oemof_tuple((id[0], id[1]))
 
         if bus:
-            carrier = str.split(bus.label, '-')[1]
+            carrier = str.split(bus.label, "-")[1]
 
             return carrier
 
     def get_in_out(id, component_id):
 
         if not id[1] is np.nan:
-            in_out = ['out', 'in'][component_id]
+            in_out = ["out", "in"][component_id]
 
             return in_out
 
@@ -464,10 +455,10 @@ def map_var_names(scalars):
         bus = get_bus_from_oemof_tuple(id)
 
         if bus == to_bus:
-            in_out = 'to_bus'
+            in_out = "to_bus"
 
         elif bus == from_bus:
-            in_out = 'from_bus'
+            in_out = "from_bus"
 
         return in_out
 
@@ -486,7 +477,7 @@ def map_var_names(scalars):
 
         var_name = [item for item in var_name if item is not None]
 
-        var_name = '_'.join(var_name)
+        var_name = "_".join(var_name)
 
         index = (component, None, var_name)
 
@@ -496,39 +487,39 @@ def map_var_names(scalars):
 
     scalars.index = scalars.index.droplevel(1)
 
-    scalars.index.names = ('name', 'var_name')
+    scalars.index.names = ("name", "var_name")
 
     return scalars
 
 
 def add_component_info(scalars):
 
-    scalars.name = 'var_value'
+    scalars.name = "var_value"
 
     scalars = pd.DataFrame(scalars)
 
-    scalars['region'] = scalars.index.get_level_values(0).map(lambda x: x.region)
+    scalars["region"] = scalars.index.get_level_values(0).map(lambda x: x.region)
 
-    scalars['type'] = scalars.index.get_level_values(0).map(lambda x: x.type)
+    scalars["type"] = scalars.index.get_level_values(0).map(lambda x: x.type)
 
-    scalars['carrier'] = scalars.index.get_level_values(0).map(lambda x: x.carrier)
+    scalars["carrier"] = scalars.index.get_level_values(0).map(lambda x: x.carrier)
 
-    scalars['tech'] = scalars.index.get_level_values(0).map(lambda x: x.tech)
+    scalars["tech"] = scalars.index.get_level_values(0).map(lambda x: x.tech)
 
     return scalars
 
 
 def group_by_element(scalars):
     elements = {}
-    for group, df in scalars.groupby(['carrier', 'tech']):
-        name = '-'.join(group)
+    for group, df in scalars.groupby(["carrier", "tech"]):
+        name = "-".join(group)
 
         df = df.reset_index()
 
         df = df.pivot(
-            index=['name', 'type', 'carrier', 'tech'],
-            columns='var_name',
-            values='var_value'
+            index=["name", "type", "carrier", "tech"],
+            columns="var_name",
+            values="var_value",
         )
 
         elements[name] = df
@@ -538,7 +529,7 @@ def group_by_element(scalars):
 
 def sort_scalars(scalars):
 
-    scalars = scalars.sort_values(by=['carrier', 'tech', 'var_name'])
+    scalars = scalars.sort_values(by=["carrier", "tech", "var_name"])
 
     return scalars
 
@@ -553,7 +544,7 @@ def save_dataframes_to(dict, destination):
         os.makedirs(destination)
 
     for key, value in dict.items():
-        path = os.path.join(destination, key + '.csv')
+        path = os.path.join(destination, key + ".csv")
 
         value.to_csv(path)
 
@@ -593,28 +584,34 @@ def run_postprocessing(es):
     summed_flows = sum_flows(sequences)
 
     # Collect the annual sum of renewable energy
-    summed_flows_re = filter_series_by_component_attr(summed_flows, tech=['wind', 'solar'])
+    summed_flows_re = filter_series_by_component_attr(
+        summed_flows, tech=["wind", "solar"]
+    )
 
     # Calculate storage losses
-    summed_flows_storage = filter_series_by_component_attr(summed_flows, type='storage')
+    summed_flows_storage = filter_series_by_component_attr(summed_flows, type="storage")
 
-    storage_losses = get_losses(summed_flows_storage, var_name='storage_losses')
+    storage_losses = get_losses(summed_flows_storage, var_name="storage_losses")
 
     # Calculate transmission losses
-    summed_flows_transmission = filter_series_by_component_attr(summed_flows, type='link')
+    summed_flows_transmission = filter_series_by_component_attr(
+        summed_flows, type="link"
+    )
 
-    transmission_losses = get_losses(summed_flows_transmission, var_name='transmission_losses')
+    transmission_losses = get_losses(
+        summed_flows_transmission, var_name="transmission_losses"
+    )
 
     # Collect existing (exogenous) capacity (units of power) and storage capacity (units of energy)
     # Keep in mind - this has an index of the form (component, None). It is not attributed to a flow
-    capacity = filter_by_var_name(scalar_params, 'capacity')
+    capacity = filter_by_var_name(scalar_params, "capacity")
 
-    from_to_capacity = filter_by_var_name(scalar_params, 'from_to_capacity')
+    from_to_capacity = filter_by_var_name(scalar_params, "from_to_capacity")
 
-    to_from_capacity = filter_by_var_name(scalar_params, 'to_from_capacity')
+    to_from_capacity = filter_by_var_name(scalar_params, "to_from_capacity")
 
     # Keep in mind - this has an index of the form (component, None). It is not attributed to a flow
-    storage_capacity = filter_by_var_name(scalar_params, 'storage_capacity')
+    storage_capacity = filter_by_var_name(scalar_params, "storage_capacity")
 
     # Collect invested (endogenous) capacity (units of power) and storage capacity (units of energy)
 
@@ -623,7 +620,7 @@ def run_postprocessing(es):
     invested_storage_capacity = None
 
     if not (scalars is None or scalars.empty):
-        invest = filter_by_var_name(scalars, 'invest')
+        invest = filter_by_var_name(scalars, "invest")
 
         target_is_none = invest.index.get_level_values(1).isnull()
 

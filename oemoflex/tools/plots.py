@@ -63,6 +63,7 @@ def rename_by_string_matching(columns, labels_dict):
     renamed_columns : list
         List with new column names.
     """
+
     def map_tuple(tuple, dictionary):
         r"""
         The corresponding value of the tuple which is supposed to be a key in the dictionary is retrieved.
