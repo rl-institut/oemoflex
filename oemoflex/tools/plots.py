@@ -281,7 +281,7 @@ def plot_dispatch(
     y_stack_pos = []
     y_stack_neg = []
     for index, value in (df < 0).any().items():
-        if value == True:
+        if value is True:
             y_stack_neg.append(index)
         else:
             y_stack_pos.append(index)
