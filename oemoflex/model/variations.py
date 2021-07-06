@@ -3,7 +3,6 @@ import os
 
 
 class VariationGenerator:
-
     def __init__(self, datapackage):
 
         self.base_datapackage = datapackage

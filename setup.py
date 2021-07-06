@@ -31,4 +31,5 @@ setup(
         "oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular",
         "frictionless",
     ],
+    extras_require={"dev": ["pytest", "black==20.8b1", "coverage", "flake8"]},
 )

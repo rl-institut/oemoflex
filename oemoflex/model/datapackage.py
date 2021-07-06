@@ -14,6 +14,7 @@ class DataFramePackage:
     Provides a representation of frictionless datapackages as a collection
     of pandas.DataFrames.
     """
+
     def __init__(self, basepath, data, rel_paths, *args, **kwargs):
 
         self.basepath = basepath
@@ -27,7 +28,7 @@ class DataFramePackage:
         r"""
         Initialize a DataFramePackage from a csv directory
         """
-        rel_paths = cls._get_rel_paths(dir, '.csv')
+        rel_paths = cls._get_rel_paths(dir, ".csv")
 
         data = cls._load_csv(cls, dir, rel_paths)
 
@@ -43,7 +44,7 @@ class DataFramePackage:
 
         dir = os.path.split(json_file_path)[0]
 
-        rel_paths = {r['name']: r['path'] for r in dp.resources}
+        rel_paths = {r["name"]: r["path"] for r in dp.resources}
 
         data = cls._load_csv(cls, dir, rel_paths)
 
@@ -110,18 +111,9 @@ class EnergyDataPackage(DataFramePackage):
 
         self.components = kwargs.get("components")
 
-
     @classmethod
     def setup_default(
-            cls,
-            name,
-            basepath,
-            datetimeindex,
-            components,
-            busses,
-            regions,
-            links,
-            **kwargs
+        cls, name, basepath, datetimeindex, components, busses, regions, links, **kwargs
     ):
 
         data, rel_paths = create_default_data(
@@ -130,7 +122,7 @@ class EnergyDataPackage(DataFramePackage):
             datetimeindex=datetimeindex,
             select_components=components,
             select_busses=busses,
-            **kwargs
+            **kwargs,
         )
 
         return cls(
@@ -138,7 +130,7 @@ class EnergyDataPackage(DataFramePackage):
             basepath=basepath,
             rel_paths=rel_paths,
             data=data,
-            components=components
+            components=components,
         )
 
     def infer_metadata(self):
@@ -199,10 +191,12 @@ class ResultsDataPackage(DataFramePackage):
 
         bus_results = tabular_pp.bus_results(es, es.results)
 
-        bus_results = {key: value for key, value in bus_results.items() if not value.empty}
+        bus_results = {
+            key: value for key, value in bus_results.items() if not value.empty
+        }
 
         rel_paths = {
-            key: os.path.join('sequences', 'bus', key + '.csv')
+            key: os.path.join("sequences", "bus", key + ".csv")
             for key in bus_results.keys()
         }
 
@@ -217,14 +211,14 @@ class ResultsDataPackage(DataFramePackage):
             data_scal = group_by_element(all_scalars)
 
             rel_paths_scal = {
-                key: os.path.join('scalars', key + '.csv') for key in data_scal.keys()
+                key: os.path.join("scalars", key + ".csv") for key in data_scal.keys()
             }
 
         else:
 
-            data_scal = {'scalars': all_scalars}
+            data_scal = {"scalars": all_scalars}
 
-            rel_paths_scal = {'scalars': 'scalars.csv'}
+            rel_paths_scal = {"scalars": "scalars.csv"}
 
         return data_scal, rel_paths_scal
 
@@ -237,7 +231,10 @@ class ResultsDataPackage(DataFramePackage):
         scenario_name : str
             Name of the scenario
         """
+
         def prepend_index(df, level_name, values):
             return pd.concat([df], keys=[values], names=[level_name])
 
-        self.data['scalars'] = prepend_index(self.data['scalars'], 'scenario', scenario_name)
+        self.data["scalars"] = prepend_index(
+            self.data["scalars"], "scenario", scenario_name
+        )
