@@ -182,10 +182,10 @@ def replace_near_zeros(df):
 
 def prepare_dispatch_data(df, bus_name, demand_name):
     r"""
-    The data in df is split into a DataFrame with consumers and generators and a DataFrame which only
-    contains the demand data. Consumer data is made negative. The multilevel column names are replaced
-    by more simple names. Columns the same name are grouped together. Really small numerical values which
-    are practically zero are replaced with 0.0.
+    The data in df is split into a DataFrame with consumers and generators and a DataFrame which
+    only contains the demand data. Consumer data is made negative. The multilevel column names are
+    replaced by more simple names. Columns the same name are grouped together. Really small
+    numerical values which are practically zero are replaced with 0.0.
 
     Parameters
     ---------------
@@ -293,8 +293,8 @@ def plot_dispatch_plotly(
     conv_number=1000,
 ):
     r"""
-    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line plot and
-    suppliers and other consumers are plotted with a stackplot.
+    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line
+    plot and suppliers and other consumers are plotted with a stackplot.
 
     Parameters
     ---------------
