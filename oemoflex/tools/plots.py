@@ -285,7 +285,12 @@ def assign_stackgroup(key, values):
 
 
 def plot_dispatch_plotly(
-    df, bus_name, demand_name="demand", colors_odict=colors_odict, unit = "W", conv_number=1000
+    df,
+    bus_name,
+    demand_name="demand",
+    colors_odict=colors_odict,
+    unit="W",
+    conv_number=1000,
 ):
     r"""
     Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line plot and
@@ -369,13 +374,12 @@ def plot_dispatch_plotly(
             rangeslider=dict(visible=True),
             type="date",
         ),
-        xaxis_title = "Date",
-        yaxis_title = "Power",
+        xaxis_title="Date",
+        yaxis_title="Power",
     )
 
     # Scale power data on y axis with SI exponents
-    fig.update_yaxes(exponentformat="SI",
-                     ticksuffix=unit)
+    fig.update_yaxes(exponentformat="SI", ticksuffix=unit)
 
     return fig
 

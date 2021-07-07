@@ -31,11 +31,11 @@ fig = plots.plot_dispatch_plotly(
     bus_name="A-electricity",
     demand_name="A-electricity-demand",
     unit="W",
-    conv_number=1000
+    conv_number=1000,
 )
 
 fig.write_html(
-    file=os.path.join(here, 'dispatch_interactive.html'),
+    file=os.path.join(here, "dispatch_interactive.html"),
     # include_plotlyjs=False,
     # full_html=False
 )
