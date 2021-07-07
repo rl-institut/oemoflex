@@ -1,7 +1,8 @@
 ,Color
 PV,#bcbd22
 Wind,#1f77b4
-Biomass,#2ca02c
+Biomass ST,#2ca02c
+Biomass GT,#007000
 CH4,#d62728
 BAT discharge,#9467bd
 Import,#17becf

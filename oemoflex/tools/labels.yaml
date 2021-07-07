@@ -1,4 +1,5 @@
-!!python/tuple ['-biomass-gt', '-electricity', 'flow']: Biomass
+!!python/tuple ['-biomass-gt', '-electricity', 'flow']: Biomass GT
+!!python/tuple ['-biomass-st', '-electricity', 'flow']: Biomass ST
 !!python/tuple ['-ch4-gt', '-electricity', 'flow']: CH4
 !!python/tuple ['-electricity', '-electricity-curtailment', 'flow']: Curtailment
 !!python/tuple ['-electricity', '-electricity-demand', 'flow']: El. demand
