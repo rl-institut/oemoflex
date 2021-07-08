@@ -254,8 +254,8 @@ def filter_timeseries(df, start_date=None, end_date=None):
 
 def assign_stackgroup(key, values):
     r"""
-    This function decides if data is supposed to be plotted on the positive or negative side of the
-    stackplot. If values has both negative and positive values, a value error is raised.
+    This function decides if data is supposed to be plotted on the positive or negative side of
+    the stackplot. If values has both negative and positive values, a value error is raised.
 
     Parameters
     ---------------
@@ -291,8 +291,8 @@ def plot_dispatch_plotly(
     unit="W",
 ):
     r"""
-    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line
-    plot and suppliers and other consumers are plotted with a stackplot.
+    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
+    line plot and suppliers and other consumers are plotted with a stackplot.
 
     Parameters
     ---------------
@@ -427,8 +427,8 @@ def lineplot(ax, df, colors_odict=colors_odict):
 def plot_dispatch(ax, df, df_demand):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
-    suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues are stacked below
-    the x axis and columns with positive values above.
+    suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
+    are stacked below the x axis and columns with positive values above.
 
     Parameters
     ---------------
