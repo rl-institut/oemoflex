@@ -286,11 +286,9 @@ def assign_stackgroup(key, values):
 
 def plot_dispatch_plotly(
     df,
-    bus_name,
-    demand_name="demand",
+    df_demand,
     colors_odict=colors_odict,
     unit="W",
-    conv_number=1000,
 ):
     r"""
     Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line
@@ -299,11 +297,9 @@ def plot_dispatch_plotly(
     Parameters
     ---------------
     df : pandas.DataFrame
-        Dataframe with data.
-    bus_name : string
-        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
-    demand_name: string
-        Name of the bus representing the demand.
+        Dataframe with data except demand.
+    df_demand : pandas.DataFrame
+        Dataframe with demand data.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
 
@@ -312,12 +308,6 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
-    # convert data to SI-unit
-    df = df * conv_number
-
-    # prepare dispatch data
-    df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
-
     # make sure to obey order as definded in colors_odict
     generic_order = list(colors_odict)
     concrete_order = generic_order.copy()
@@ -434,33 +424,21 @@ def lineplot(ax, df, colors_odict=colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(
-    ax, df, bus_name, start_date=None, end_date=None, demand_name="demand"
-):
+def plot_dispatch(ax, df, df_demand):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
-    suppliers and other consumers are plotted with a stackplot.
+    suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues are stacked below
+    the x axis and columns with positive values above.
 
     Parameters
     ---------------
     ax : matplotlib.AxesSubplot
         Axis on which data is plotted.
     df : pandas.DataFrame
-        Dataframe with data.
-    bus_name : string
-        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
-    start_date : string
-        String with the start date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
-    end_date : string
-        String with the end date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
-    demand_name: string
-        Name of the bus representing the demand.
+        Dataframe with data except demand.
+    df_demand : pandas.DataFrame
+        Dataframe with demand data.
     """
-    df = filter_timeseries(df, start_date, end_date)
-
-    # prepare dispatch data
-    df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
-
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
     y_stack_neg = []
