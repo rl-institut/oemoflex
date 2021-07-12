@@ -12,4 +12,5 @@ efficiency,float,unitless,Efficiency of the conversion biomass to electricity
 carrier_cost,float,Eur/MWh,Cost per unit of used fuel
 marginal_cost,float,Eur/MWh,Marginal cost
 expandable,boolean,n/a,Capacity can be expanded
+capacity_potential,float,MW,Maximum invest capacity in unit of output capacity
 output_parameters,dict,n/a,Optional parameters passed to oemof-solph's output flow
