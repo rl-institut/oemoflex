@@ -287,8 +287,8 @@ def assign_stackgroup(key, values):
 def plot_dispatch_plotly(
     df,
     df_demand,
+    unit,
     colors_odict=colors_odict,
-    unit="W",
 ):
     r"""
     Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
@@ -302,6 +302,8 @@ def plot_dispatch_plotly(
         Dataframe with demand data.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
+    unit: string
+        String with unit sign of plotted data on y-axis.
 
     Returns
     ----------
