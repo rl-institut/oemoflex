@@ -39,9 +39,10 @@ end_date = "2016-01-10 23:00:00"
 df_time_filtered = plots.filter_timeseries(df, start_date, end_date)
 df_demand_time_filtered = plots.filter_timeseries(df_demand, start_date, end_date)
 
-plots.plot_dispatch(ax=ax, df=df_time_filtered, df_demand=df_demand_time_filtered, unit="W")
+plots.plot_dispatch(
+    ax=ax, df=df_time_filtered, df_demand=df_demand_time_filtered, unit="W"
+)
 
 plt.legend(loc="best")
 plt.tight_layout()
 plt.show()
-
