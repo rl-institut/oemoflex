@@ -426,7 +426,7 @@ def lineplot(ax, df, colors_odict=colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(ax, df, df_demand):
+def plot_dispatch(ax, df, df_demand, unit):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
     suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
@@ -441,6 +441,9 @@ def plot_dispatch(ax, df, df_demand):
     df_demand : pandas.DataFrame
         Dataframe with demand data.
     """
+    # apply EngFormatter on axis
+    ax = eng_format(ax, unit=unit)
+
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
     y_stack_neg = []
@@ -465,7 +468,7 @@ def plot_dispatch(ax, df, df_demand):
     lineplot(ax, df_demand)
 
 
-def eng_format(ax, df, unit, conv_number):
+def eng_format(ax, unit):
     r"""
     Applies the EngFormatter to y-axis.
 
@@ -473,19 +476,14 @@ def eng_format(ax, df, unit, conv_number):
     ---------------
     ax : matplotlib.AxesSubplot
         Axis on which data is plotted.
-    df : pandas.DataFrame
-        Dataframe with data.
     unit : string
         Unit which is plotted on y-axis
-    conv_number : int
-        Conversion number to convert data to given unit.
 
     Returns
     ----------
-    df : pandas.DataFrame
-        Adjusted dataframe to unit.
+    ax : matplotlib.AxesSubplot
+        Axis with formatter set to EngFormatter
     """
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
-    df *= conv_number
-    return ax, df
+    return ax
