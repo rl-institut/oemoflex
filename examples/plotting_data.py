@@ -23,13 +23,14 @@ df, df_demand = plots.prepare_dispatch_data(
     data, bus_name="A-electricity", demand_name="demand"
 )
 
-# interactive plotly dispatch plot
+# create interactive plotly dispatch plot
 fig = plots.plot_dispatch_plotly(
     df=df,
     df_demand=df_demand,
     unit="W",
 )
 
+# save the plot
 filename = os.path.join(here, "04_plotted", "dispatch_interactive.html")
 fig.write_html(
     file=filename,
@@ -38,7 +39,7 @@ fig.write_html(
 )
 print(f"Saved static dispatch plot to {filename}")
 
-# static dispatch plot
+# create static dispatch plot
 fig, ax = plt.subplots(figsize=(12, 5))
 
 start_date = "2016-01-01 00:00:00"
@@ -53,7 +54,7 @@ plots.plot_dispatch(
 plt.legend(loc="best")
 plt.tight_layout()
 
-# save
+# save the plot
 filename = os.path.join(here, "04_plotted", "dispatch_static.png")
 plt.savefig(filename)
 print(f"Saved static dispatch plot to {filename}")
