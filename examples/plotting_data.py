@@ -10,6 +10,11 @@ input_path = os.path.join(
 )
 data = pd.read_csv(input_path, header=[0, 1, 2], parse_dates=[0], index_col=[0])
 
+# create directory for plots
+path_plotted = os.path.join(here, "04_plotted")
+if not os.path.exists(path_plotted):
+    os.makedirs(path_plotted)
+
 # prepare data
 # convert data to SI-unit
 conv_number = 1000
@@ -25,11 +30,13 @@ fig = plots.plot_dispatch_plotly(
     unit="W",
 )
 
+filename = os.path.join(here, "04_plotted", "dispatch_interactive.html")
 fig.write_html(
-    file=os.path.join(here, "dispatch_interactive.html"),
+    file=filename,
     # include_plotlyjs=False,
     # full_html=False
 )
+print(f"Saved static dispatch plot to {filename}")
 
 # static dispatch plot
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -45,4 +52,8 @@ plots.plot_dispatch(
 
 plt.legend(loc="best")
 plt.tight_layout()
-plt.show()
+
+# save
+filename = os.path.join(here, "04_plotted", "dispatch_static.png")
+plt.savefig(filename)
+print(f"Saved static dispatch plot to {filename}")
