@@ -376,7 +376,7 @@ def plot_dispatch_plotly(
     return fig
 
 
-def stackplot(ax, df, colors_odict=colors_odict):
+def stackplot(ax, df, colors_odict):
     r"""
     Plots data as a stackplot. The stacking order is determined by the order
     of labels in the colors_odict. It is stacked beginning with the x-axis as
@@ -409,7 +409,7 @@ def stackplot(ax, df, colors_odict=colors_odict):
     ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_odict=colors_odict):
+def lineplot(ax, df, colors_odict):
     r"""
     Plots data as a lineplot.
 
@@ -426,7 +426,7 @@ def lineplot(ax, df, colors_odict=colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(ax, df, df_demand, unit):
+def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
     suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
@@ -442,6 +442,8 @@ def plot_dispatch(ax, df, df_demand, unit):
         Dataframe with demand data.
     unit: string
         String with unit sign of plotted data on y-axis.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
     """
     # apply EngFormatter on axis
     ax = eng_format(ax, unit=unit)
@@ -461,13 +463,13 @@ def plot_dispatch(ax, df, df_demand, unit):
     for i in y_stack_pos:
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
-    stackplot(ax, df[y_stack_pos])
+    stackplot(ax, df[y_stack_pos], colors_odict)
     # check whether the list y_stack_neg is filled
     if y_stack_neg != []:
-        stackplot(ax, df[y_stack_neg])
+        stackplot(ax, df[y_stack_neg], colors_odict)
 
     # plot lineplot (demand)
-    lineplot(ax, df_demand)
+    lineplot(ax, df_demand, colors_odict)
 
 
 def eng_format(ax, unit):
