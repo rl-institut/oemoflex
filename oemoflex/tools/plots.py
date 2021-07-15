@@ -180,7 +180,9 @@ def replace_near_zeros(df):
     return df
 
 
-def prepare_dispatch_data(df, bus_name, demand_name):
+def prepare_dispatch_data(
+    df, bus_name, demand_name, general_labels_dict=general_labels_dict
+):
     r"""
     The data in df is split into a DataFrame with consumers and generators and a DataFrame which
     only contains the demand data. Consumer data is made negative. The multilevel column names are
@@ -195,6 +197,8 @@ def prepare_dispatch_data(df, bus_name, demand_name):
         name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
     demand_name: string
         Name of the bus representing the demand.
+    general_labels_dict : dict
+        Dictionary to map the column labels.
 
     Returns
     ----------
@@ -254,8 +258,8 @@ def filter_timeseries(df, start_date=None, end_date=None):
 
 def assign_stackgroup(key, values):
     r"""
-    This function decides if data is supposed to be plotted on the positive or negative side of the
-    stackplot. If values has both negative and positive values, a value error is raised.
+    This function decides if data is supposed to be plotted on the positive or negative side of
+    the stackplot. If values has both negative and positive values, a value error is raised.
 
     Parameters
     ---------------
@@ -286,24 +290,22 @@ def assign_stackgroup(key, values):
 
 def plot_dispatch_plotly(
     df,
-    bus_name,
-    demand_name="demand",
+    df_demand,
+    unit,
     colors_odict=colors_odict,
-    unit="W",
-    conv_number=1000,
 ):
     r"""
-    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a line
-    plot and suppliers and other consumers are plotted with a stackplot.
+    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
+    line plot and suppliers and other consumers are plotted with a stackplot.
 
     Parameters
     ---------------
     df : pandas.DataFrame
-        Dataframe with data.
-    bus_name : string
-        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
-    demand_name: string
-        Name of the bus representing the demand.
+        Dataframe with data except demand.
+    df_demand : pandas.DataFrame
+        Dataframe with demand data.
+    unit: string
+        String with unit sign of plotted data on y-axis.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
 
@@ -312,12 +314,6 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
-    # convert data to SI-unit
-    df = df * conv_number
-
-    # prepare dispatch data
-    df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
-
     # make sure to obey order as definded in colors_odict
     generic_order = list(colors_odict)
     concrete_order = generic_order.copy()
@@ -384,7 +380,7 @@ def plot_dispatch_plotly(
     return fig
 
 
-def stackplot(ax, df, colors_odict=colors_odict):
+def stackplot(ax, df, colors_odict):
     r"""
     Plots data as a stackplot. The stacking order is determined by the order
     of labels in the colors_odict. It is stacked beginning with the x-axis as
@@ -417,7 +413,7 @@ def stackplot(ax, df, colors_odict=colors_odict):
     ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_odict=colors_odict):
+def lineplot(ax, df, colors_odict):
     r"""
     Plots data as a lineplot.
 
@@ -434,32 +430,27 @@ def lineplot(ax, df, colors_odict=colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(
-    ax, df, bus_name, start_date=None, end_date=None, demand_name="demand"
-):
+def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
-    suppliers and other consumers are plotted with a stackplot.
+    suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
+    are stacked below the x axis and columns with positive values above.
 
     Parameters
     ---------------
     ax : matplotlib.AxesSubplot
         Axis on which data is plotted.
     df : pandas.DataFrame
-        Dataframe with data.
-    bus_name : string
-        name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
-    start_date : string
-        String with the start date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
-    end_date : string
-        String with the end date for filtering in the format 'YYYY-MM-DD hh:mm:ss'.
-    demand_name: string
-        Name of the bus representing the demand.
+        Dataframe with data except demand.
+    df_demand : pandas.DataFrame
+        Dataframe with demand data.
+    unit: string
+        String with unit sign of plotted data on y-axis.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
     """
-    df = filter_timeseries(df, start_date, end_date)
-
-    # prepare dispatch data
-    df, df_demand = prepare_dispatch_data(df, bus_name, demand_name)
+    # apply EngFormatter on axis
+    ax = eng_format(ax, unit=unit)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
@@ -476,16 +467,16 @@ def plot_dispatch(
     for i in y_stack_pos:
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
-    stackplot(ax, df[y_stack_pos])
+    stackplot(ax, df[y_stack_pos], colors_odict)
     # check whether the list y_stack_neg is filled
     if y_stack_neg != []:
-        stackplot(ax, df[y_stack_neg])
+        stackplot(ax, df[y_stack_neg], colors_odict)
 
     # plot lineplot (demand)
-    lineplot(ax, df_demand)
+    lineplot(ax, df_demand, colors_odict)
 
 
-def eng_format(ax, df, unit, conv_number):
+def eng_format(ax, unit):
     r"""
     Applies the EngFormatter to y-axis.
 
@@ -493,19 +484,14 @@ def eng_format(ax, df, unit, conv_number):
     ---------------
     ax : matplotlib.AxesSubplot
         Axis on which data is plotted.
-    df : pandas.DataFrame
-        Dataframe with data.
     unit : string
         Unit which is plotted on y-axis
-    conv_number : int
-        Conversion number to convert data to given unit.
 
     Returns
     ----------
-    df : pandas.DataFrame
-        Adjusted dataframe to unit.
+    ax : matplotlib.AxesSubplot
+        Axis with formatter set to EngFormatter
     """
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
-    df *= conv_number
-    return ax, df
+    return ax
