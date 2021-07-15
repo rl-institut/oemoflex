@@ -300,10 +300,10 @@ def plot_dispatch_plotly(
         Dataframe with data except demand.
     df_demand : pandas.DataFrame
         Dataframe with demand data.
-    colors_odict : collections.OrderedDictionary
-        Ordered dictionary with labels as keys and colourcodes as values.
     unit: string
         String with unit sign of plotted data on y-axis.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
 
     Returns
     ----------
@@ -440,6 +440,8 @@ def plot_dispatch(ax, df, df_demand, unit):
         Dataframe with data except demand.
     df_demand : pandas.DataFrame
         Dataframe with demand data.
+    unit: string
+        String with unit sign of plotted data on y-axis.
     """
     # apply EngFormatter on axis
     ax = eng_format(ax, unit=unit)
