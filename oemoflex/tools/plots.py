@@ -180,7 +180,7 @@ def replace_near_zeros(df):
     return df
 
 
-def prepare_dispatch_data(df, bus_name, demand_name):
+def prepare_dispatch_data(df, bus_name, demand_name, general_labels_dict=general_labels_dict):
     r"""
     The data in df is split into a DataFrame with consumers and generators and a DataFrame which
     only contains the demand data. Consumer data is made negative. The multilevel column names are
@@ -195,6 +195,8 @@ def prepare_dispatch_data(df, bus_name, demand_name):
         name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
     demand_name: string
         Name of the bus representing the demand.
+    general_labels_dict : dict
+        Dictionary to map the column labels.
 
     Returns
     ----------
