@@ -14,13 +14,13 @@ def clean_path(path):
 
 def test_datapackage():
 
-    data = {'a': 0, 'b': 0}
+    data = {"a": 0, "b": 0}
 
-    rel_paths = {'a': 'a.csv', 'b': 'b.csv'}
+    rel_paths = {"a": "a.csv", "b": "b.csv"}
 
-    dfp = DataFramePackage(basepath='path', data=data, rel_paths=rel_paths)
+    dfp = DataFramePackage(basepath="path", data=data, rel_paths=rel_paths)
 
-    assert dfp.basepath == 'path'
+    assert dfp.basepath == "path"
 
     assert dfp.data == data
 
@@ -28,20 +28,20 @@ def test_datapackage():
 
 
 def test_edp():
-    EnergyDataPackage(basepath='path', data={}, rel_paths={})
+    EnergyDataPackage(basepath="path", data={}, rel_paths={})
 
 
 def test_edp_setup_default():
 
     here = os.path.dirname(__file__)
-    defaultpath = os.path.join(here, '_files', 'default_edp')
-    tmp = extend_basic_path('tmp')
+    defaultpath = os.path.join(here, "_files", "default_edp")
+    tmp = extend_basic_path("tmp")
 
-    name = 'test_edp'
+    name = "test_edp"
     basepath = os.path.join(tmp, name)
     datetimeindex = None
-    regions = ['A', 'B']
-    links = ['A-B']
+    regions = ["A", "B"]
+    links = ["A-B"]
 
     edp = EnergyDataPackage.setup_default(
         name=name,
@@ -62,15 +62,15 @@ def test_edp_setup_default():
 
 def test_edp_setup_default_select():
 
-    tmp = extend_basic_path('tmp')
+    tmp = extend_basic_path("tmp")
 
-    name = 'test_edp'
-    components = ['electricity-heatpump', 'ch4-boiler']
-    busses = ['ch4', 'electricity', 'heat']
+    name = "test_edp"
+    components = ["electricity-heatpump", "ch4-boiler"]
+    busses = ["ch4", "electricity", "heat"]
     basepath = os.path.join(tmp, name)
     datetimeindex = None
-    regions = ['A', 'B']
-    links = ['A-B']
+    regions = ["A", "B"]
+    links = ["A-B"]
 
     EnergyDataPackage.setup_default(
         name=name,
@@ -85,14 +85,14 @@ def test_edp_setup_default_select():
 
 def test_edp_stack_unstack():
 
-    tmp = extend_basic_path('tmp')
-    before = os.path.join(tmp, 'before')
-    after = os.path.join(tmp, 'after')
+    tmp = extend_basic_path("tmp")
+    before = os.path.join(tmp, "before")
+    after = os.path.join(tmp, "after")
 
-    name = 'test_edp'    
+    name = "test_edp"
     datetimeindex = None
-    regions = ['A', 'B']
-    links = ['A-B']
+    regions = ["A", "B"]
+    links = ["A-B"]
 
     edp = EnergyDataPackage.setup_default(
         name=name,
@@ -109,9 +109,9 @@ def test_edp_stack_unstack():
     clean_path(after)
 
     edp.to_csv_dir(before)
-                   
+
     edp.stack_components()
-    
+
     edp.unstack_components()
 
     edp.to_csv_dir(after)

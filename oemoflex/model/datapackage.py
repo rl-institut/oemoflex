@@ -14,6 +14,7 @@ class DataFramePackage:
     Provides a representation of frictionless datapackages as a collection
     of pandas.DataFrames.
     """
+
     def __init__(self, basepath, data, rel_paths, *args, **kwargs):
 
         self.basepath = basepath
@@ -27,7 +28,7 @@ class DataFramePackage:
         r"""
         Initialize a DataFramePackage from a csv directory
         """
-        rel_paths = cls._get_rel_paths(dir, '.csv')
+        rel_paths = cls._get_rel_paths(dir, ".csv")
 
         data = cls._load_csv(cls, dir, rel_paths)
 
@@ -43,7 +44,7 @@ class DataFramePackage:
 
         dir = os.path.split(json_file_path)[0]
 
-        rel_paths = {r['name']: r['path'] for r in dp.resources}
+        rel_paths = {r["name"]: r["path"] for r in dp.resources}
 
         data = cls._load_csv(cls, dir, rel_paths)
 
@@ -111,8 +112,9 @@ class DataFramePackage:
 
     def _separate_stacked_frame(self, frame_name, target_dir, group_by):
 
-        assert frame_name in self.data, "Cannot group by component if stacked frame is " \
-                                        "missing."
+        assert frame_name in self.data, (
+            "Cannot group by component if stacked frame is " "missing."
+        )
 
         frame_to_separate = self.data.pop(frame_name)
 
@@ -122,11 +124,13 @@ class DataFramePackage:
 
         self.data.update(separate_dfs)
 
-        self.rel_paths.update({
-            key: os.path.join(target_dir, key + '.csv') for key in separate_dfs.keys()
-        })
+        self.rel_paths.update(
+            {key: os.path.join(target_dir, key + ".csv") for key in separate_dfs.keys()}
+        )
 
-    def _stack_frames(self, frame_names, target_name, target_dir, unstacked_vars, index_vars):
+    def _stack_frames(
+        self, frame_names, target_name, target_dir, unstacked_vars, index_vars
+    ):
 
         assert frame_names, "Cannot stack scalars if frames are not in ."
 
@@ -136,9 +140,11 @@ class DataFramePackage:
 
             self.rel_paths.pop(name)
 
-        self.data[target_name] = stack_frames(frames_to_stack, unstacked_vars, index_vars)
+        self.data[target_name] = stack_frames(
+            frames_to_stack, unstacked_vars, index_vars
+        )
 
-        self.rel_paths[target_name] = os.path.join(target_dir, target_name + '.csv')
+        self.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
 
 
 class EnergyDataPackage(DataFramePackage):
@@ -149,17 +155,16 @@ class EnergyDataPackage(DataFramePackage):
 
         self.components = kwargs.get("components")
 
-
     @classmethod
     def setup_default(
-            cls,
-            name,
-            basepath,
-            datetimeindex,
-            components,
-            busses,
-            regions,
-            links,
+        cls,
+        name,
+        basepath,
+        datetimeindex,
+        components,
+        busses,
+        regions,
+        links,
     ):
 
         data, rel_paths = create_default_data(
@@ -175,7 +180,7 @@ class EnergyDataPackage(DataFramePackage):
             basepath=basepath,
             rel_paths=rel_paths,
             data=data,
-            components=components
+            components=components,
         )
 
     def infer_metadata(self):
@@ -192,31 +197,31 @@ class EnergyDataPackage(DataFramePackage):
         self.data[frame].loc[:, column] = values
 
     def stack_components(self):
-
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
-            return 'elements' in directory
+            return "elements" in directory
 
         component_names = [
-            key for key, rel_path in self.rel_paths.items()
-            if is_element(rel_path)
-               and not key == 'bus'
+            key
+            for key, rel_path in self.rel_paths.items()
+            if is_element(rel_path) and not key == "bus"
         ]
 
         self._stack_frames(
             component_names,
-            target_name='component',
-            target_dir=os.path.join('data', 'elements'),
-            unstacked_vars=['name', 'region', 'carrier', 'tech', 'type'],
-            index_vars=['name', 'var_name']
+            target_name="component",
+            target_dir=os.path.join("data", "elements"),
+            unstacked_vars=["name", "region", "carrier", "tech", "type"],
+            index_vars=["name", "var_name"],
         )
 
     def unstack_components(self):
 
         self._separate_stacked_frame(
-            frame_name='component',
-            target_dir=os.path.join('data', 'elements'),
-            group_by=['carrier', 'tech'])
+            frame_name="component",
+            target_dir=os.path.join("data", "elements"),
+            group_by=["carrier", "tech"],
+        )
 
 
 class ResultsDataPackage(DataFramePackage):
@@ -263,10 +268,12 @@ class ResultsDataPackage(DataFramePackage):
 
         bus_results = tabular_pp.bus_results(es, es.results)
 
-        bus_results = {key: value for key, value in bus_results.items() if not value.empty}
+        bus_results = {
+            key: value for key, value in bus_results.items() if not value.empty
+        }
 
         rel_paths = {
-            key: os.path.join('sequences', 'bus', key + '.csv')
+            key: os.path.join("sequences", "bus", key + ".csv")
             for key in bus_results.keys()
         }
 
@@ -278,9 +285,9 @@ class ResultsDataPackage(DataFramePackage):
 
         all_scalars = all_scalars[sorted(all_scalars.columns)]
 
-        data_scal = {'scalars': all_scalars}
+        data_scal = {"scalars": all_scalars}
 
-        rel_paths_scal = {'scalars': 'scalars.csv'}
+        rel_paths_scal = {"scalars": "scalars.csv"}
 
         return data_scal, rel_paths_scal
 
@@ -293,58 +300,59 @@ class ResultsDataPackage(DataFramePackage):
         scenario_name : str
             Name of the scenario
         """
+
         def prepend_index(df, level_name, values):
             return pd.concat([df], keys=[values], names=[level_name])
-        
-        assert 'scalars' in self.data, "Scenario name can only be set when scalars are stacked."
 
-        self.data['scalars'] = prepend_index(self.data['scalars'], 'scenario', scenario_name)
+        assert (
+            "scalars" in self.data
+        ), "Scenario name can only be set when scalars are stacked."
+
+        self.data["scalars"] = prepend_index(
+            self.data["scalars"], "scenario", scenario_name
+        )
 
     def to_element_dfs(self):
 
         self._separate_stacked_frame(
-            frame_name='scalars',
-            target_dir='elements',
-            group_by=['carrier', 'tech']
+            frame_name="scalars", target_dir="elements", group_by=["carrier", "tech"]
         )
 
     def to_stacked_scalars(self):
-
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
-            return directory == 'elements'
+            return directory == "elements"
 
-        element_names = [key for key, rel_path in self.rel_paths.items() if is_element(rel_path)]
+        element_names = [
+            key for key, rel_path in self.rel_paths.items() if is_element(rel_path)
+        ]
 
         self._stack_frames(
             frame_names=element_names,
-            target_name='scalars',
-            target_dir='',
-            unstacked_vars=['scenario', 'name', 'region', 'carrier', 'tech', 'type'],
-            index_vars=['scenario', 'name', 'var_name']
+            target_name="scalars",
+            target_dir="",
+            unstacked_vars=["scenario", "name", "region", "carrier", "tech", "type"],
+            index_vars=["scenario", "name", "var_name"],
         )
+
 
 def group_by_pivot(stacked_frame, group_by):
     elements = {}
     for group, df in stacked_frame.groupby(group_by):
-        name = '-'.join(group)
+        name = "-".join(group)
 
         df = df.reset_index()
 
         index = df.columns
 
-        index = list(index.drop('var_name').drop('var_value'))
+        index = list(index.drop("var_name").drop("var_value"))
 
-        df = df.pivot(
-            index=index,
-            columns='var_name',
-            values='var_value'
-        )
+        df = df.pivot(index=index, columns="var_name", values="var_value")
 
         # set index and sort columns for comparability
         df = df.reset_index()
 
-        df = df.set_index('name')
+        df = df.set_index("name")
 
         df = df[sorted(df.columns)]
 
@@ -361,11 +369,7 @@ def stack_frames(frames_to_stack, unstacked_vars, index_vars):
 
         df.reset_index(inplace=True)
 
-        df = df.melt(
-            unstacked_vars,
-            var_name='var_name',
-            value_name='var_value'
-        )
+        df = df.melt(unstacked_vars, var_name="var_name", value_name="var_value")
 
         stacked.append(df)
 

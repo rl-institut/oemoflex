@@ -7,13 +7,15 @@ import oemoflex.tools.helpers as helpers
 
 dir_name = os.path.abspath(os.path.dirname(__file__))
 
-labels_dict = helpers.load_yaml(os.path.join(dir_name,'labels.yaml'))
+labels_dict = helpers.load_yaml(os.path.join(dir_name, "labels.yaml"))
 
-colors_csv = pd.read_csv(os.path.join(dir_name, 'colors.csv'), header=[0], index_col=[0])
+colors_csv = pd.read_csv(
+    os.path.join(dir_name, "colors.csv"), header=[0], index_col=[0]
+)
 colors_csv = colors_csv.T
 colors_odict = OrderedDict()
 for i in colors_csv.columns:
-    colors_odict[i] = colors_csv.loc['Color',i]
+    colors_odict[i] = colors_csv.loc["Color", i]
 
 
 def map_labels(df, labels_dict=labels_dict):
@@ -83,8 +85,8 @@ def stackplot(ax, df, colors_odict=colors_odict):
         Ordered dictionary with labels as keys and colourcodes as values.
     """
     # y is a list which gets the correct stack order from colors file
-    colors=[]
-    labels=[]
+    colors = []
+    labels = []
     y = []
 
     order = list(colors_odict)
@@ -136,8 +138,8 @@ def plot_dispatch(ax, df, bus_name, demand_name, start_date=None, end_date=None)
     df_demand = map_labels(df_demand)
 
     # plot stackplot, differentiate between positive and negative stacked data
-    y_stack_pos=[]
-    y_stack_neg=[]
+    y_stack_pos = []
+    y_stack_neg = []
     for index, value in (df < 0).any().items():
         if value == True:
             y_stack_neg.append(index)
@@ -175,5 +177,5 @@ def eng_format(ax, df, unit, conv_number):
     """
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
-    df[df.select_dtypes(include=['number']).columns] *= conv_number
+    df[df.select_dtypes(include=["number"]).columns] *= conv_number
     return df

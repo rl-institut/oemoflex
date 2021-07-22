@@ -6,7 +6,7 @@ from pandas.testing import assert_frame_equal
 
 
 def load_yaml(file_path):
-    with open(file_path, 'r') as yaml_file:
+    with open(file_path, "r") as yaml_file:
         yaml_data = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
     return yaml_data
@@ -73,8 +73,8 @@ def check_if_csv_dirs_equal(dir_a, dir_b):
     files_a = get_all_file_paths(dir_a)
     files_b = get_all_file_paths(dir_b)
 
-    files_a = [file for file in files_a if file.split('.')[-1] == 'csv']
-    files_b = [file for file in files_b if file.split('.')[-1] == 'csv']
+    files_a = [file for file in files_a if file.split(".")[-1] == "csv"]
+    files_b = [file for file in files_b if file.split(".")[-1] == "csv"]
 
     files_a.sort()
     files_b.sort()
@@ -84,9 +84,7 @@ def check_if_csv_dirs_equal(dir_a, dir_b):
 
     diff = list(set(f_names_a).symmetric_difference(set(f_names_b)))
 
-    assert not diff,\
-        f"Lists of filenames are not the same." \
-        f" The diff is: {diff}"
+    assert not diff, f"Lists of filenames are not the same." f" The diff is: {diff}"
 
     for file_a, file_b in zip(files_a, files_b):
         try:
@@ -95,10 +93,14 @@ def check_if_csv_dirs_equal(dir_a, dir_b):
             diff.append([file_a, file_b])
 
     if diff:
-        error_message = ''
+        error_message = ""
         for pair in diff:
-            short_name_a, short_name_b = (os.path.join(*f.split(os.sep)[-4:]) for f in pair)
-            line = ' - ' + short_name_a + ' and ' + short_name_b + '\n'
+            short_name_a, short_name_b = (
+                os.path.join(*f.split(os.sep)[-4:]) for f in pair
+            )
+            line = " - " + short_name_a + " and " + short_name_b + "\n"
             error_message += line
 
-        raise AssertionError(f" The contents of these file are different:\n{error_message}")
+        raise AssertionError(
+            f" The contents of these file are different:\n{error_message}"
+        )
