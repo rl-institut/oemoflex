@@ -157,15 +157,7 @@ class EnergyDataPackage(DataFramePackage):
 
     @classmethod
     def setup_default(
-        cls,
-        name,
-        basepath,
-        datetimeindex,
-        components,
-        busses,
-        regions,
-        links,
-        **kwargs
+        cls, name, basepath, datetimeindex, components, busses, regions, links, **kwargs
     ):
 
         data, rel_paths = create_default_data(
