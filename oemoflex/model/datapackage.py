@@ -5,7 +5,7 @@ from frictionless import Package
 
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.inferring import infer
-from oemoflex.model.postprocessing import run_postprocessing
+from oemoflex.model.postprocessing import run_postprocessing, group_by_element
 import oemof.tabular.tools.postprocessing as tabular_pp
 
 
@@ -165,6 +165,7 @@ class EnergyDataPackage(DataFramePackage):
         busses,
         regions,
         links,
+        **kwargs
     ):
 
         data, rel_paths = create_default_data(
@@ -173,6 +174,7 @@ class EnergyDataPackage(DataFramePackage):
             datetimeindex=datetimeindex,
             select_components=components,
             select_busses=busses,
+            **kwargs,
         )
 
         return cls(
@@ -279,15 +281,25 @@ class ResultsDataPackage(DataFramePackage):
 
         return bus_results, rel_paths
 
-    def get_scalars(self, es):
+    def get_scalars(self, es, by_element=False):
 
         all_scalars = run_postprocessing(es)
 
         all_scalars = all_scalars[sorted(all_scalars.columns)]
 
-        data_scal = {"scalars": all_scalars}
+        if by_element:
 
-        rel_paths_scal = {"scalars": "scalars.csv"}
+            data_scal = group_by_element(all_scalars)
+
+            rel_paths_scal = {
+                key: os.path.join("scalars", key + ".csv") for key in data_scal.keys()
+            }
+
+        else:
+
+            data_scal = {"scalars": all_scalars}
+
+            rel_paths_scal = {"scalars": "scalars.csv"}
 
         return data_scal, rel_paths_scal
 

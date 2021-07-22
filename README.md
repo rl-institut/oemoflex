@@ -1,21 +1,34 @@
 # oemoflex
 
-A flexible model structure for creating and analysing multi-regional sector-integrated energysystem models featuring many flexibility options. 
+oemoflex is a flexible model structure for creating and analysing multi-regional sector-integrated 
+energysystem models featuring many flexibility options.
+
+oemoflex makes it easy to create datapackages that represent energy systems that can be optimized
+with oemof.solph. It also helps to postprocess the results so that you can focus on your main tasks
+of modeling: Finding good data and drawing assumptions to build meaningful scenarios and interpret
+them.
+
+The core parts of oemoflex have been originally developed in the project FlexMex. Its main
+application is currently within the energy system model [oemof-B3](https://oemof-b3.readthedocs.io/)
 
 ## Getting started
 
+## Installation
+
+You can install oemoflex in your environment for developing with pip:
+
+    pip install -e <path-to-oemoflex>
+
 ## Usage
 
-This folder is where you should place the code of your package (package name to be edited in `setup.py` under name)
-
-You can install it locally for developing with
-
-    python setup.py install
-    
-More details for packaging are available on [https://packaging.python.org](https://packaging.python.org/tutorials/packaging-projects/)
-
+Have a look at the examples to see how to create an EnergyDataPackage by specifying the components,
+busses, regions and links, how to parametrize it and how to pass it to oemof.solph to solve the
+optimization problem.
 
 ## Docs
+
+Online documentation is hosted by readthedocs and can be found 
+[here](https://oemoflex.readthedocs.io/en/latest/). The docs are currently under construction. 
 
 To build the docs simply go to the `docs` folder
 

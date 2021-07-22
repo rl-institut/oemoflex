@@ -509,6 +509,24 @@ def add_component_info(scalars):
     return scalars
 
 
+def group_by_element(scalars):
+    elements = {}
+    for group, df in scalars.groupby(['carrier', 'tech']):
+        name = '-'.join(group)
+
+        df = df.reset_index()
+
+        df = df.pivot(
+            index=['name', 'type', 'carrier', 'tech'],
+            columns='var_name',
+            values='var_value'
+        )
+
+        elements[name] = df
+
+    return elements
+
+
 def sort_scalars(scalars):
 
     scalars = scalars.sort_values(by=["carrier", "tech", "var_name"])
@@ -566,9 +584,11 @@ def run_postprocessing(es):
     summed_flows = sum_flows(sequences)
 
     # Collect the annual sum of renewable energy
-    summed_flows_re = filter_series_by_component_attr(
-        summed_flows, tech=["wind", "solar"]
-    )
+    # scalars in summed_flows_re not generic and therefore
+    # not used in the following but held here as an alternative.
+    # summed_flows_re = filter_series_by_component_attr(
+    #     summed_flows, tech=["wind", "solar"]
+    # )
 
     # Calculate storage losses
     summed_flows_storage = filter_series_by_component_attr(summed_flows, type="storage")
@@ -585,13 +605,20 @@ def run_postprocessing(es):
     )
 
     # Collect existing (exogenous) capacity (units of power) and storage capacity (units of energy)
-    # Keep in mind - this has an index of the form (component, None). It is not attributed to a flow
+    # Keep in mind - this has an index of the form (component, None).
+    # It is not attributed to a flow
     capacity = filter_by_var_name(scalar_params, "capacity")
 
-    # Keep in mind - this has an index of the form (component, None). It is not attributed to a flow
+    from_to_capacity = filter_by_var_name(scalar_params, "from_to_capacity")
+
+    to_from_capacity = filter_by_var_name(scalar_params, "to_from_capacity")
+
+    # Keep in mind - this has an index of the form (component, None).
+    # It is not attributed to a flow
     storage_capacity = filter_by_var_name(scalar_params, "storage_capacity")
 
-    # Collect invested (endogenous) capacity (units of power) and storage capacity (units of energy)
+    # Collect invested (endogenous) capacity (units of power) and
+    # storage capacity (units of energy)
 
     invested_capacity = None
 
@@ -621,7 +648,8 @@ def run_postprocessing(es):
     #
     # inputs = get_inputs(summed_flows)
     #
-    # flows_with_emissions = filter_series_by_component_attr(inputs, carrier=carriers_with_emissions)
+    # flows_with_emissions = filter_series_by_component_attr(inputs,
+    #                                                        carrier=carriers_with_emissions)
     #
     # # Get emissions
     #
@@ -651,6 +679,8 @@ def run_postprocessing(es):
         transmission_losses,
         capacity,
         storage_capacity,
+        from_to_capacity,
+        to_from_capacity,
         invested_capacity,
         invested_storage_capacity,
         summed_carrier_costs,
