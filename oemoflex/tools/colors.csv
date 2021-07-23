@@ -40,3 +40,10 @@ Heatpump,#2ca02c
 PtH,#ff7f0e
 
 CH4 excess,red
+
+Biomass,#2ca02c
+CH4,#d62728
+Hard coal,black
+Lignite,saddlebrown
+Oil,#9467bd
+Other,#7f7f7f
