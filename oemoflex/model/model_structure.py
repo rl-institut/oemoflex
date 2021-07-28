@@ -177,7 +177,7 @@ def create_bus_element(bus_attrs, select_regions):
         {"region": regions, "name": carriers, "type": "bus", "balanced": balanced}
     )
 
-    bus_df = bus_df.set_index("region")
+    bus_df = bus_df.set_index("name")
 
     return bus_df
 
@@ -255,7 +255,10 @@ def create_component_element(component_attrs, select_regions, select_links):
     for key, value in defaults.items():
         comp_data[key] = value
 
-    component_df = pd.DataFrame(comp_data).set_index("region")
+    # sort the columns for comparability
+    component_df = pd.DataFrame(comp_data).set_index("name")
+
+    component_df = component_df[sorted(component_df.columns)]
 
     return component_df
 

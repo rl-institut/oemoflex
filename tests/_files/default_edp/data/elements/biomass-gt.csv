@@ -1,3 +1,3 @@
-region,name,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,output_parameters
-A,A-biomass-gt,conversion,biomass,gt,A-biomass,A-electricity,,,,,,,{}
-B,B-biomass-gt,conversion,biomass,gt,B-biomass,B-electricity,,,,,,,{}
+name,capacity,capacity_cost,carrier,carrier_cost,efficiency,expandable,from_bus,marginal_cost,output_parameters,region,tech,to_bus,type
+A-biomass-gt,,,biomass,,,,A-biomass,,{},A,gt,A-electricity,conversion
+B-biomass-gt,,,biomass,,,,B-biomass,,{},B,gt,B-electricity,conversion

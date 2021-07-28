@@ -7,6 +7,11 @@ from oemoflex.model.datapackage import DataFramePackage, EnergyDataPackage
 from oemoflex.tools.helpers import check_if_csv_dirs_equal
 
 
+def clean_path(path):
+    if os.path.exists(path):
+        rmtree(path)
+
+
 def test_datapackage():
 
     data = {"a": 0, "b": 0}
@@ -48,8 +53,7 @@ def test_edp_setup_default():
         links=links,
     )
 
-    if os.path.exists(basepath):
-        rmtree(basepath)
+    clean_path(basepath)
 
     edp.to_csv_dir(basepath)
 
@@ -77,3 +81,39 @@ def test_edp_setup_default_select():
         regions=regions,
         links=links,
     )
+
+
+def test_edp_stack_unstack():
+
+    tmp = extend_basic_path("tmp")
+    before = os.path.join(tmp, "before")
+    after = os.path.join(tmp, "after")
+
+    name = "test_edp"
+    datetimeindex = None
+    regions = ["A", "B"]
+    links = ["A-B"]
+
+    edp = EnergyDataPackage.setup_default(
+        name=name,
+        components=None,
+        busses=None,
+        basepath=None,
+        datetimeindex=datetimeindex,
+        regions=regions,
+        links=links,
+    )
+
+    clean_path(before)
+
+    clean_path(after)
+
+    edp.to_csv_dir(before)
+
+    edp.stack_components()
+
+    edp.unstack_components()
+
+    edp.to_csv_dir(after)
+
+    check_if_csv_dirs_equal(before, after)
