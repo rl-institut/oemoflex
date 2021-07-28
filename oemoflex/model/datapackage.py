@@ -341,7 +341,6 @@ class ResultsDataPackage(DataFramePackage):
 
 
 def group_by_pivot(stacked_frame, group_by):
-
     def pivot_pandas_0_25_3_compatible(df, index, columns, values):
         _df = df.copy()
 
@@ -363,7 +362,9 @@ def group_by_pivot(stacked_frame, group_by):
 
         index = df.columns
 
-        df = pivot_pandas_0_25_3_compatible(df, index=index, columns="var_name", values="var_value")
+        df = pivot_pandas_0_25_3_compatible(
+            df, index=index, columns="var_name", values="var_value"
+        )
 
         # set index and sort columns for comparability
         df = df.reset_index()
