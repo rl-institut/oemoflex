@@ -21,7 +21,7 @@ for i in colors_csv.columns:
     colors_odict[i] = colors_csv.loc["Color", i]
 
 
-def map_labels(df, labels_dict):
+def map_labels(df, labels_dict=general_labels_dict):
     r"""
     Renames columns according to the specifications in the label_dict. The data has multilevel
     column names. Thus, the labels_dict needs a tuple as key. The value is used as the new column
