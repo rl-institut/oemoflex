@@ -177,11 +177,12 @@ class EnergyDataPackage(DataFramePackage):
             components=components,
         )
 
-    def infer_metadata(self):
+    def infer_metadata(self, foreign_keys_update=None):
         infer(
             select_components=self.components,
             package_name=self.name,
             path=self.basepath,
+            foreign_keys_update=foreign_keys_update,
         )
 
     def parametrize(self, frame, column, values):
