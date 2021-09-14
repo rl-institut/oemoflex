@@ -13,6 +13,8 @@
     'electricity-liion_battery',
     'hydro-reservoir',
     'electricity-bev',
+    'hydro-ror',
+    'ch4-excess',
 ]
 
 'profile': [
@@ -21,6 +23,7 @@
     'solar-pv',
     'electricity-demand',
     'hydro-reservoir',
+    'hydro-ror',
     'heat-demand',
 ]
 
