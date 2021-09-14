@@ -182,7 +182,7 @@ class EnergyDataPackage(DataFramePackage):
             select_components=self.components,
             package_name=self.name,
             path=self.basepath,
-            foreign_keys_update=foreign_keys_update
+            foreign_keys_update=foreign_keys_update,
         )
 
     def parametrize(self, frame, column, values):
