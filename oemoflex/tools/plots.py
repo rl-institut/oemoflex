@@ -91,11 +91,10 @@ def rename_by_string_matching(columns, labels_dict):
 
         if len(mapped) > 1:
             raise ValueError("Multiple labels are matching.")
+        elif not mapped:
+            raise KeyError(f"No label matches for {tupl}.")
         else:
             mapped = mapped[0]
-
-        if not mapped:
-            raise KeyError(f"No label matches for {tuple}.")
 
         return mapped
 
