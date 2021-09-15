@@ -21,6 +21,13 @@ for i in colors_csv.columns:
     colors_odict[i] = colors_csv.loc["Color", i]
 
 
+def check_undefined_colors(labels, color_labels):
+    undefined_colors = list(set(labels).difference(color_labels))
+
+    if undefined_colors:
+        raise KeyError(f"Undefined colors {undefined_colors}.")
+
+
 def map_labels(df, labels_dict=general_labels_dict):
     r"""
     Renames columns according to the specifications in the label_dict. The data has multilevel
@@ -123,10 +130,10 @@ def rename_by_string_matching(columns, labels_dict):
 
     # Map column names
     renamed_columns = pd.Series(map(lambda x: map_tuple(x, labels_dict), columns))
-
+    print(renamed_columns)
     # If there are duplicates, append in/out
     renamed_columns = rename_duplicated(columns, renamed_columns, labels_dict)
-
+    print(renamed_columns)
     return renamed_columns
 
 
@@ -305,6 +312,8 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
+    check_undefined_colors(df.columns, colors_odict.keys())
+
     # make sure to obey order as definded in colors_odict
     generic_order = list(colors_odict)
     concrete_order = generic_order.copy()
@@ -386,6 +395,8 @@ def stackplot(ax, df, colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    check_undefined_colors(df.columns, colors_odict.keys())
+
     # y is a list which gets the correct stack order from colors file
     colors = []
     labels = []
@@ -417,6 +428,8 @@ def lineplot(ax, df, colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    check_undefined_colors(df.columns, colors_odict.keys())
+
     for i in df.columns:
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
@@ -440,6 +453,8 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    check_undefined_colors(df.columns, colors_odict.keys())
+
     # apply EngFormatter on axis
     ax = eng_format(ax, unit=unit)
 
