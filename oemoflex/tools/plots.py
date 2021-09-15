@@ -67,7 +67,7 @@ def rename_by_string_matching(columns, labels_dict):
         List with new column names.
     """
 
-    def map_tuple(tuple, dictionary):
+    def map_tuple(tupl, dictionary):
         r"""
         The corresponding value of the tuple which is supposed to be a key in the dictionary is
         retrieved.
@@ -85,56 +85,41 @@ def rename_by_string_matching(columns, labels_dict):
         mapped : string
             String with new column name.
         """
-        mapped = None
+        mapped = [value for key, value in dictionary.items() if any([key in y for y in tupl])]
 
-        for key, value in dictionary.items():
-
-            if concrete_in_generic(tuple, key):
-                mapped = value
-
-            else:
-                continue
+        if len(mapped) > 1:
+            raise ValueError("Multiple labels are matching.")
+        else:
+            mapped = mapped[0]
 
         if not mapped:
-            raise KeyError(f"No mapping defined for {col}.")
+            raise KeyError(f"No label matches for {tuple}.")
 
         return mapped
 
-    def concrete_in_generic(concrete_tuple, generic_tuple):
+    def rename_duplicated(columns_tuple, columns_mapped, dictionary):
         r"""
-        It is checked if the concrete_tuple is contained in the generic_tuple which is a key of
-        the labels_dict. Thus, it is checked if a multilevel column name is contained in the
-        labels_dict.
-
-        Parameters
-        ---------------
-        concrete_tuple : tuple
-            Column names which need to be adapted to a concise name.
-        generic_tuple : tuple
-            Contains old and new column names. The new column names are used for the labels in the
-            plot.
-
-        Returns
-        ----------
-        True or False : Boolean
-            Boolean whether concrete_tuple is contained in generic_tuple.
+        Appends a suffix to those columns that are not unique. This happens in
+        oemof because a component can appear as the first or second entry in a tuple, which
+        signifies the output or input of the component, respectively.
         """
-        for concrete, generic in zip(concrete_tuple, generic_tuple):
-            if generic in concrete:
-                continue
+        columns_duplicated = columns_mapped.duplicated(keep=False)
 
-            else:
-                return False
+        mapped_where = [j for tupl in columns_tuple for j, x in enumerate(tupl) if any([key in x for key in dictionary.keys()])]
 
-        return True
+        mapped_where = pd.Series(mapped_where)
 
-    renamed_columns = list()
+        columns_mapped.loc[columns_duplicated & (mapped_where == 0)] += " out"
 
-    for col in columns:
+        columns_mapped.loc[columns_duplicated & mapped_where == 1] += " in"
 
-        renamed_col = map_tuple(col, labels_dict)
+        return columns_mapped
 
-        renamed_columns.append(renamed_col)
+    # Map column names
+    renamed_columns = pd.Series(map(lambda x: map_tuple(x, labels_dict), columns))
+
+    # If there are duplicates, append in/out
+    renamed_columns = rename_duplicated(columns, renamed_columns, labels_dict)
 
     return renamed_columns
 
