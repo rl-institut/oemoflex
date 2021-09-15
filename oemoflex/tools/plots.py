@@ -130,10 +130,10 @@ def rename_by_string_matching(columns, labels_dict):
 
     # Map column names
     renamed_columns = pd.Series(map(lambda x: map_tuple(x, labels_dict), columns))
-    print(renamed_columns)
+
     # If there are duplicates, append in/out
     renamed_columns = rename_duplicated(columns, renamed_columns, labels_dict)
-    print(renamed_columns)
+
     return renamed_columns
 
 
