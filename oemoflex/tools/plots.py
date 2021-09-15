@@ -85,7 +85,9 @@ def rename_by_string_matching(columns, labels_dict):
         mapped : string
             String with new column name.
         """
-        mapped = [value for key, value in dictionary.items() if any([key in y for y in tupl])]
+        mapped = [
+            value for key, value in dictionary.items() if any([key in y for y in tupl])
+        ]
 
         if len(mapped) > 1:
             raise ValueError("Multiple labels are matching.")
@@ -105,7 +107,12 @@ def rename_by_string_matching(columns, labels_dict):
         """
         columns_duplicated = columns_mapped.duplicated(keep=False)
 
-        mapped_where = [j for tupl in columns_tuple for j, x in enumerate(tupl) if any([key in x for key in dictionary.keys()])]
+        mapped_where = [
+            j
+            for tupl in columns_tuple
+            for j, x in enumerate(tupl)
+            if any([key in x for key in dictionary.keys()])
+        ]
 
         mapped_where = pd.Series(mapped_where)
 
