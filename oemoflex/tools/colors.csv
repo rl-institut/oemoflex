@@ -11,9 +11,9 @@ H2 GT,magenta
 CH4 GT,#d62728
 Nuclear ST,pink
 
-Liion Battery,#9467bd
-BAT discharge,#9467bd
-BAT charge,#9467bd
+Battery,#9467bd
+Battery out,#9467bd
+Battery in,#9467bd
 
 El. H2 cavern,orchid
 BEV,gold
