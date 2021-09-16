@@ -130,9 +130,7 @@ def rename_by_string_matching(columns, labels_dict):
 
     def map_str(string, dictionary):
 
-        mapped = [
-            value for key, value in dictionary.items() if key in string
-        ]
+        mapped = [value for key, value in dictionary.items() if key in string]
 
         if len(mapped) > 1:
             raise ValueError("Multiple labels are matching.")
