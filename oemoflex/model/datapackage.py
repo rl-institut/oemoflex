@@ -252,27 +252,35 @@ class ResultsDataPackage(DataFramePackage):
 
         return data, rel_paths
 
-    def get_sequences(self, es):
+    def get_sequences(self, es, kind=("bus", "component")):
+        def get_rel_paths(keys, *subdirs, file_ext=".csv"):
+            return {key: os.path.join(*subdirs, key + file_ext) for key in keys}
 
-        data_seq, rel_paths_seq = self.get_bus_sequences(es)
+        def drop_empty_dfs(dictionary):
+            return {key: value for key, value in dictionary.items() if not value.empty}
+
+        methods = {
+            "bus": tabular_pp.bus_results,
+            "component": tabular_pp.component_results,
+        }
+
+        methods = {k: v for k, v in methods.items() if k in kind}
+
+        data_seq = {}
+        rel_paths_seq = {}
+
+        for name, method in methods.items():
+            data = method(es, es.results)
+
+            data = drop_empty_dfs(data)
+
+            rel_paths = get_rel_paths(data, "sequences", name)
+
+            data_seq.update(data)
+
+            rel_paths_seq.update(rel_paths)
 
         return data_seq, rel_paths_seq
-
-    @staticmethod
-    def get_bus_sequences(es):
-
-        bus_results = tabular_pp.bus_results(es, es.results)
-
-        bus_results = {
-            key: value for key, value in bus_results.items() if not value.empty
-        }
-
-        rel_paths = {
-            key: os.path.join("sequences", "bus", key + ".csv")
-            for key in bus_results.keys()
-        }
-
-        return bus_results, rel_paths
 
     def get_scalars(self, es, by_element=False):
 
