@@ -7,26 +7,32 @@ Overview
 oemoflex is a flexible model structure for creating and analysing multi-regional sector-integrated
 energysystem models featuring many flexibility options.
 
-oemoflex defines **schemas for tabular data** amd makes it easy to create datapackages that represent
-energy systems that can be optimized with oemof.solph.
+oemoflex makes it easy to create datapackages that represent
+energy systems that can be optimized with oemof.solph. In detail, oemoflex:
 
-The schemas :file:`oemoflex.model.facade_attrs`
-:file:`oemoflex.model.busses.yml`
-:file:`oemoflex.model.components_attrs.yml`
+* defines **schemas for tabular data packages** that describe energy systems.
 
-Custom-defined components can be passed
+  The schemas for different types of components are defined here :file:`oemoflex.model.facade_attrs`.
+  The files :file:`oemoflex.model.components_attrs.yml` and :file:`oemoflex.model.busses.yml` define
+  the available components and busses.
 
-**Build datapackages** EnergyDataPackage.setup_default
+* **builds datapackages**
 
-**infer metadata**
-:file:`oemoflex.model.foreign_keys.yml`
+  EnergyDataPackage.setup_default
+  :attr:`regions`, :attr:`links`, :attr:`busses` and :attr:`components`.
 
-**parametrize** EnergyDataPackage.parametrize
+  Custom-defined busses and components can be passed as :attr:`bus_attrs_update` and
+  :attr:`component_attrs_update`.
 
-**validate** EnergyDataPackage.validate
+* **infers metadata**
+  Foreign key relations are defined in :file:`oemoflex.model.foreign_keys.yml`
 
-It also helps to **postprocess** the results so that you can focus on your main tasks
-of modeling: Finding good data and drawing assumptions to build meaningful scenarios and interpret
-them. ResultsDataPackage(es)
+* **parametrizes data packages** EnergyDataPackage.parametrize
 
-**plots**
+* **validates data schemas** EnergyDataPackage.validate
+
+* helps **postprocessing** the results so that you can focus on your main tasks of modeling: Finding
+  good data and drawing assumptions to build meaningful scenarios and interpret them.
+  ResultsDataPackage(es)
+
+* provides functions for **plotting** results.
