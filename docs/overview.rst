@@ -11,20 +11,22 @@ oemoflex defines **schemas for tabular data** amd makes it easy to create datapa
 energy systems that can be optimized with oemof.solph.
 
 The schemas :file:`oemoflex.model.facade_attrs`
-:file:`oemoflex.modelbusses.yml`
-:file:`components_attrs.yml`
-:file:`foreign_keys.yml`
+:file:`oemoflex.model.busses.yml`
+:file:`oemoflex.model.components_attrs.yml`
 
-Custom-defined components can be passed.
+Custom-defined components can be passed
 
 **Build datapackages** EnergyDataPackage.setup_default
+
+**infer metadata**
+:file:`oemoflex.model.foreign_keys.yml`
 
 **parametrize** EnergyDataPackage.parametrize
 
 **validate** EnergyDataPackage.validate
 
-**stack** **unstack**
-
 It also helps to **postprocess** the results so that you can focus on your main tasks
 of modeling: Finding good data and drawing assumptions to build meaningful scenarios and interpret
 them. ResultsDataPackage(es)
+
+**plots**
