@@ -27,6 +27,11 @@ class DataFramePackage:
     def from_csv_dir(cls, dir):
         r"""
         Initialize a DataFramePackage from a csv directory
+
+        Parameters
+        ----------
+        dir : str
+            Path to csv directory
         """
         rel_paths = cls._get_rel_paths(dir, ".csv")
 
@@ -39,6 +44,11 @@ class DataFramePackage:
         r"""
         Initialize a DataFramePackage from the metadata string,
         usually named datapackage.json
+
+        Parameters
+        ----------
+        json_file_path : str
+            Path to metadata
         """
         dp = Package(json_file_path)
 
@@ -53,6 +63,11 @@ class DataFramePackage:
     def to_csv_dir(self, destination):
         r"""
         Save the DataFramePackage to csv files.
+
+        Parameters
+        ----------
+        destination : str
+            Path to store data to
         """
         for name, data in self.data.items():
             path = self.rel_paths[name]
@@ -159,7 +174,29 @@ class EnergyDataPackage(DataFramePackage):
     def setup_default(
         cls, name, basepath, datetimeindex, components, busses, regions, links, **kwargs
     ):
+        r"""
+        Initializes an EnergyDataPackage with a specific structure, but without the values of
+        parameters being set.
 
+        Parameters
+        ----------
+        name : str
+            Name of the EnergyDataPackage
+        basepath : str
+            Path where EnergyDataPackage is stored
+        datetimeindex : pandas.DatetimeIndex
+            A valid timeindex
+        components : list
+            List of components
+        busses : list
+            List of busses
+        regions : list
+            List of regions
+        links : list
+            List of links between regions
+        kwargs : dict
+            Other keyword arguments.
+        """
         data, rel_paths = create_default_data(
             select_regions=regions,
             select_links=links,
@@ -178,6 +215,18 @@ class EnergyDataPackage(DataFramePackage):
         )
 
     def infer_metadata(self, foreign_keys_update=None):
+        r"""
+        Infers metadata of the EnergyDataPackage and save it
+        in basepath as `datapackage.json`.
+
+        Parameters
+        ----------
+        foreign_keys_update
+
+        Returns
+        -------
+
+        """
         infer(
             select_components=self.components,
             package_name=self.name,
@@ -186,12 +235,27 @@ class EnergyDataPackage(DataFramePackage):
         )
 
     def parametrize(self, frame, column, values):
+        r"""
+        Sets the values of parameters.
 
+        Parameters
+        ----------
+        frame : str
+            Name of the DataFrame in the Package.
+        column :
+            Name of the columns within the DataFrame
+        values : str or numeric
+            Values with the correct index to be set to the DataFrame
+        """
         assert column in self.data[frame].columns, f"Column '{column}' is not defined!"
 
         self.data[frame].loc[:, column] = values
 
     def stack_components(self):
+        r"""
+        Stacks the component DataFrames into a single DataFrame.
+        """
+
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
             return "elements" in directory
@@ -211,7 +275,9 @@ class EnergyDataPackage(DataFramePackage):
         )
 
     def unstack_components(self):
-
+        r"""
+        Unstacks a single component DataFrame into separate DataFrames for each component.
+        """
         self._separate_stacked_frame(
             frame_name="component",
             target_dir=os.path.join("data", "elements"),
@@ -225,6 +291,14 @@ class ResultsDataPackage(DataFramePackage):
 
     @classmethod
     def from_energysytem(cls, es):
+        r"""
+        Initializes a ResultsDataPackage from an EnergySystem with optimization results.
+
+        Parameters
+        ----------
+        es : oemof.solph.EnergySystem
+            EnergySystem with results.
+        """
 
         basepath = None
 
