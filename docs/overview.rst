@@ -31,10 +31,13 @@ Custom-defined busses and components can be passed as dictionaries :attr:`bus_at
 When adding custom-defined components and busses, a dictionary with :attr:`foreign_keys_update`
 can be passed.
 
-**Parametrizes data packages.** EnergyDataPackage.parametrize
+**Parametrizes data packages.** Parametrize the EnergyDataPackage by setting values to
 
-**Validate data schemas.** EnergyDataPackage.validate
+.. TODO: Not implemented yet. **Validate data schemas.** EnergyDataPackage.validate
 
-**Postprocess results.**
+.. TODO: Not implemented yet. **Create variations.** of existing EnergyDataPackages.
 
-**Plot results.**
+**Postprocess results.** Results of an oemof.solph optimisation can be postprocessed and saved as
+a ResultsDataPackage.
+
+**Plot results.** Plot methods help to visualize and understand the results of a scenario.
