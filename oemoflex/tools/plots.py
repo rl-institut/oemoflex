@@ -286,100 +286,6 @@ def _assign_stackgroup(key, values):
     return stackgroup
 
 
-def plot_dispatch_plotly(
-    df,
-    df_demand,
-    unit,
-    colors_odict=colors_odict,
-):
-    r"""
-    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
-    line plot and suppliers and other consumers are plotted with a stackplot.
-
-    Parameters
-    ---------------
-    df : pandas.DataFrame
-        Dataframe with data except demand.
-    df_demand : pandas.DataFrame
-        Dataframe with demand data.
-    unit: string
-        String with unit sign of plotted data on y-axis.
-    colors_odict : collections.OrderedDictionary
-        Ordered dictionary with labels as keys and colourcodes as values.
-
-    Returns
-    ----------
-    fig : plotly.graph_objs._figure.Figure
-        Interactive plotly dispatch plot
-    """
-    _check_undefined_colors(df.columns, colors_odict.keys())
-
-    # make sure to obey order as definded in colors_odict
-    generic_order = list(colors_odict)
-    concrete_order = generic_order.copy()
-    for i in generic_order:
-        if i not in df.columns:
-            concrete_order.remove(i)
-    df = df[concrete_order]
-
-    # plotly figure
-    fig = go.Figure()
-
-    # plot stacked generators and consumers
-    df = df[[c for c in df.columns if not isinstance(c, tuple)]]
-    for key, values in df.iteritems():
-        stackgroup = _assign_stackgroup(key, values)
-
-        fig.add_trace(
-            go.Scatter(
-                x=df.index,
-                y=values,
-                mode="lines",
-                stackgroup=stackgroup,
-                line=dict(width=0, color=colors_odict[key]),
-                name=key,
-            )
-        )
-
-    # plot demand line
-    fig.add_traces(
-        go.Scatter(
-            x=df_demand.index,
-            y=df_demand.iloc[:, 0],
-            mode="lines",
-            line=dict(width=2, color=colors_odict[df_demand.columns[0]]),
-            name=df_demand.columns[0],
-        )
-    )
-
-    fig.update_layout(
-        hovermode="x unified",
-        font=dict(family="Aleo"),
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=list(
-                    [
-                        dict(count=1, label="1m", step="month", stepmode="backward"),
-                        dict(count=6, label="6m", step="month", stepmode="backward"),
-                        dict(count=1, label="YTD", step="year", stepmode="todate"),
-                        dict(count=1, label="1y", step="year", stepmode="backward"),
-                        dict(step="all"),
-                    ]
-                )
-            ),
-            rangeslider=dict(visible=True),
-            type="date",
-        ),
-        xaxis_title="Date",
-        yaxis_title="Power",
-    )
-
-    # Scale power data on y axis with SI exponents
-    fig.update_yaxes(exponentformat="SI", ticksuffix=unit)
-
-    return fig
-
-
 def stackplot(ax, df, colors_odict):
     r"""
     Plots data as a stackplot. The stacking order is determined by the order
@@ -480,6 +386,100 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
 
     # plot lineplot (demand)
     lineplot(ax, df_demand, colors_odict)
+
+
+def plot_dispatch_plotly(
+    df,
+    df_demand,
+    unit,
+    colors_odict=colors_odict,
+):
+    r"""
+    Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
+    line plot and suppliers and other consumers are plotted with a stackplot.
+
+    Parameters
+    ---------------
+    df : pandas.DataFrame
+        Dataframe with data except demand.
+    df_demand : pandas.DataFrame
+        Dataframe with demand data.
+    unit: string
+        String with unit sign of plotted data on y-axis.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
+
+    Returns
+    ----------
+    fig : plotly.graph_objs._figure.Figure
+        Interactive plotly dispatch plot
+    """
+    _check_undefined_colors(df.columns, colors_odict.keys())
+
+    # make sure to obey order as definded in colors_odict
+    generic_order = list(colors_odict)
+    concrete_order = generic_order.copy()
+    for i in generic_order:
+        if i not in df.columns:
+            concrete_order.remove(i)
+    df = df[concrete_order]
+
+    # plotly figure
+    fig = go.Figure()
+
+    # plot stacked generators and consumers
+    df = df[[c for c in df.columns if not isinstance(c, tuple)]]
+    for key, values in df.iteritems():
+        stackgroup = _assign_stackgroup(key, values)
+
+        fig.add_trace(
+            go.Scatter(
+                x=df.index,
+                y=values,
+                mode="lines",
+                stackgroup=stackgroup,
+                line=dict(width=0, color=colors_odict[key]),
+                name=key,
+            )
+        )
+
+    # plot demand line
+    fig.add_traces(
+        go.Scatter(
+            x=df_demand.index,
+            y=df_demand.iloc[:, 0],
+            mode="lines",
+            line=dict(width=2, color=colors_odict[df_demand.columns[0]]),
+            name=df_demand.columns[0],
+        )
+    )
+
+    fig.update_layout(
+        hovermode="x unified",
+        font=dict(family="Aleo"),
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list(
+                    [
+                        dict(count=1, label="1m", step="month", stepmode="backward"),
+                        dict(count=6, label="6m", step="month", stepmode="backward"),
+                        dict(count=1, label="YTD", step="year", stepmode="todate"),
+                        dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(step="all"),
+                    ]
+                )
+            ),
+            rangeslider=dict(visible=True),
+            type="date",
+        ),
+        xaxis_title="Date",
+        yaxis_title="Power",
+    )
+
+    # Scale power data on y axis with SI exponents
+    fig.update_yaxes(exponentformat="SI", ticksuffix=unit)
+
+    return fig
 
 
 def _eng_format(ax, unit):
