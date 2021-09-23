@@ -39,27 +39,6 @@ class DataFramePackage:
 
         return cls(dir, data, rel_paths)
 
-    @classmethod
-    def from_metadata(cls, json_file_path):
-        r"""
-        Initialize a DataFramePackage from the metadata string,
-        usually named datapackage.json
-
-        Parameters
-        ----------
-        json_file_path : str
-            Path to metadata
-        """
-        dp = Package(json_file_path)
-
-        dir = os.path.split(json_file_path)[0]
-
-        rel_paths = {r["name"]: r["path"] for r in dp.resources}
-
-        data = cls._load_csv(cls, dir, rel_paths)
-
-        return cls(dir, data, rel_paths)
-
     def to_csv_dir(self, destination):
         r"""
         Save the DataFramePackage to csv files.
@@ -213,6 +192,27 @@ class EnergyDataPackage(DataFramePackage):
             data=data,
             components=components,
         )
+
+    @classmethod
+    def from_metadata(cls, json_file_path):
+        r"""
+        Initialize a DataFramePackage from the metadata string,
+        usually named datapackage.json
+
+        Parameters
+        ----------
+        json_file_path : str
+            Path to metadata
+        """
+        dp = Package(json_file_path)
+
+        dir = os.path.split(json_file_path)[0]
+
+        rel_paths = {r["name"]: r["path"] for r in dp.resources}
+
+        data = cls._load_csv(cls, dir, rel_paths)
+
+        return cls(dir, data, rel_paths)
 
     def infer_metadata(self, foreign_keys_update=None):
         r"""
