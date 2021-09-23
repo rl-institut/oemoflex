@@ -173,8 +173,13 @@ class EnergyDataPackage(DataFramePackage):
             List of regions
         links : list
             List of links between regions
-        kwargs : dict
-            Other keyword arguments.
+
+        Other Parameters
+        ----------------
+        bus_attrs_update : dict
+            Update with custom-defined busses
+        component_attrs_update : dict
+            Update with custom-defined components
         """
         data, rel_paths = create_default_data(
             select_regions=regions,
@@ -392,12 +397,18 @@ class ResultsDataPackage(DataFramePackage):
         )
 
     def to_element_dfs(self):
-
+        r"""
+        Separates scalar results such that each component is represented by one DataFrame.
+        """
         self._separate_stacked_frame(
             frame_name="scalars", target_dir="elements", group_by=["carrier", "tech"]
         )
 
     def to_stacked_scalars(self):
+        r"""
+        Stacks all scalar results such into a single DataFrame named 'scalars'.
+        """
+
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
             return directory == "elements"
