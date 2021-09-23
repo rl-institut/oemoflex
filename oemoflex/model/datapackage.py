@@ -302,17 +302,17 @@ class ResultsDataPackage(DataFramePackage):
 
         basepath = None
 
-        data, rel_paths = cls.get_results(cls, es)
+        data, rel_paths = cls._get_results(cls, es)
 
         return cls(basepath, data, rel_paths)
 
-    def get_results(self, es):
+    def _get_results(self, es):
 
         data = {}
 
         rel_paths = {}
 
-        data_scal, rel_paths_scal = self.get_scalars(self, es)
+        data_scal, rel_paths_scal = self._get_scalars(self, es)
 
         data_seq, rel_paths_seq = self.get_sequences(self, es)
 
@@ -326,14 +326,14 @@ class ResultsDataPackage(DataFramePackage):
 
         return data, rel_paths
 
-    def get_sequences(self, es):
+    def _get_sequences(self, es):
 
-        data_seq, rel_paths_seq = self.get_bus_sequences(es)
+        data_seq, rel_paths_seq = self._get_bus_sequences(es)
 
         return data_seq, rel_paths_seq
 
     @staticmethod
-    def get_bus_sequences(es):
+    def _get_bus_sequences(es):
 
         bus_results = tabular_pp.bus_results(es, es.results)
 
@@ -348,7 +348,7 @@ class ResultsDataPackage(DataFramePackage):
 
         return bus_results, rel_paths
 
-    def get_scalars(self, es, by_element=False):
+    def _get_scalars(self, es, by_element=False):
 
         all_scalars = run_postprocessing(es)
 
