@@ -12,16 +12,12 @@ oemoflex.model.datapackage
 ==========================
 
 .. autoclass:: oemoflex.model.datapackage.EnergyDataPackage
-    :members:
-    :undoc-members:
     :inherited-members:
-    :member-order: alphabetical
+    :members:
 
 .. autoclass:: oemoflex.model.datapackage.ResultsDataPackage
-    :members:
-    :undoc-members:
     :inherited-members:
-    :member-order: alphabetical
+    :members:
 
 oemoflex.tools.plots
 ====================
