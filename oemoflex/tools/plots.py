@@ -10,18 +10,18 @@ pd.plotting.register_matplotlib_converters()
 
 dir_name = os.path.abspath(os.path.dirname(__file__))
 
-general_labels_dict = helpers.load_yaml(os.path.join(dir_name, "labels.yaml"))
+default_labels_dict = helpers.load_yaml(os.path.join(dir_name, "labels.yaml"))
 
 colors_csv = pd.read_csv(
     os.path.join(dir_name, "colors.csv"), header=[0], index_col=[0]
 )
 colors_csv = colors_csv.T
-colors_odict = OrderedDict()
+default_colors_odict = OrderedDict()
 for i in colors_csv.columns:
-    colors_odict[i] = colors_csv.loc["Color", i]
+    default_colors_odict[i] = colors_csv.loc["Color", i]
 
 
-def map_labels(df, labels_dict=general_labels_dict):
+def map_labels(df, labels_dict=None):
     r"""
     Renames columns according to the specifications in the label_dict. The data has multilevel
     column names. Thus, the labels_dict needs a tuple as key. The value is used as the new column
@@ -40,6 +40,9 @@ def map_labels(df, labels_dict=general_labels_dict):
     df : pandas.DataFrame
         Edited dataframe with new column names.
     """
+    if labels_dict is None:
+        labels_dict = default_labels_dict
+
     # rename columns
     df.columns = df.columns.to_flat_index()
 
@@ -178,9 +181,7 @@ def _replace_near_zeros(df):
     return df
 
 
-def prepare_dispatch_data(
-    df, bus_name, demand_name, general_labels_dict=general_labels_dict
-):
+def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
     r"""
     The data in df is split into a DataFrame with consumers and generators and a DataFrame which
     only contains the demand data. Consumer data is made negative. The multilevel column names are
@@ -195,7 +196,7 @@ def prepare_dispatch_data(
         name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
     demand_name: string
         Name of the bus representing the demand.
-    general_labels_dict : dict
+    labels_dict : dict
         Dictionary to map the column labels.
 
     Returns
@@ -205,6 +206,9 @@ def prepare_dispatch_data(
     df_demand: pandas.DataFrame
         DataFrame with prepared data for dispatch plotting of demand.
     """
+    if labels_dict is None:
+        labels_dict = default_labels_dict
+
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
@@ -216,8 +220,8 @@ def prepare_dispatch_data(
             df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    df = map_labels(df, general_labels_dict)
-    df_demand = map_labels(df_demand, general_labels_dict)
+    df = map_labels(df, labels_dict)
+    df_demand = map_labels(df_demand, labels_dict)
 
     # group columns with the same name, e.g. transmission busses by import and export
     df = _group_agg_by_column(df)
@@ -340,7 +344,7 @@ def lineplot(ax, df, colors_odict):
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
 
 
-def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
+def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
     suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
@@ -359,6 +363,9 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    if colors_odict is None:
+        colors_odict = default_colors_odict
+
     _check_undefined_colors(df.columns, colors_odict.keys())
 
     # apply EngFormatter on axis
@@ -392,7 +399,7 @@ def plot_dispatch_plotly(
     df,
     df_demand,
     unit,
-    colors_odict=colors_odict,
+    colors_odict=None,
 ):
     r"""
     Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
@@ -414,6 +421,9 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
+    if colors_odict is None:
+        colors_odict = default_colors_odict
+
     _check_undefined_colors(df.columns, colors_odict.keys())
 
     # make sure to obey order as definded in colors_odict
