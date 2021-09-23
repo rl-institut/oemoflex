@@ -21,13 +21,6 @@ for i in colors_csv.columns:
     colors_odict[i] = colors_csv.loc["Color", i]
 
 
-def check_undefined_colors(labels, color_labels):
-    undefined_colors = list(set(labels).difference(color_labels))
-
-    if undefined_colors:
-        raise KeyError(f"Undefined colors {undefined_colors}.")
-
-
 def map_labels(df, labels_dict=general_labels_dict):
     r"""
     Renames columns according to the specifications in the label_dict. The data has multilevel
@@ -50,12 +43,19 @@ def map_labels(df, labels_dict=general_labels_dict):
     # rename columns
     df.columns = df.columns.to_flat_index()
 
-    df.columns = rename_by_string_matching(df.columns, labels_dict)
+    df.columns = _rename_by_string_matching(df.columns, labels_dict)
 
     return df
 
 
-def rename_by_string_matching(columns, labels_dict):
+def _check_undefined_colors(labels, color_labels):
+    undefined_colors = list(set(labels).difference(color_labels))
+
+    if undefined_colors:
+        raise KeyError(f"Undefined colors {undefined_colors}.")
+
+
+def _rename_by_string_matching(columns, labels_dict):
     r"""
     The generic labels_dict needs to be adapted to the specific region which is investigated
     in order to rename the multilevel column names.
@@ -137,7 +137,7 @@ def rename_by_string_matching(columns, labels_dict):
     return renamed_columns
 
 
-def group_agg_by_column(df):
+def _group_agg_by_column(df):
     r"""
     Columns with the same name are grouped together and aggregated.
     e.g. needed to group the Import and Export columns if there are
@@ -158,7 +158,7 @@ def group_agg_by_column(df):
     return df_grouped
 
 
-def replace_near_zeros(df):
+def _replace_near_zeros(df):
     r"""
     Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
     All values which are smaller than a defined tolerance are replaced by 0.0.
@@ -220,9 +220,9 @@ def prepare_dispatch_data(
     df_demand = map_labels(df_demand, general_labels_dict)
 
     # group columns with the same name, e.g. transmission busses by import and export
-    df = group_agg_by_column(df)
+    df = _group_agg_by_column(df)
     # check columns on numeric values which are practical zero and replace them with 0.0
-    df = replace_near_zeros(df)
+    df = _replace_near_zeros(df)
 
     return df, df_demand
 
@@ -254,7 +254,7 @@ def filter_timeseries(df, start_date=None, end_date=None):
     return df_filtered
 
 
-def assign_stackgroup(key, values):
+def _assign_stackgroup(key, values):
     r"""
     This function decides if data is supposed to be plotted on the positive or negative side of
     the stackplot. If values has both negative and positive values, a value error is raised.
@@ -312,7 +312,7 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
-    check_undefined_colors(df.columns, colors_odict.keys())
+    _check_undefined_colors(df.columns, colors_odict.keys())
 
     # make sure to obey order as definded in colors_odict
     generic_order = list(colors_odict)
@@ -328,7 +328,7 @@ def plot_dispatch_plotly(
     # plot stacked generators and consumers
     df = df[[c for c in df.columns if not isinstance(c, tuple)]]
     for key, values in df.iteritems():
-        stackgroup = assign_stackgroup(key, values)
+        stackgroup = _assign_stackgroup(key, values)
 
         fig.add_trace(
             go.Scatter(
@@ -395,7 +395,7 @@ def stackplot(ax, df, colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
-    check_undefined_colors(df.columns, colors_odict.keys())
+    _check_undefined_colors(df.columns, colors_odict.keys())
 
     # y is a list which gets the correct stack order from colors file
     colors = []
@@ -428,7 +428,7 @@ def lineplot(ax, df, colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
-    check_undefined_colors(df.columns, colors_odict.keys())
+    _check_undefined_colors(df.columns, colors_odict.keys())
 
     for i in df.columns:
         ax.plot(df.index, df[i], color=colors_odict[i], label=i)
@@ -453,10 +453,10 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
-    check_undefined_colors(df.columns, colors_odict.keys())
+    _check_undefined_colors(df.columns, colors_odict.keys())
 
     # apply EngFormatter on axis
-    ax = eng_format(ax, unit=unit)
+    ax = _eng_format(ax, unit=unit)
 
     # plot stackplot, differentiate between positive and negative stacked data
     y_stack_pos = []
@@ -464,7 +464,7 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
 
     # assign data to positive or negative stackplot
     for key, values in df.iteritems():
-        stackgroup = assign_stackgroup(key, values)
+        stackgroup = _assign_stackgroup(key, values)
         if stackgroup == "negative":
             y_stack_neg.append(key)
         elif stackgroup == "positive":
@@ -482,7 +482,7 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
     lineplot(ax, df_demand, colors_odict)
 
 
-def eng_format(ax, unit):
+def _eng_format(ax, unit):
     r"""
     Applies the EngFormatter to y-axis.
 
