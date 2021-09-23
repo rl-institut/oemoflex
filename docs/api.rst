@@ -24,5 +24,4 @@ oemoflex.tools.plots
 
 .. automodule:: oemoflex.tools.plots
     :members:
-    :undoc-members:
-
+    :member-order: bysource
