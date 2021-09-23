@@ -50,10 +50,16 @@ class DataFramePackage:
 
         return cls(dir, data, rel_paths)
 
-    def to_csv_dir(self, destination):
+    def to_csv_dir(self, destination, overwrite=False):
         r"""
         Save the DataFramePackage to csv files.
         """
+        if not overwrite and os.listdir(destination):
+            raise UserWarning(
+                "The path is not empty. Might overwrite existing data. "
+                "Pass 'overwrite=True' to ignore"
+            )
+
         for name, data in self.data.items():
             path = self.rel_paths[name]
 
