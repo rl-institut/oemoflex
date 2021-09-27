@@ -60,6 +60,12 @@ class DataFramePackage:
                 "Pass 'overwrite=True' to ignore"
             )
 
+        # if overwrite is True and the path exists, delete any
+        elif overwrite and os.path.exists(destination):
+            import shutil
+
+            shutil.rmtree(destination)
+
         for name, data in self.data.items():
             path = self.rel_paths[name]
 
