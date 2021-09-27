@@ -20,24 +20,30 @@ and `busses.yml <https://github.com/rl-institut/oemoflex/blob/dev/oemoflex/model
 define the available components and busses.
 
 **Setup datapackages.** You can create data packages for an energy system by passing the lists of
-:attr:`regions`, :attr:`links`, :attr:`busses` and :attr:`components` that you want to model.
+regions, links, busses and components that you want to model to
+:meth:`EnergyDataPackage.setup_default <oemoflex.model.datapackage.EnergyDataPackage.setup_default>`.
 Custom-defined busses and components can be passed as dictionaries :attr:`bus_attrs_update` and
 :attr:`component_attrs_update`.
 
-**Infer metadata:** Metadata that describe the tables and their foreign key relations in form of a
+**Infer metadata.** Metadata that describe the tables and their foreign key relations in form of a
 :file:`datapackage.json` are a requirement for oemof.tabular to load the datapackage as an
-:class:`EnergySystem`. Foreign key relations are defined in
+:class:`oemof.solph.EnergySystem`. To infer metadata for an existing data package, use
+:meth:`EnergyDataPackage.infer_metadata <oemoflex.model.datapackage.EnergyDataPackage.infer_metadata>`.
+Foreign key relations are defined in
 `foreign_keys.yml <https://github.com/rl-institut/oemoflex/blob/dev/oemoflex/model/foreign_keys.yml>`_.
 When adding custom-defined components and busses, a dictionary with :attr:`foreign_keys_update`
 can be passed.
 
-**Parametrizes data packages.** Parametrize the EnergyDataPackage by setting values to
+**Parametrize data packages.** Parametrize the EnergyDataPackage with
+:meth:`EnergyDataPackage.parametrize <oemoflex.model.datapackage.EnergyDataPackage.parametrize>` to
+set the values of parameters for all components.
 
 .. TODO: Not implemented yet. **Validate data schemas.** EnergyDataPackage.validate
 
 .. TODO: Not implemented yet. **Create variations.** of existing EnergyDataPackages.
 
 **Postprocess results.** Results of an oemof.solph optimisation can be postprocessed and saved as
-a ResultsDataPackage.
+a :class:`ResultsDataPackage <oemoflex.model.datapackage.ResultsDataPackage>`.
 
-**Plot results.** Plot methods help to visualize and understand the results of a scenario.
+**Plot results.** Plot methods help to visualize and understand the results of a scenario. Read the
+API documentation of :mod:`oemoflex.tools.plots <oemoflex.tools.plots>` for more details.
