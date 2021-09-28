@@ -1,3 +1,3 @@
-region,name,type,carrier,tech,bus,capacity,capacity_cost,expandable,capacity_potential,marginal_cost,profile,output_parameters
-A,A-wind-offshore,volatile,wind,offshore,A-electricity,,,,,0,A-wind-offshore-profile,{}
-B,B-wind-offshore,volatile,wind,offshore,B-electricity,,,,,0,B-wind-offshore-profile,{}
+name,bus,capacity,capacity_cost,capacity_potential,carrier,expandable,marginal_cost,output_parameters,profile,region,tech,type
+A-wind-offshore,A-electricity,,,,wind,,0,{},A-wind-offshore-profile,A,offshore,volatile
+B-wind-offshore,B-electricity,,,,wind,,0,{},B-wind-offshore-profile,B,offshore,volatile

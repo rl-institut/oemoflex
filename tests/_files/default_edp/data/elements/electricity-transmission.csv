@@ -1,2 +1,2 @@
-region,name,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,loss
-A_B,A-B-electricity-transmission,link,electricity,transmission,A-electricity,B-electricity,,,
+name,capacity,capacity_cost,carrier,from_bus,loss,region,tech,to_bus,type
+A-B-electricity-transmission,,,electricity,A-electricity,,A_B,transmission,B-electricity,link

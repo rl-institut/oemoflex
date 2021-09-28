@@ -1,3 +1,3 @@
-region,name,type,carrier,tech,from_bus,to_bus,capacity,capacity_cost,efficiency,carrier_cost,marginal_cost,expandable,capacity_potential,output_parameters
-A,A-electricity-heatpump,conversion,electricity,heatpump,A-electricity,A-heat,,,A-cop-profile,,,,,{}
-B,B-electricity-heatpump,conversion,electricity,heatpump,B-electricity,B-heat,,,B-cop-profile,,,,,{}
+name,capacity,capacity_cost,capacity_potential,carrier,carrier_cost,efficiency,expandable,from_bus,marginal_cost,output_parameters,region,tech,to_bus,type
+A-electricity-heatpump,,,,electricity,,A-cop-profile,,A-electricity,,{},A,heatpump,A-heat,conversion
+B-electricity-heatpump,,,,electricity,,B-cop-profile,,B-electricity,,{},B,heatpump,B-heat,conversion
