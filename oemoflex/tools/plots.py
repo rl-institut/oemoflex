@@ -128,11 +128,31 @@ def rename_by_string_matching(columns, labels_dict):
 
         return columns_mapped
 
-    # Map column names
-    renamed_columns = pd.Series(map(lambda x: map_tuple(x, labels_dict), columns))
+    def map_str(string, dictionary):
 
-    # If there are duplicates, append in/out
-    renamed_columns = rename_duplicated(columns, renamed_columns, labels_dict)
+        mapped = [value for key, value in dictionary.items() if key in string]
+
+        if len(mapped) > 1:
+            raise ValueError("Multiple labels are matching.")
+        elif not mapped:
+            raise KeyError(f"No label matches for {string}.")
+        else:
+            mapped = mapped[0]
+
+        return mapped
+
+    # Map column names
+    if all([isinstance(col, tuple) for col in columns]):
+        renamed_columns = pd.Series(map(lambda x: map_tuple(x, labels_dict), columns))
+
+        # If there are duplicates, append in/out
+        renamed_columns = rename_duplicated(columns, renamed_columns, labels_dict)
+
+    elif all([isinstance(col, str) for col in columns]):
+        renamed_columns = pd.Series(map(lambda x: map_str(x, labels_dict), columns))
+
+    else:
+        raise ValueError("Cannot rename. Columns should be tuples or strings.")
 
     return renamed_columns
 
