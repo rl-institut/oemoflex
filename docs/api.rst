@@ -11,15 +11,17 @@ API
 oemoflex.model.datapackage
 ==========================
 
-.. automodule:: oemoflex.model.datapackage
+.. autoclass:: oemoflex.model.datapackage.EnergyDataPackage
+    :inherited-members:
     :members:
-    :undoc-members:
-    :show-inheritance:
+
+.. autoclass:: oemoflex.model.datapackage.ResultsDataPackage
+    :inherited-members:
+    :members:
 
 oemoflex.tools.plots
 ====================
 
 .. automodule:: oemoflex.tools.plots
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :member-order: bysource

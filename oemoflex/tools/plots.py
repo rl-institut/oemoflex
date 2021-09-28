@@ -10,25 +10,18 @@ pd.plotting.register_matplotlib_converters()
 
 dir_name = os.path.abspath(os.path.dirname(__file__))
 
-general_labels_dict = helpers.load_yaml(os.path.join(dir_name, "labels.yaml"))
+default_labels_dict = helpers.load_yaml(os.path.join(dir_name, "labels.yaml"))
 
 colors_csv = pd.read_csv(
     os.path.join(dir_name, "colors.csv"), header=[0], index_col=[0]
 )
 colors_csv = colors_csv.T
-colors_odict = OrderedDict()
+default_colors_odict = OrderedDict()
 for i in colors_csv.columns:
-    colors_odict[i] = colors_csv.loc["Color", i]
+    default_colors_odict[i] = colors_csv.loc["Color", i]
 
 
-def check_undefined_colors(labels, color_labels):
-    undefined_colors = list(set(labels).difference(color_labels))
-
-    if undefined_colors:
-        raise KeyError(f"Undefined colors {undefined_colors}.")
-
-
-def map_labels(df, labels_dict=general_labels_dict):
+def map_labels(df, labels_dict=None):
     r"""
     Renames columns according to the specifications in the label_dict. The data has multilevel
     column names. Thus, the labels_dict needs a tuple as key. The value is used as the new column
@@ -47,15 +40,25 @@ def map_labels(df, labels_dict=general_labels_dict):
     df : pandas.DataFrame
         Edited dataframe with new column names.
     """
+    if labels_dict is None:
+        labels_dict = default_labels_dict
+
     # rename columns
     df.columns = df.columns.to_flat_index()
 
-    df.columns = rename_by_string_matching(df.columns, labels_dict)
+    df.columns = _rename_by_string_matching(df.columns, labels_dict)
 
     return df
 
 
-def rename_by_string_matching(columns, labels_dict):
+def _check_undefined_colors(labels, color_labels):
+    undefined_colors = list(set(labels).difference(color_labels))
+
+    if undefined_colors:
+        raise KeyError(f"Undefined colors {undefined_colors}.")
+
+
+def _rename_by_string_matching(columns, labels_dict):
     r"""
     The generic labels_dict needs to be adapted to the specific region which is investigated
     in order to rename the multilevel column names.
@@ -157,7 +160,7 @@ def rename_by_string_matching(columns, labels_dict):
     return renamed_columns
 
 
-def group_agg_by_column(df):
+def _group_agg_by_column(df):
     r"""
     Columns with the same name are grouped together and aggregated.
     e.g. needed to group the Import and Export columns if there are
@@ -178,7 +181,7 @@ def group_agg_by_column(df):
     return df_grouped
 
 
-def replace_near_zeros(df):
+def _replace_near_zeros(df):
     r"""
     Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
     All values which are smaller than a defined tolerance are replaced by 0.0.
@@ -198,9 +201,7 @@ def replace_near_zeros(df):
     return df
 
 
-def prepare_dispatch_data(
-    df, bus_name, demand_name, general_labels_dict=general_labels_dict
-):
+def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
     r"""
     The data in df is split into a DataFrame with consumers and generators and a DataFrame which
     only contains the demand data. Consumer data is made negative. The multilevel column names are
@@ -215,7 +216,7 @@ def prepare_dispatch_data(
         name of the main bus to which all other are connected, e.g. the "BB-electricity" bus.
     demand_name: string
         Name of the bus representing the demand.
-    general_labels_dict : dict
+    labels_dict : dict
         Dictionary to map the column labels.
 
     Returns
@@ -225,6 +226,9 @@ def prepare_dispatch_data(
     df_demand: pandas.DataFrame
         DataFrame with prepared data for dispatch plotting of demand.
     """
+    if labels_dict is None:
+        labels_dict = default_labels_dict
+
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
     df.columns = df.columns.to_flat_index()
@@ -236,13 +240,13 @@ def prepare_dispatch_data(
             df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    df = map_labels(df, general_labels_dict)
-    df_demand = map_labels(df_demand, general_labels_dict)
+    df = map_labels(df, labels_dict)
+    df_demand = map_labels(df_demand, labels_dict)
 
     # group columns with the same name, e.g. transmission busses by import and export
-    df = group_agg_by_column(df)
+    df = _group_agg_by_column(df)
     # check columns on numeric values which are practical zero and replace them with 0.0
-    df = replace_near_zeros(df)
+    df = _replace_near_zeros(df)
 
     return df, df_demand
 
@@ -274,7 +278,7 @@ def filter_timeseries(df, start_date=None, end_date=None):
     return df_filtered
 
 
-def assign_stackgroup(key, values):
+def _assign_stackgroup(key, values):
     r"""
     This function decides if data is supposed to be plotted on the positive or negative side of
     the stackplot. If values has both negative and positive values, a value error is raised.
@@ -306,11 +310,116 @@ def assign_stackgroup(key, values):
     return stackgroup
 
 
+def stackplot(ax, df, colors_odict):
+    r"""
+    Plots data as a stackplot. The stacking order is determined by the order
+    of labels in the colors_odict. It is stacked beginning with the x-axis as
+    the bottom.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
+    """
+    _check_undefined_colors(df.columns, colors_odict.keys())
+
+    # y is a list which gets the correct stack order from colors file
+    colors = []
+    labels = []
+    y = []
+
+    order = list(colors_odict)
+
+    for i in order:
+        if i not in df.columns:
+            continue
+        labels.append(i)
+        colors.append(colors_odict[i])
+        y.append(df[i])
+
+    y = np.vstack(y)
+    ax.stackplot(df.index, y, colors=colors, labels=labels)
+
+
+def lineplot(ax, df, colors_odict):
+    r"""
+    Plots data as a lineplot.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
+    """
+    _check_undefined_colors(df.columns, colors_odict.keys())
+
+    for i in df.columns:
+        ax.plot(df.index, df[i], color=colors_odict[i], label=i)
+
+
+def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
+    r"""
+    Plots data as a dispatch plot. The demand is plotted as a line plot and
+    suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
+    are stacked below the x axis and columns with positive values above.
+
+    Parameters
+    ---------------
+    ax : matplotlib.AxesSubplot
+        Axis on which data is plotted.
+    df : pandas.DataFrame
+        Dataframe with data except demand.
+    df_demand : pandas.DataFrame
+        Dataframe with demand data.
+    unit: string
+        String with unit sign of plotted data on y-axis.
+    colors_odict : collections.OrderedDictionary
+        Ordered dictionary with labels as keys and colourcodes as values.
+    """
+    if colors_odict is None:
+        colors_odict = default_colors_odict
+
+    _check_undefined_colors(df.columns, colors_odict.keys())
+
+    # apply EngFormatter on axis
+    ax = _eng_format(ax, unit=unit)
+
+    # plot stackplot, differentiate between positive and negative stacked data
+    y_stack_pos = []
+    y_stack_neg = []
+
+    # assign data to positive or negative stackplot
+    for key, values in df.iteritems():
+        stackgroup = _assign_stackgroup(key, values)
+        if stackgroup == "negative":
+            y_stack_neg.append(key)
+        elif stackgroup == "positive":
+            y_stack_pos.append(key)
+
+    for i in y_stack_pos:
+        if df[i].isin([0]).all():
+            y_stack_pos.remove(i)
+    stackplot(ax, df[y_stack_pos], colors_odict)
+    # check whether the list y_stack_neg is filled
+    if y_stack_neg != []:
+        stackplot(ax, df[y_stack_neg], colors_odict)
+
+    # plot lineplot (demand)
+    lineplot(ax, df_demand, colors_odict)
+
+
 def plot_dispatch_plotly(
     df,
     df_demand,
     unit,
-    colors_odict=colors_odict,
+    colors_odict=None,
 ):
     r"""
     Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
@@ -332,7 +441,10 @@ def plot_dispatch_plotly(
     fig : plotly.graph_objs._figure.Figure
         Interactive plotly dispatch plot
     """
-    check_undefined_colors(df.columns, colors_odict.keys())
+    if colors_odict is None:
+        colors_odict = default_colors_odict
+
+    _check_undefined_colors(df.columns, colors_odict.keys())
 
     # make sure to obey order as definded in colors_odict
     generic_order = list(colors_odict)
@@ -348,7 +460,7 @@ def plot_dispatch_plotly(
     # plot stacked generators and consumers
     df = df[[c for c in df.columns if not isinstance(c, tuple)]]
     for key, values in df.iteritems():
-        stackgroup = assign_stackgroup(key, values)
+        stackgroup = _assign_stackgroup(key, values)
 
         fig.add_trace(
             go.Scatter(
@@ -400,109 +512,7 @@ def plot_dispatch_plotly(
     return fig
 
 
-def stackplot(ax, df, colors_odict):
-    r"""
-    Plots data as a stackplot. The stacking order is determined by the order
-    of labels in the colors_odict. It is stacked beginning with the x-axis as
-    the bottom.
-
-    Parameters
-    ---------------
-    ax : matplotlib.AxesSubplot
-        Axis on which data is plotted.
-    df : pandas.DataFrame
-        Dataframe with data.
-    colors_odict : collections.OrderedDictionary
-        Ordered dictionary with labels as keys and colourcodes as values.
-    """
-    check_undefined_colors(df.columns, colors_odict.keys())
-
-    # y is a list which gets the correct stack order from colors file
-    colors = []
-    labels = []
-    y = []
-
-    order = list(colors_odict)
-
-    for i in order:
-        if i not in df.columns:
-            continue
-        labels.append(i)
-        colors.append(colors_odict[i])
-        y.append(df[i])
-
-    y = np.vstack(y)
-    ax.stackplot(df.index, y, colors=colors, labels=labels)
-
-
-def lineplot(ax, df, colors_odict):
-    r"""
-    Plots data as a lineplot.
-
-    Parameters
-    ---------------
-    ax : matplotlib.AxesSubplot
-        Axis on which data is plotted.
-    df : pandas.DataFrame
-        Dataframe with data.
-    colors_odict : collections.OrderedDictionary
-        Ordered dictionary with labels as keys and colourcodes as values.
-    """
-    check_undefined_colors(df.columns, colors_odict.keys())
-
-    for i in df.columns:
-        ax.plot(df.index, df[i], color=colors_odict[i], label=i)
-
-
-def plot_dispatch(ax, df, df_demand, unit, colors_odict=colors_odict):
-    r"""
-    Plots data as a dispatch plot. The demand is plotted as a line plot and
-    suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
-    are stacked below the x axis and columns with positive values above.
-
-    Parameters
-    ---------------
-    ax : matplotlib.AxesSubplot
-        Axis on which data is plotted.
-    df : pandas.DataFrame
-        Dataframe with data except demand.
-    df_demand : pandas.DataFrame
-        Dataframe with demand data.
-    unit: string
-        String with unit sign of plotted data on y-axis.
-    colors_odict : collections.OrderedDictionary
-        Ordered dictionary with labels as keys and colourcodes as values.
-    """
-    check_undefined_colors(df.columns, colors_odict.keys())
-
-    # apply EngFormatter on axis
-    ax = eng_format(ax, unit=unit)
-
-    # plot stackplot, differentiate between positive and negative stacked data
-    y_stack_pos = []
-    y_stack_neg = []
-
-    # assign data to positive or negative stackplot
-    for key, values in df.iteritems():
-        stackgroup = assign_stackgroup(key, values)
-        if stackgroup == "negative":
-            y_stack_neg.append(key)
-        elif stackgroup == "positive":
-            y_stack_pos.append(key)
-
-    for i in y_stack_pos:
-        if df[i].isin([0]).all():
-            y_stack_pos.remove(i)
-    stackplot(ax, df[y_stack_pos], colors_odict)
-    # check whether the list y_stack_neg is filled
-    if y_stack_neg != []:
-        stackplot(ax, df[y_stack_neg], colors_odict)
-
-    # plot lineplot (demand)
-    lineplot(ax, df_demand, colors_odict)
-
-
-def eng_format(ax, unit):
+def _eng_format(ax, unit):
     r"""
     Applies the EngFormatter to y-axis.
 

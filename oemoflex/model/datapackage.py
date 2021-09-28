@@ -27,24 +27,13 @@ class DataFramePackage:
     def from_csv_dir(cls, dir):
         r"""
         Initialize a DataFramePackage from a csv directory
+
+        Parameters
+        ----------
+        dir : str
+            Path to csv directory
         """
         rel_paths = cls._get_rel_paths(dir, ".csv")
-
-        data = cls._load_csv(cls, dir, rel_paths)
-
-        return cls(dir, data, rel_paths)
-
-    @classmethod
-    def from_metadata(cls, json_file_path):
-        r"""
-        Initialize a DataFramePackage from the metadata string,
-        usually named datapackage.json
-        """
-        dp = Package(json_file_path)
-
-        dir = os.path.split(json_file_path)[0]
-
-        rel_paths = {r["name"]: r["path"] for r in dp.resources}
 
         data = cls._load_csv(cls, dir, rel_paths)
 
@@ -53,6 +42,11 @@ class DataFramePackage:
     def to_csv_dir(self, destination, overwrite=False):
         r"""
         Save the DataFramePackage to csv files.
+
+        Parameters
+        ----------
+        destination : str
+            Path to store data to
         """
         if not overwrite and os.listdir(destination):
             raise UserWarning(
@@ -171,7 +165,34 @@ class EnergyDataPackage(DataFramePackage):
     def setup_default(
         cls, name, basepath, datetimeindex, components, busses, regions, links, **kwargs
     ):
+        r"""
+        Initializes an EnergyDataPackage with a specific structure, but without the values of
+        parameters being set.
 
+        Parameters
+        ----------
+        name : str
+            Name of the EnergyDataPackage
+        basepath : str
+            Path where EnergyDataPackage is stored
+        datetimeindex : pandas.DatetimeIndex
+            A valid timeindex
+        components : list
+            List of components
+        busses : list
+            List of busses
+        regions : list
+            List of regions
+        links : list
+            List of links between regions
+
+        Other Parameters
+        ----------------
+        bus_attrs_update : dict
+            Update with custom-defined busses
+        component_attrs_update : dict
+            Update with custom-defined components
+        """
         data, rel_paths = create_default_data(
             select_regions=regions,
             select_links=links,
@@ -189,7 +210,40 @@ class EnergyDataPackage(DataFramePackage):
             components=components,
         )
 
+    @classmethod
+    def from_metadata(cls, json_file_path):
+        r"""
+        Initialize a DataFramePackage from the metadata string,
+        usually named datapackage.json
+
+        Parameters
+        ----------
+        json_file_path : str
+            Path to metadata
+        """
+        dp = Package(json_file_path)
+
+        dir = os.path.split(json_file_path)[0]
+
+        rel_paths = {r["name"]: r["path"] for r in dp.resources}
+
+        data = cls._load_csv(cls, dir, rel_paths)
+
+        return cls(dir, data, rel_paths)
+
     def infer_metadata(self, foreign_keys_update=None):
+        r"""
+        Infers metadata of the EnergyDataPackage and save it
+        in basepath as `datapackage.json`.
+
+        Parameters
+        ----------
+        foreign_keys_update
+
+        Returns
+        -------
+
+        """
         infer(
             select_components=self.components,
             package_name=self.name,
@@ -198,12 +252,27 @@ class EnergyDataPackage(DataFramePackage):
         )
 
     def parametrize(self, frame, column, values):
+        r"""
+        Sets the values of parameters.
 
+        Parameters
+        ----------
+        frame : str
+            Name of the DataFrame in the Package.
+        column :
+            Name of the columns within the DataFrame
+        values : str or numeric
+            Values with the correct index to be set to the DataFrame
+        """
         assert column in self.data[frame].columns, f"Column '{column}' is not defined!"
 
         self.data[frame].loc[:, column] = values
 
     def stack_components(self):
+        r"""
+        Stacks the component DataFrames into a single DataFrame.
+        """
+
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
             return "elements" in directory
@@ -223,7 +292,9 @@ class EnergyDataPackage(DataFramePackage):
         )
 
     def unstack_components(self):
-
+        r"""
+        Unstacks a single component DataFrame into separate DataFrames for each component.
+        """
         self._separate_stacked_frame(
             frame_name="component",
             target_dir=os.path.join("data", "elements"),
@@ -237,22 +308,30 @@ class ResultsDataPackage(DataFramePackage):
 
     @classmethod
     def from_energysytem(cls, es):
+        r"""
+        Initializes a ResultsDataPackage from an EnergySystem with optimization results.
+
+        Parameters
+        ----------
+        es : oemof.solph.EnergySystem
+            EnergySystem with results.
+        """
 
         basepath = None
 
-        data, rel_paths = cls.get_results(cls, es)
+        data, rel_paths = cls._get_results(cls, es)
 
         return cls(basepath, data, rel_paths)
 
-    def get_results(self, es):
+    def _get_results(self, es):
 
         data = {}
 
         rel_paths = {}
 
-        data_scal, rel_paths_scal = self.get_scalars(self, es)
+        data_scal, rel_paths_scal = self._get_scalars(self, es)
 
-        data_seq, rel_paths_seq = self.get_sequences(self, es)
+        data_seq, rel_paths_seq = self._get_sequences(self, es)
 
         data.update(data_seq)
 
@@ -264,14 +343,14 @@ class ResultsDataPackage(DataFramePackage):
 
         return data, rel_paths
 
-    def get_sequences(self, es):
+    def _get_sequences(self, es):
 
-        data_seq, rel_paths_seq = self.get_bus_sequences(es)
+        data_seq, rel_paths_seq = self._get_bus_sequences(es)
 
         return data_seq, rel_paths_seq
 
     @staticmethod
-    def get_bus_sequences(es):
+    def _get_bus_sequences(es):
 
         bus_results = tabular_pp.bus_results(es, es.results)
 
@@ -286,7 +365,7 @@ class ResultsDataPackage(DataFramePackage):
 
         return bus_results, rel_paths
 
-    def get_scalars(self, es, by_element=False):
+    def _get_scalars(self, es, by_element=False):
 
         all_scalars = run_postprocessing(es)
 
@@ -330,12 +409,18 @@ class ResultsDataPackage(DataFramePackage):
         )
 
     def to_element_dfs(self):
-
+        r"""
+        Separates scalar results such that each component is represented by one DataFrame.
+        """
         self._separate_stacked_frame(
             frame_name="scalars", target_dir="elements", group_by=["carrier", "tech"]
         )
 
     def to_stacked_scalars(self):
+        r"""
+        Stacks all scalar results such into a single DataFrame named 'scalars'.
+        """
+
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
             return directory == "elements"
