@@ -13,7 +13,8 @@ efficiency_discharge,float,unitless,Efficiency of discharging
 marginal_cost,float,Eur/MWh,Marginal cost of charging/discharging
 loss_rate,float,unitless,Losses due to self discharging
 expandable,boolean,n/a,Capacity can be expanded
-capacity_potential,float,MW,Potential of the investment for capacity
+capacity_potential_charge,float,MW,Potential of the investment for charging capacity
+capacity_potential_discharge,float,MW,Potential of the investment for discharging capacity
 storage_capacity_potential,float,MWh,Potential of the investment for storage capacity
 capacity_cost_charge,float,Eur/MW,Annualized investment cost per charging capacity
 capacity_cost_discharge,float,Eur/MW,Annualized investment cost per discharging capacity
