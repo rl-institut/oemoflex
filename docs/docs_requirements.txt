@@ -1,1 +1,2 @@
+setuptools < 58
 -e .
