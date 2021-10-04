@@ -41,24 +41,30 @@ class DataFramePackage:
 
     def to_csv_dir(self, destination, overwrite=False):
         r"""
-        Save the DataFramePackage to csv files.
+        Save the DataFramePackage to csv files. Warns if overwrite is False and the destination is
+        not empty. If overwrite is True, all existing contents in destination will be deleted.
 
         Parameters
         ----------
         destination : str
             Path to store data to
+        overwrite : bool
+            Decides if any existing files will be overwritten.
         """
-        if not overwrite and os.listdir(destination):
-            raise UserWarning(
-                "The path is not empty. Might overwrite existing data. "
-                "Pass 'overwrite=True' to ignore"
-            )
+        # Check if path exists and is non-empty
+        if os.path.exists(destination) and os.listdir(destination):
+            # If overwrite is False, throw a warning
+            if not overwrite:
+                raise UserWarning(
+                    "The path is not empty. Might overwrite existing data. "
+                    "Pass 'overwrite=True' to ignore"
+                )
 
-        # if overwrite is True and the path exists, delete any
-        elif overwrite and os.path.exists(destination):
-            import shutil
+            # If overwrite is True delete any contents
+            elif overwrite:
+                import shutil
 
-            shutil.rmtree(destination)
+                shutil.rmtree(destination)
 
         for name, data in self.data.items():
             path = self.rel_paths[name]
