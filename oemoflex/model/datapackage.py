@@ -1,12 +1,14 @@
+import copy
 import os
 
+import oemof.tabular.tools.postprocessing as tabular_pp
 import pandas as pd
 from frictionless import Package
+from oemof.outputlib.views import convert_to_multiindex
 
-from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.inferring import infer
-from oemoflex.model.postprocessing import run_postprocessing, group_by_element
-import oemof.tabular.tools.postprocessing as tabular_pp
+from oemoflex.model.model_structure import create_default_data
+from oemoflex.model.postprocessing import group_by_element, run_postprocessing
 
 
 class DataFramePackage:
@@ -349,27 +351,64 @@ class ResultsDataPackage(DataFramePackage):
 
         return data, rel_paths
 
-    def _get_sequences(self, es):
+    def _get_sequences(self, es, kind=("bus", "component", "by_variable")):
+        def get_rel_paths(keys, *subdirs, file_ext=".csv"):
+            return {key: os.path.join(*subdirs, key + file_ext) for key in keys}
 
-        data_seq, rel_paths_seq = self._get_bus_sequences(es)
+        def drop_empty_dfs(dictionary):
+            return {key: value for key, value in dictionary.items() if not value.empty}
+
+        methods = {
+            "bus": tabular_pp.bus_results,
+            "component": tabular_pp.component_results,
+            "by_variable": self._get_seq_by_var,
+        }
+
+        methods = {k: v for k, v in methods.items() if k in kind}
+
+        data_seq = {}
+        rel_paths_seq = {}
+
+        for name, method in methods.items():
+            data = method(es, es.results)
+
+            data = drop_empty_dfs(data)
+
+            rel_paths = get_rel_paths(data, "sequences", name)
+
+            data_seq.update(data)
+
+            rel_paths_seq.update(rel_paths)
 
         return data_seq, rel_paths_seq
 
     @staticmethod
-    def _get_bus_sequences(es):
+    def _get_seq_by_var(es, results):
 
-        bus_results = tabular_pp.bus_results(es, es.results)
+        # copy to avoid manipulating the data in es.results
+        sequences = copy.deepcopy(
+            {
+                key: value["sequences"]
+                for key, value in results.items()
+                if value["sequences"] is not None
+            }
+        )
 
-        bus_results = {
-            key: value for key, value in bus_results.items() if not value.empty
-        }
+        sequences = convert_to_multiindex(sequences)
 
-        rel_paths = {
-            key: os.path.join("sequences", "bus", key + ".csv")
-            for key in bus_results.keys()
-        }
+        idx = pd.IndexSlice
 
-        return bus_results, rel_paths
+        variables = list(set(sequences.columns.get_level_values(2)))
+
+        sequences_by_variable = {}
+
+        for variable in variables:
+
+            var_results = sequences.loc[:, idx[:, :, variable]]
+
+            sequences_by_variable[variable] = var_results
+
+        return sequences_by_variable
 
     def _get_scalars(self, es, by_element=False):
 
