@@ -1,12 +1,14 @@
+import copy
 import os
 
+import oemof.tabular.tools.postprocessing as tabular_pp
 import pandas as pd
 from frictionless import Package
+from oemof.outputlib.views import convert_to_multiindex
 
-from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.inferring import infer
-from oemoflex.model.postprocessing import run_postprocessing, group_by_element
-import oemof.tabular.tools.postprocessing as tabular_pp
+from oemoflex.model.model_structure import create_default_data
+from oemoflex.model.postprocessing import group_by_element, run_postprocessing
 
 
 class DataFramePackage:
@@ -286,7 +288,16 @@ class ResultsDataPackage(DataFramePackage):
     @staticmethod
     def _get_seq_by_var(es, results):
 
-        sequences = pd.concat({k: v["sequences"] for k, v in results.items()}, 1)
+        # copy to avoid manipulating the data in es.results
+        sequences = copy.deepcopy(
+            {
+                key: value["sequences"]
+                for key, value in results.items()
+                if value["sequences"] is not None
+            }
+        )
+
+        sequences = convert_to_multiindex(sequences)
 
         idx = pd.IndexSlice
 
