@@ -252,7 +252,7 @@ class ResultsDataPackage(DataFramePackage):
 
         return data, rel_paths
 
-    def get_sequences(self, es, kind=("bus", "component")):
+    def get_sequences(self, es, kind=("bus", "component", "by_variable")):
         def get_rel_paths(keys, *subdirs, file_ext=".csv"):
             return {key: os.path.join(*subdirs, key + file_ext) for key in keys}
 
@@ -262,6 +262,7 @@ class ResultsDataPackage(DataFramePackage):
         methods = {
             "bus": tabular_pp.bus_results,
             "component": tabular_pp.component_results,
+            "by_variable": self._get_seq_by_var,
         }
 
         methods = {k: v for k, v in methods.items() if k in kind}
@@ -281,6 +282,25 @@ class ResultsDataPackage(DataFramePackage):
             rel_paths_seq.update(rel_paths)
 
         return data_seq, rel_paths_seq
+
+    @staticmethod
+    def _get_seq_by_var(es, results):
+
+        sequences = pd.concat({k: v["sequences"] for k, v in results.items()}, 1)
+
+        idx = pd.IndexSlice
+
+        variables = list(set(sequences.columns.get_level_values(2)))
+
+        sequences_by_variable = {}
+
+        for variable in variables:
+
+            var_results = sequences.loc[:, idx[:, :, variable]]
+
+            sequences_by_variable[variable] = var_results
+
+        return sequences_by_variable
 
     def get_scalars(self, es, by_element=False):
 
