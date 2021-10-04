@@ -9,7 +9,7 @@ of modeling: Finding good data and drawing assumptions to build meaningful scena
 them.
 
 The core parts of oemoflex have been originally developed in the project FlexMex. Its main
-application is currently within the energy system model [oemof-B3](https://oemof-b3.readthedocs.io/)
+application is currently within the energy system model [oemof-B3](https://oemof-b3.readthedocs.io/).
 
 ## Getting started
 
