@@ -55,7 +55,7 @@ def test_edp_setup_default():
 
     clean_path(basepath)
 
-    edp.to_csv_dir(basepath)
+    edp.to_csv_dir(basepath, overwrite=True)
 
     check_if_csv_dirs_equal(basepath, defaultpath)
 
@@ -108,12 +108,12 @@ def test_edp_stack_unstack():
 
     clean_path(after)
 
-    edp.to_csv_dir(before)
+    edp.to_csv_dir(before, overwrite=True)
 
     edp.stack_components()
 
     edp.unstack_components()
 
-    edp.to_csv_dir(after)
+    edp.to_csv_dir(after, overwrite=True)
 
     check_if_csv_dirs_equal(before, after)

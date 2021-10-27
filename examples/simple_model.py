@@ -54,7 +54,7 @@ edp.parametrize("electricity-demand-profile", "A-electricity-demand-profile", pr
 edp.parametrize("electricity-demand-profile", "B-electricity-demand-profile", profile)
 
 # save to csv
-edp.to_csv_dir(preprocessed)
+edp.to_csv_dir(preprocessed, overwrite=True)
 
 # add metadata
 edp.infer_metadata()
@@ -88,4 +88,4 @@ results_dp = ResultsDataPackage.from_energysytem(es_restored)
 
 results_dp.set_scenario_name("simple_model")
 
-results_dp.to_csv_dir(postprocessed)
+results_dp.to_csv_dir(postprocessed, overwrite=True)
