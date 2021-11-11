@@ -5,11 +5,11 @@ import copy
 import pytest
 
 here = os.path.dirname(__file__)
-path_edp_default = os.path.join(here, "_files", "default_edp")
+path_edp_lb = os.path.join(here, "_files", "edp_lb")
+path_edp_ub = os.path.join(here, "_files", "edp_ub")
 
-lb = EnergyDataPackage.from_csv_dir(path_edp_default)
-lb.stack_components()
-ub = copy.deepcopy(lb)
+lb = EnergyDataPackage.from_csv_dir(path_edp_lb)
+ub = EnergyDataPackage.from_csv_dir(path_edp_ub)
 
 
 def test_sanity_check():
