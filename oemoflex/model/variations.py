@@ -16,7 +16,7 @@ def smaller_equal(df_a, df_b):
 
 def get_diff(df_a, df_b):
     ## pandas>1.1.0
-    # diff = lb_data.compare(ub_data)
+    # diff = self.lb.compare(self.ub)
     return ~((df_a == df_b) | ((df_a != df_a) & (df_b != df_b)))
 
 
@@ -34,40 +34,30 @@ class Sensitivity(object):
         self.eps = eps
 
     def sanity_check(self):
-        # assert lb, ub.data["component"] exists
-        for edp in [self.lb, self.ub]:
-            assert (
-                "component" in edp.data
-            ), f"EnergyDatapackage lb or ub does not contain stacked component data."
-
-        lb_data = self.lb.data["component"]
-
-        ub_data = self.ub.data["component"]
-
         # assert index same
-        assert index_same(lb_data, ub_data), f"Indexes of lb and ub are not the same."
+        assert index_same(self.lb, self.ub), f"Indexes of lb and ub are not the same."
 
         # Assert that the data is different
-        assert not data_same(lb_data, ub_data), f"There is no difference between lb and ub."
+        assert not data_same(self.lb, self.ub), f"There is no difference between lb and ub."
 
         # Assert that the auxiliary columns are the same
         AUX_COLUMNS = ["carrier", "region", "tech", "type"]
-        assert data_same(lb_data.loc[:, AUX_COLUMNS], ub_data.loc[:, AUX_COLUMNS])
+        assert data_same(self.lb.loc[:, AUX_COLUMNS], self.ub.loc[:, AUX_COLUMNS])
 
         # find the parameters that are different (comparing NaN)
-        diff = get_diff(lb_data.loc[:, "var_value"], ub_data.loc[:, "var_value"])
+        diff = get_diff(self.lb.loc[:, "var_value"], self.ub.loc[:, "var_value"])
 
         # assert lb <= ub
-        assert smaller_equal(lb_data.loc[:, "var_value"], ub_data.loc[:, "var_value"])
+        assert smaller_equal(self.lb.loc[diff, "var_value"], self.ub.loc[diff, "var_value"])
 
         # assert that the difference is larger than eps
 
-        assert diff_larger_eps(lb_data, ub_data, self.eps), \
+        assert diff_larger_eps(self.lb.loc[diff, "var_value"], self.ub.loc[diff, "var_value"], self.eps), \
             f"The difference between lb and ub islower than the defined tolerance of {self.eps}"
 
     def get_param(self):
         # get the parameters that are varied
-        param = get_diff(self.lb.data["component"], self.lb.data["component"])
+        param = get_diff(self.lb, self.lb)
         return param
 
     def get_samples_oat(self):
@@ -79,7 +69,7 @@ class Sensitivity(object):
         # for each param, create n samples
         samples = []
         for param in params:
-            sample = self.lb.data["component"].copy()
+            sample = self.lb.copy()
             sample.loc[param] = param
             samples.append(sample)
 
