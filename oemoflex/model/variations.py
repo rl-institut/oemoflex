@@ -67,15 +67,21 @@ class Sensitivity(object):
 
     def get_param(self):
         # get the parameters that are varied
-        param = []
+        param = get_diff(self.lb.data["component"], self.lb.data["component"])
         return param
 
     def get_samples_oat(self):
 
         self.sanity_check()
 
+        params = self.get_param()
+
         # for each param, create n samples
         samples = []
+        for param in params:
+            sample = self.lb.data["component"].copy()
+            sample.loc[param] = param
+            samples.append(sample)
 
         return samples
 
