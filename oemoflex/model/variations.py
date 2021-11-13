@@ -84,26 +84,12 @@ class Sensitivity(object):
         return samples
 
 
-def decorate_sens_edp(cls):
-    r"""
-    This is a decorator for Sensitivity. It allows to pass EnergyDatapackages as lower bound and
-    upper bound instead of DataFrames.
-
-    Parameters
-    ----------
-    cls
-
-    Returns
-    -------
-
-    """
-    def new_init(self, lb_edp, ub_edp, n, eps=1e-6):
+class EDPSensitivity(Sensitivity):
+    def __init__(self, lb_edp, ub_edp, n, eps=1e-6):
         self.lb_edp = lb_edp
         self.ub_edp = ub_edp
         self.n = n
         self.eps = eps
-
-    cls.__init__ = new_init
 
     def get_lb(self):
         return self.lb_edp.data["component"]
@@ -123,13 +109,8 @@ def decorate_sens_edp(cls):
     def del_ub(self):
         del self.ub_edp
 
-    cls.lb = property(get_lb, set_lb, del_lb)
-    cls.ub = property(get_ub, set_ub, del_ub)
-
-    return cls
-
-
-EDPSensitivity = decorate_sens_edp(Sensitivity)
+    lb = property(get_lb, set_lb, del_lb)
+    ub = property(get_ub, set_ub, del_ub)
 
 
 class VariationGenerator:
