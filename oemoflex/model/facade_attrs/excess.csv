@@ -5,6 +5,5 @@ type,str,n/a,Type
 carrier,str,n/a,Energy carrier
 tech,str,n/a,Technology
 bus,str,n/a,The bus this component is connected to
-capacity,float,MW,Installed capacity
 marginal_cost,float,Eur/MWh,Marginal cost
 output_parameters,dict,n/a,Optional parameters passed to oemof-solph's output flow
