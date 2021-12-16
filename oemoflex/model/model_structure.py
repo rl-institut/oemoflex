@@ -217,11 +217,10 @@ def create_component_element(component_attrs, select_regions, select_links):
     if "defaults" in component_attrs:
         defaults = component_attrs["defaults"]
 
-    facade_attrs = pd.read_csv(
-        os.path.join(module_path, "facade_attrs", simple_keys["type"] + ".csv"),
-        index_col=0,
-        header=0,
-    )
+    # load facade attrs
+    f_attrs = FacadeAttrs(os.path.join(module_path, "facade_attrs"))
+
+    facade_attrs = f_attrs.get_facade_attrs(simple_keys["type"])
 
     comp_data = {key: None for key in facade_attrs.index}
 
@@ -261,6 +260,37 @@ def create_component_element(component_attrs, select_regions, select_links):
     component_df = component_df[sorted(component_df.columns)]
 
     return component_df
+
+
+class FacadeAttrs:
+    def __init__(self, dir_facade_attrs):
+        self.paths = {}
+        self.specs = {}
+        self.update(dir_facade_attrs)
+
+    def get_facade_attrs(self, type):
+        return self.specs[type]
+
+    def update(self, dir_facade_attrs):
+        self._update_paths(dir_facade_attrs)
+        self._update_specs()
+
+    def _update_paths(self, dir_facade_attrs):
+        paths = {
+            os.path.splitext(path)[0]: os.path.join(dir_facade_attrs, path)
+            for path in os.listdir(dir_facade_attrs)
+            if path
+        }
+
+        self.paths.update(paths)
+
+    def _update_specs(self):
+        for type, path in self.paths.items():
+            self.specs[type] = pd.read_csv(
+                os.path.join(module_path, "facade_attrs", type + ".csv"),
+                index_col=0,
+                header=0,
+            )
 
 
 def create_component_sequences(
