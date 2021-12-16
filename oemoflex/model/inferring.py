@@ -16,9 +16,11 @@ all_foreign_keys = load_yaml(os.path.join(module_path, FOREIGN_KEYS))
 def infer(select_components, package_name, path, foreign_keys_update=None):
 
     if foreign_keys_update:
-        for key, value in all_foreign_keys.items():
-            if key in foreign_keys_update:
-                value.extend(foreign_keys_update[key])
+        for key, value in foreign_keys_update.items():
+            if key in all_foreign_keys:
+                all_foreign_keys[key].extend(foreign_keys_update[key])
+            else:
+                all_foreign_keys[key] = foreign_keys_update[key]
 
         print("Updated foreign keys.")
 
