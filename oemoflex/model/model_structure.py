@@ -7,6 +7,53 @@ from oemoflex.tools.helpers import load_yaml
 module_path = os.path.dirname(os.path.abspath(__file__))
 
 
+class FacadeAttrs:
+    r"""
+    A class representing facade attributes specified in .csv files.
+
+    Parameters
+    ----------
+    dir_facade_attrs : path
+        Path of the directory containing specifications as .csv files
+
+    Attributes
+    ---------
+    paths : dict
+        Dictionary mapping facade type to absolute paths
+    specs : dict
+        Dictionary mapping facade type to pd.DataFrame containing specs
+    """
+
+    def __init__(self, dir_facade_attrs):
+        self.paths = {}
+        self.specs = {}
+        self.update(dir_facade_attrs)
+
+    def get_facade_attr(self, type):
+        return self.specs[type]
+
+    def update(self, dir_facade_attrs):
+        self._update_paths(dir_facade_attrs)
+        self._update_specs()
+
+    def _update_paths(self, dir_facade_attrs):
+        paths = {
+            os.path.splitext(path)[0]: os.path.join(dir_facade_attrs, path)
+            for path in os.listdir(dir_facade_attrs)
+            if path
+        }
+
+        self.paths.update(paths)
+
+    def _update_specs(self):
+        for type, path in self.paths.items():
+            self.specs[type] = pd.read_csv(
+                os.path.join(module_path, "facade_attrs", type + ".csv"),
+                index_col=0,
+                header=0,
+            )
+
+
 def create_default_data(
     select_regions,
     select_links,
@@ -16,8 +63,10 @@ def create_default_data(
     dummy_sequences=False,
     bus_attrs_file=os.path.join(module_path, "busses.yml"),
     component_attrs_file=os.path.join(module_path, "component_attrs.yml"),
+    facade_attrs_dir=os.path.join(module_path, "facade_attrs"),
     bus_attrs_update=None,
     component_attrs_update=None,
+    facade_attrs_update=None,
     elements_subdir="elements",
     sequences_subdir="sequences",
 ):
@@ -66,10 +115,12 @@ def create_default_data(
     rel_paths : dict
         Dictionary containing relative file paths.
     """
-    # load component and bus specifications
+    # load component, bus and facade specifications
     component_attrs = load_yaml(component_attrs_file)
 
     bus_attrs = load_yaml(bus_attrs_file)
+
+    facade_attrs = FacadeAttrs(facade_attrs_dir)
 
     # update
     if component_attrs_update:
@@ -77,6 +128,9 @@ def create_default_data(
 
     if bus_attrs_update:
         bus_attrs.update(bus_attrs_update)
+
+    if facade_attrs_update:
+        facade_attrs.update(facade_attrs_update)
 
     # TODO: Use only the busses necessary or defined.
     selected_bus_attrs = select_from_node_attrs(bus_attrs, select_busses)
@@ -99,7 +153,9 @@ def create_default_data(
     # Create component dfs
     for component, attrs in selected_component_attrs.items():
 
-        data[component] = create_component_element(attrs, select_regions, select_links)
+        data[component] = create_component_element(
+            attrs, select_regions, select_links, facade_attrs
+        )
 
         rel_paths[component] = os.path.join("data", elements_subdir, component + ".csv")
 
@@ -182,7 +238,9 @@ def create_bus_element(bus_attrs, select_regions):
     return bus_df
 
 
-def create_component_element(component_attrs, select_regions, select_links):
+def create_component_element(
+    component_attrs, select_regions, select_links, facade_attrs
+):
     r"""
     Takes dictionary for component attributes and returns a pd.DataFrame with the regions,
     links, names, references to profiles and default values.
@@ -218,11 +276,9 @@ def create_component_element(component_attrs, select_regions, select_links):
         defaults = component_attrs["defaults"]
 
     # load facade attrs
-    f_attrs = FacadeAttrs(os.path.join(module_path, "facade_attrs"))
+    facade_attr = facade_attrs.get_facade_attr(simple_keys["type"])
 
-    facade_attrs = f_attrs.get_facade_attrs(simple_keys["type"])
-
-    comp_data = {key: None for key in facade_attrs.index}
+    comp_data = {key: None for key in facade_attr.index}
 
     comp_data.update(simple_keys)
 
@@ -260,37 +316,6 @@ def create_component_element(component_attrs, select_regions, select_links):
     component_df = component_df[sorted(component_df.columns)]
 
     return component_df
-
-
-class FacadeAttrs:
-    def __init__(self, dir_facade_attrs):
-        self.paths = {}
-        self.specs = {}
-        self.update(dir_facade_attrs)
-
-    def get_facade_attrs(self, type):
-        return self.specs[type]
-
-    def update(self, dir_facade_attrs):
-        self._update_paths(dir_facade_attrs)
-        self._update_specs()
-
-    def _update_paths(self, dir_facade_attrs):
-        paths = {
-            os.path.splitext(path)[0]: os.path.join(dir_facade_attrs, path)
-            for path in os.listdir(dir_facade_attrs)
-            if path
-        }
-
-        self.paths.update(paths)
-
-    def _update_specs(self):
-        for type, path in self.paths.items():
-            self.specs[type] = pd.read_csv(
-                os.path.join(module_path, "facade_attrs", type + ".csv"),
-                index_col=0,
-                header=0,
-            )
 
 
 def create_component_sequences(
