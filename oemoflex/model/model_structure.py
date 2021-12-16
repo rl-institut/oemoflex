@@ -48,7 +48,7 @@ class FacadeAttrs:
     def _update_specs(self):
         for type, path in self.paths.items():
             self.specs[type] = pd.read_csv(
-                os.path.join(module_path, "facade_attrs", type + ".csv"),
+                self.paths[type],
                 index_col=0,
                 header=0,
             )
