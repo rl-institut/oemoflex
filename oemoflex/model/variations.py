@@ -34,7 +34,7 @@ class Sensitivity(object):
     """
     AUX_COLUMNS = ["carrier", "region", "tech", "type"]
     VAR_VALUE = "var_value"
-    def __init__(self, lb, ub, eps=1e6):
+    def __init__(self, lb, ub, eps=1e-6):
         self.lb = lb
         self.ub = ub
         self.eps = eps
@@ -58,8 +58,8 @@ class Sensitivity(object):
 
         # assert that the difference is larger than eps
 
-        assert diff_larger_eps(self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE], self.eps), \
-            f"The difference between lb and ub islower than the defined tolerance of {self.eps}"
+        assert diff_larger_eps(self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE], self.eps).all(), \
+            f"The difference between lb and ub is lower than the defined minimum of {self.eps}"
 
     def get_param(self):
         # get the parameters that are varied
