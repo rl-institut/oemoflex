@@ -3,7 +3,7 @@ import os
 
 
 def index_same(df_a, df_b):
-    return df_a.index.equals(df_a.index)
+    return df_a.index.equals(df_b.index)
 
 
 def data_same(df_a, df_b):
