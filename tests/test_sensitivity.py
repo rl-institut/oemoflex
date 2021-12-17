@@ -1,7 +1,12 @@
 import pandas as pd
 
 from oemoflex.model.datapackage import EnergyDataPackage
-from oemoflex.model.variations import Sensitivity, EDPSensitivity, diff_larger_eps, get_diff
+from oemoflex.model.variations import (
+    Sensitivity,
+    EDPSensitivity,
+    diff_larger_eps,
+    get_diff,
+)
 import os
 import copy
 import pytest
@@ -23,7 +28,10 @@ edp_ub_stacked.stack_components()
 
 
 def test_get_diff():
-    assert (get_diff(lb["var_value"], ub["var_value"]) == pd.Series([True, True, False, False])).all()
+    assert (
+        get_diff(lb["var_value"], ub["var_value"])
+        == pd.Series([True, True, False, False])
+    ).all()
 
 
 def test_diff_larger_eps():
@@ -31,13 +39,12 @@ def test_diff_larger_eps():
 
 
 def test_init():
-    sens = Sensitivity(lb, ub)
+    Sensitivity(lb, ub)
 
 
 def test_sanity_check_not_stacked():
-    sens = EDPSensitivity(edp_lb, edp_ub)
     with pytest.raises(AssertionError):
-        sens.sanity_check()
+        EDPSensitivity(edp_lb, edp_ub)
 
 
 def test_sanity_check():
@@ -48,7 +55,7 @@ def test_sanity_check_index_different():
     edp_lb_stacked.data["component"].reset_index(inplace=True, drop=True)
 
     with pytest.raises(AssertionError):
-        sens = EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
+        EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ def smaller_equal(df_a, df_b):
 
 
 def get_diff(df_a, df_b):
-    ## pandas>1.1.0
+    # # pandas>1.1.0
     # diff = self.lb.compare(self.ub)
     return ~((df_a == df_b) | ((df_a != df_a) & (df_b != df_b)))
 
@@ -34,6 +34,7 @@ class Sensitivity(object):
     """
     AUX_COLUMNS = ["carrier", "region", "tech", "type"]
     VAR_VALUE = "var_value"
+
     def __init__(self, lb, ub, eps=1e-6):
         self.lb = lb
         self.ub = ub
@@ -42,24 +43,33 @@ class Sensitivity(object):
 
     def sanity_check(self):
         # assert index same
-        assert index_same(self.lb, self.ub), f"Indexes of lb and ub are not the same."
+        assert index_same(self.lb, self.ub), "Indexes of lb and ub are not the same."
 
         # Assert that the data is different
-        assert not data_same(self.lb, self.ub), f"There is no difference between lb and ub."
+        assert not data_same(
+            self.lb, self.ub
+        ), "There is no difference between lb and ub."
 
         # Assert that the auxiliary columns are the same
-        assert data_same(self.lb.loc[:, self.AUX_COLUMNS], self.ub.loc[:, self.AUX_COLUMNS])
+        assert data_same(
+            self.lb.loc[:, self.AUX_COLUMNS], self.ub.loc[:, self.AUX_COLUMNS]
+        )
 
         # find the parameters that are different (comparing NaN)
         diff = get_diff(self.lb.loc[:, self.VAR_VALUE], self.ub.loc[:, self.VAR_VALUE])
 
         # assert lb <= ub
-        assert smaller_equal(self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE])
+        assert smaller_equal(
+            self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE]
+        )
 
         # assert that the difference is larger than eps
 
-        assert diff_larger_eps(self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE], self.eps).all(), \
-            f"The difference between lb and ub is lower than the defined minimum of {self.eps}"
+        assert diff_larger_eps(
+            self.lb.loc[diff, self.VAR_VALUE],
+            self.ub.loc[diff, self.VAR_VALUE],
+            self.eps,
+        ).all(), f"The difference between lb and ub is lower than the defined minimum of {self.eps}"
 
     def get_param(self):
         # get the parameters that are varied
@@ -95,6 +105,7 @@ class EDPSensitivity(Sensitivity):
     Accepts two EnergyDataPackages that are have different values. The Packages describe lower and
     upper bound of a variation. With these intervals, different sampling methods can be invoked.
     """
+
     def __init__(self, lb_edp, ub_edp, eps=1e-6):
         self.lb_edp = lb_edp
         self.ub_edp = ub_edp

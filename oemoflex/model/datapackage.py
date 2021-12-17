@@ -327,7 +327,6 @@ class EnergyDataPackage(DataFramePackage):
         super().to_csv_dir(destination, overwrite)
 
 
-
 class ResultsDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
