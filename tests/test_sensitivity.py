@@ -13,7 +13,7 @@ ub = EnergyDataPackage.from_csv_dir(path_edp_ub)
 
 
 def test_sanity_check():
-    sens = EDPSensitivity(lb, ub, n=4)
+    sens = EDPSensitivity(lb, ub)
     sens.sanity_check()
 
 
@@ -22,7 +22,7 @@ def test_sanity_check_not_stacked():
     ub_unstacked = copy.deepcopy(ub)
     lb_unstacked.unstack_components()
     ub_unstacked.unstack_components()
-    sens = EDPSensitivity(lb_unstacked, ub_unstacked, n=4)
+    sens = EDPSensitivity(lb_unstacked, ub_unstacked)
     with pytest.raises(AssertionError):
         sens.sanity_check()
 
@@ -30,7 +30,7 @@ def test_sanity_check_not_stacked():
 def test_sanity_check_index_different():
     lb.data["component"].reset_index(inplace=True, drop=True)
 
-    sens = EDPSensitivity(lb, ub, n=4)
+    sens = EDPSensitivity(lb, ub)
 
     with pytest.raises(AssertionError):
         sens.sanity_check()

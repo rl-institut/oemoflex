@@ -32,10 +32,9 @@ class Sensitivity(object):
     in the column 'var_value'. The DataFrames describe lower and upper bound of a variation. With
     these intervals, different sampling methods can be invoked.
     """
-    def __init__(self, lb, ub, n, eps=1e6):
+    def __init__(self, lb, ub, eps=1e6):
         self.lb = lb
         self.ub = ub
-        self.n = n
         self.eps = eps
 
     def sanity_check(self):
@@ -94,10 +93,9 @@ class EDPSensitivity(Sensitivity):
     Accepts two EnergyDataPackages that are have different values. The Packages describe lower and
     upper bound of a variation. With these intervals, different sampling methods can be invoked.
     """
-    def __init__(self, lb_edp, ub_edp, n, eps=1e-6):
+    def __init__(self, lb_edp, ub_edp, eps=1e-6):
         self.lb_edp = lb_edp
         self.ub_edp = ub_edp
-        self.n = n
         self.eps = eps
 
     def get_lb(self):
