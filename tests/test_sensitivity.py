@@ -8,18 +8,18 @@ here = os.path.dirname(__file__)
 path_edp_lb = os.path.join(here, "_files", "edp_lb")
 path_edp_ub = os.path.join(here, "_files", "edp_ub")
 
-lb = EnergyDataPackage.from_csv_dir(path_edp_lb)
-ub = EnergyDataPackage.from_csv_dir(path_edp_ub)
+edp_lb = EnergyDataPackage.from_csv_dir(path_edp_lb)
+edp_ub = EnergyDataPackage.from_csv_dir(path_edp_ub)
 
 
 def test_sanity_check():
-    sens = EDPSensitivity(lb, ub)
+    sens = EDPSensitivity(edp_lb, edp_ub)
     sens.sanity_check()
 
 
 def test_sanity_check_not_stacked():
-    lb_unstacked = copy.deepcopy(lb)
-    ub_unstacked = copy.deepcopy(ub)
+    lb_unstacked = copy.deepcopy(edp_lb)
+    ub_unstacked = copy.deepcopy(edp_ub)
     lb_unstacked.unstack_components()
     ub_unstacked.unstack_components()
     sens = EDPSensitivity(lb_unstacked, ub_unstacked)
@@ -28,9 +28,9 @@ def test_sanity_check_not_stacked():
 
 
 def test_sanity_check_index_different():
-    lb.data["component"].reset_index(inplace=True, drop=True)
+    edp_lb.data["component"].reset_index(inplace=True, drop=True)
 
-    sens = EDPSensitivity(lb, ub)
+    sens = EDPSensitivity(edp_lb, edp_ub)
 
     with pytest.raises(AssertionError):
         sens.sanity_check()
