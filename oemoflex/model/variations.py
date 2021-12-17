@@ -99,6 +99,12 @@ class EDPSensitivity(Sensitivity):
         self.lb_edp = lb_edp
         self.ub_edp = ub_edp
         self.eps = eps
+        self.check_if_stacked()
+        self.sanity_check()
+
+    def check_if_stacked(self):
+        if not (self.lb_edp.stacked and self.ub_edp.stacked):
+            raise AssertionError("EnergyDataPackages have to be stacked")
 
     def get_lb(self):
         return self.lb_edp.data["component"]
