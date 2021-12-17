@@ -32,6 +32,8 @@ class Sensitivity(object):
     in the column 'var_value'. The DataFrames describe lower and upper bound of a variation. With
     these intervals, different sampling methods can be invoked.
     """
+    AUX_COLUMNS = ["carrier", "region", "tech", "type"]
+    VAR_VALUE = "var_value"
     def __init__(self, lb, ub, eps=1e6):
         self.lb = lb
         self.ub = ub
@@ -45,18 +47,17 @@ class Sensitivity(object):
         assert not data_same(self.lb, self.ub), f"There is no difference between lb and ub."
 
         # Assert that the auxiliary columns are the same
-        AUX_COLUMNS = ["carrier", "region", "tech", "type"]
-        assert data_same(self.lb.loc[:, AUX_COLUMNS], self.ub.loc[:, AUX_COLUMNS])
+        assert data_same(self.lb.loc[:, self.AUX_COLUMNS], self.ub.loc[:, self.AUX_COLUMNS])
 
         # find the parameters that are different (comparing NaN)
-        diff = get_diff(self.lb.loc[:, "var_value"], self.ub.loc[:, "var_value"])
+        diff = get_diff(self.lb.loc[:, self.VAR_VALUE], self.ub.loc[:, self.VAR_VALUE])
 
         # assert lb <= ub
-        assert smaller_equal(self.lb.loc[diff, "var_value"], self.ub.loc[diff, "var_value"])
+        assert smaller_equal(self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE])
 
         # assert that the difference is larger than eps
 
-        assert diff_larger_eps(self.lb.loc[diff, "var_value"], self.ub.loc[diff, "var_value"], self.eps), \
+        assert diff_larger_eps(self.lb.loc[diff, self.VAR_VALUE], self.ub.loc[diff, self.VAR_VALUE], self.eps), \
             f"The difference between lb and ub islower than the defined tolerance of {self.eps}"
 
     def get_param(self):
