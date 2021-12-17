@@ -27,6 +27,11 @@ def diff_larger_eps(df_a, df_b, eps):
 
 
 class Sensitivity(object):
+    r"""
+    Accepts two DataFrames that are the same in index and most columns, but have different entries
+    in the column 'var_value'. The DataFrames describe lower and upper bound of a variation. With
+    these intervals, different sampling methods can be invoked.
+    """
     def __init__(self, lb, ub, n, eps=1e6):
         self.lb = lb
         self.ub = ub
@@ -85,6 +90,10 @@ class Sensitivity(object):
 
 
 class EDPSensitivity(Sensitivity):
+    r"""
+    Accepts two EnergyDataPackages that are have different values. The Packages describe lower and
+    upper bound of a variation. With these intervals, different sampling methods can be invoked.
+    """
     def __init__(self, lb_edp, ub_edp, n, eps=1e-6):
         self.lb_edp = lb_edp
         self.ub_edp = ub_edp
