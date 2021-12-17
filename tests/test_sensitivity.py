@@ -46,10 +46,8 @@ def test_sanity_check():
 def test_sanity_check_index_different():
     edp_lb.data["component"].reset_index(inplace=True, drop=True)
 
-    sens = EDPSensitivity(edp_lb, edp_ub)
-
     with pytest.raises(AssertionError):
-        sens.sanity_check()
+        sens = EDPSensitivity(edp_lb, edp_ub)
 
 
 if __name__ == "__main__":
