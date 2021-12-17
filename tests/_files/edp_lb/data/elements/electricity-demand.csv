@@ -1,0 +1,3 @@
+name,amount,bus,carrier,profile,region,tech,type
+BB-electricity-demand,20327320000,BB-electricity,electricity,BB-electricity-demand-profile,BB,demand,load
+BE-electricity-demand,13400000000,BE-electricity,electricity,BE-electricity-demand-profile,BE,demand,load
