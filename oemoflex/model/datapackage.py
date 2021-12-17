@@ -169,6 +169,8 @@ class EnergyDataPackage(DataFramePackage):
 
         self.components = kwargs.get("components")
 
+        self.stacked = False
+
     @classmethod
     def setup_default(
         cls, name, basepath, datetimeindex, components, busses, regions, links, **kwargs
@@ -280,6 +282,8 @@ class EnergyDataPackage(DataFramePackage):
         r"""
         Stacks the component DataFrames into a single DataFrame.
         """
+        if self.stacked is True:
+            raise ValueError("EnergyDataPackage is already stacked.")
 
         def is_element(rel_path):
             directory = os.path.split(rel_path)[0]
@@ -299,15 +303,29 @@ class EnergyDataPackage(DataFramePackage):
             index_vars=["name", "var_name"],
         )
 
+        self.stacked = True
+
     def unstack_components(self):
         r"""
         Unstacks a single component DataFrame into separate DataFrames for each component.
         """
+        if self.stacked is False:
+            raise ValueError("EnergyDataPackage is already unstacked.")
+
         self._separate_stacked_frame(
             frame_name="component",
             target_dir=os.path.join("data", "elements"),
             group_by=["carrier", "tech"],
         )
+
+        self.stacked = False
+
+    def to_csv_dir(self, destination, overwrite=False):
+        if self.stacked:
+            raise UserWarning("Saving stacked EnergyDatapackages is not supported yet.")
+
+        super().to_csv_dir(destination, overwrite)
+
 
 
 class ResultsDataPackage(DataFramePackage):
