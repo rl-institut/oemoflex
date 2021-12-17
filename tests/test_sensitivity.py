@@ -30,19 +30,17 @@ def test_init():
     sens = Sensitivity(lb, ub)
 
 
-def test_sanity_check():
-    sens = EDPSensitivity(edp_lb, edp_ub)
-    sens.sanity_check()
-
-
 def test_sanity_check_not_stacked():
-    lb_unstacked = copy.deepcopy(edp_lb)
-    ub_unstacked = copy.deepcopy(edp_ub)
-    lb_unstacked.unstack_components()
-    ub_unstacked.unstack_components()
-    sens = EDPSensitivity(lb_unstacked, ub_unstacked)
+    sens = EDPSensitivity(edp_lb, edp_ub)
     with pytest.raises(AssertionError):
         sens.sanity_check()
+
+
+def test_sanity_check():
+    edp_lb.stack_components()
+    edp_ub.stack_components()
+    sens = EDPSensitivity(edp_lb, edp_ub)
+    sens.sanity_check()
 
 
 def test_sanity_check_index_different():
