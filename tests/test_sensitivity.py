@@ -16,6 +16,10 @@ lb = pd.read_csv(path_lb, header=0)
 ub = pd.read_csv(path_ub, header=0)
 edp_lb = EnergyDataPackage.from_csv_dir(path_edp_lb)
 edp_ub = EnergyDataPackage.from_csv_dir(path_edp_ub)
+edp_lb_stacked = copy.deepcopy(edp_lb)
+edp_ub_stacked = copy.deepcopy(edp_ub)
+edp_lb_stacked.stack_components()
+edp_ub_stacked.stack_components()
 
 
 def test_get_diff():
@@ -37,17 +41,14 @@ def test_sanity_check_not_stacked():
 
 
 def test_sanity_check():
-    edp_lb.stack_components()
-    edp_ub.stack_components()
-    sens = EDPSensitivity(edp_lb, edp_ub)
-    sens.sanity_check()
+    EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
 
 
 def test_sanity_check_index_different():
-    edp_lb.data["component"].reset_index(inplace=True, drop=True)
+    edp_lb_stacked.data["component"].reset_index(inplace=True, drop=True)
 
     with pytest.raises(AssertionError):
-        sens = EDPSensitivity(edp_lb, edp_ub)
+        sens = EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
 
 
 if __name__ == "__main__":
