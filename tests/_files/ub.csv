@@ -1,0 +1,5 @@
+name,var_name,carrier,region,tech,type,var_value
+BE-wind-onshore,capacity,wind,BE,onshore,volatile,1
+BB-wind-onshore,capacity,wind,BB,onshore,volatile,9900000
+BE-wind-onshore,marginal_cost,wind,BE,onshore,volatile,0
+BB-wind-onshore,marginal_cost,wind,BB,onshore,volatile,0
