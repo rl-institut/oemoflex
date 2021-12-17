@@ -38,6 +38,7 @@ class Sensitivity(object):
         self.lb = lb
         self.ub = ub
         self.eps = eps
+        self.sanity_check()
 
     def sanity_check(self):
         # assert index same
