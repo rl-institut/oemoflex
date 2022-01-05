@@ -47,10 +47,8 @@ default_foreign_key_descriptors = {
 }
 
 
-def infer_metadata(
-    package_name="default-name",
-    keep_resources=False,
-    foreign_keys={
+default_foreign_keys = (
+    {
         "bus": [
             "volatile",
             "dispatchable",
@@ -64,6 +62,13 @@ def infer_metadata(
         "from_to_bus": ["connection", "line", "conversion"],
         "chp": ["backpressure", "extraction", "chp"],
     },
+)
+
+
+def infer_metadata(
+    package_name="default-name",
+    keep_resources=False,
+    foreign_keys=None,
     foreign_key_descriptors=None,
     path=None,
 ):
@@ -84,6 +89,9 @@ def infer_metadata(
     path: string
         Absoltue path to root-folder of the datapackage
     """
+    if foreign_keys is None:
+        foreign_keys = default_foreign_keys
+
     if foreign_key_descriptors is None:
         foreign_key_descriptors = default_foreign_key_descriptors
 
