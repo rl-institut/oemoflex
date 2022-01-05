@@ -181,7 +181,13 @@ def infer_metadata(
     os.chdir(current_path)
 
 
-def infer(select_components, package_name, path, foreign_keys_update=None):
+def infer(
+    select_components,
+    package_name,
+    path,
+    foreign_keys_update=None,
+    foreign_key_descriptors_update=None,
+):
 
     if foreign_keys_update:
         for key, value in foreign_keys_update.items():
@@ -201,8 +207,13 @@ def infer(select_components, package_name, path, foreign_keys_update=None):
         if selected_lst:
             foreign_keys[key] = selected_lst
 
+    foreign_key_descriptors = default_foreign_key_descriptors
+    if foreign_key_descriptors_update:
+        foreign_key_descriptors.update(foreign_key_descriptors_update)
+
     infer_metadata(
         package_name=package_name,
         foreign_keys=foreign_keys,
+        foreign_key_descriptors=foreign_key_descriptors,
         path=path,
     )

@@ -239,7 +239,9 @@ class EnergyDataPackage(DataFramePackage):
 
         return cls(dir, data, rel_paths)
 
-    def infer_metadata(self, foreign_keys_update=None):
+    def infer_metadata(
+        self, foreign_keys_update=None, foreign_key_descriptors_update=None
+    ):
         r"""
         Infers metadata of the EnergyDataPackage and save it
         in basepath as `datapackage.json`.
@@ -257,6 +259,7 @@ class EnergyDataPackage(DataFramePackage):
             package_name=self.name,
             path=self.basepath,
             foreign_keys_update=foreign_keys_update,
+            foreign_key_descriptors_update=foreign_key_descriptors_update,
         )
 
     def parametrize(self, frame, column, values):
