@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from oemof.network import Component
 from oemof.solph import Bus, EnergySystem
 
 
@@ -51,6 +52,24 @@ def get_scalars(dict):
     }
 
     return scalars
+
+
+def drop_component_to_component(series):
+    r"""
+    Drops those entries of an oemof_tuple indexed Series
+    where both target and source are components.
+    """
+    _series = series.copy()
+
+    component_to_component_ids = [
+        id
+        for id in series.index
+        if isinstance(id[0], Component) and isinstance(id[1], Component)
+    ]
+
+    result = _series.drop(component_to_component_ids)
+
+    return result
 
 
 def get_component_id_in_tuple(oemof_tuple):
@@ -582,6 +601,9 @@ def run_postprocessing(es):
 
     # Take the annual sum of the sequences
     summed_flows = sum_flows(sequences)
+
+    # drop those flows between component and component
+    summed_flows = drop_component_to_component(summed_flows)
 
     # Collect the annual sum of renewable energy
     # scalars in summed_flows_re not generic and therefore
