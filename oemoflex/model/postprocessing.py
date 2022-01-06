@@ -512,18 +512,20 @@ def map_var_names(scalars):
 
 
 def add_component_info(scalars):
+    def try_get_attr(x, attr):
+        try:
+            return getattr(x, attr)
+        except AttributeError:
+            return None
 
     scalars.name = "var_value"
 
     scalars = pd.DataFrame(scalars)
 
-    scalars["region"] = scalars.index.get_level_values(0).map(lambda x: x.region)
-
-    scalars["type"] = scalars.index.get_level_values(0).map(lambda x: x.type)
-
-    scalars["carrier"] = scalars.index.get_level_values(0).map(lambda x: x.carrier)
-
-    scalars["tech"] = scalars.index.get_level_values(0).map(lambda x: x.tech)
+    for attribute in ["region", "type", "carrier", "tech"]:
+        scalars[attribute] = scalars.index.get_level_values(0).map(
+            lambda x: try_get_attr(x, attribute)
+        )
 
     return scalars
 
