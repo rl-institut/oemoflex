@@ -1,3 +1,3 @@
-name,bus,carrier,marginal_cost,input_parameters,region,tech,type
-A-electricity-curtailment,A-electricity,electricity,0,{},A,curtailment,excess
-B-electricity-curtailment,B-electricity,electricity,0,{},B,curtailment,excess
+name,bus,carrier,input_parameters,marginal_cost,output_parameters,region,tech,type
+A-electricity-curtailment,A-electricity,electricity,{},0,,A,curtailment,excess
+B-electricity-curtailment,B-electricity,electricity,{},0,,B,curtailment,excess
