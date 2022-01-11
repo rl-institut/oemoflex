@@ -35,7 +35,7 @@ ch4-excess:
     bus: ch4
   defaults:
     marginal_cost: 0
-    output_parameters: "{}"
+    input_parameters: "{}"
 
 ch4-extchp:
   carrier: ch4
@@ -81,7 +81,7 @@ electricity-curtailment:
     bus: electricity
   defaults:
     marginal_cost: 0
-    output_parameters: "{}"
+    input_parameters: "{}"
 
 electricity-demand:
   carrier: electricity
