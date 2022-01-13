@@ -175,6 +175,7 @@ heat-excess:
     bus: heat
   defaults:
     marginal_cost: 0
+    input_parameters: "{}"
 
 heat-shortage:
   carrier: heat
