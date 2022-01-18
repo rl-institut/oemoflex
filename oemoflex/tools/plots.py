@@ -566,9 +566,11 @@ def plot_grouped_bar(ax, df, color_dict, unit, stacked=False):
         rot=0,
     )
 
-    ax.tick_params(axis="both", length=0, pad=7)
+    ax.minorticks_on()
+    ax.tick_params(axis="both", which="both", length=0, pad=7)
 
     ax.grid(axis="y", zorder=1, color="black", alpha=alpha)
+    ax.grid(axis="y", which="minor", zorder=1, color="darkgrey", alpha=alpha)
     ax.set_xlabel(xlabel=None)
     ax.legend()
     ax.legend(title=None, frameon=True, framealpha=1)
