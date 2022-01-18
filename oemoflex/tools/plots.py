@@ -545,11 +545,11 @@ def plot_grouped_bar(ax, df, color_dict, unit, stacked=False):
         Axes to draw the plot.
     df: pd.DataFrame
         DataFrame with an index defining the groups and columns defining the bars of different color
-        with in the group.
+        within the group.
     color_dict: dict
         Dictionary defining colors of the categories
     unit: str
-        Unit of the variables
+        Unit of the variables.
     stacked : boolean
         Stack bars of a group. False by default.
     """
