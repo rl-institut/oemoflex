@@ -85,7 +85,7 @@ class TestCases:
             # Reduces the inflow capacity in respect to a non restricted capacity_potential.
             # As a result the missing capacity is added on the outflow capacity (?)
             capacity_cost=0,  # Doesn't do anything?
-            capacity_potential=0.9,
+            capacity_potential=3,
         )
 
         results = self.run_model()
