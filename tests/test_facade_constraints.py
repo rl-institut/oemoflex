@@ -154,9 +154,9 @@ class TestConstraints:
 
         self.compare_to_reference_lp("storage_investment_brown_field.lp")
 
-    def test_assymetric_storage_investment_green_field(self):
+    def test_asymmetric_storage_investment_green_field(self):
         r"""
-        Investment of assymetric storage without existing capacities.
+        Investment of asymmetric storage without existing capacities.
         """
         bus_el = solph.Bus(label="electricity")
 
@@ -180,11 +180,11 @@ class TestConstraints:
             capacity_potential_discharge=7,
         )
 
-        self.compare_to_reference_lp("assymetric_storage_investment_green_field.lp")
+        self.compare_to_reference_lp("asymmetric_storage_investment_green_field.lp")
 
-    def test_assymetric_storage_investment_brown_field(self):
+    def test_asymmetric_storage_investment_brown_field(self):
         r"""
-        Investment of assymetric storage with existing capacities.
+        Investment of asymmetric storage with existing capacities.
         """
         bus_el = solph.Bus(label="electricity")
 
@@ -208,4 +208,4 @@ class TestConstraints:
             capacity_potential_discharge=7,
         )
 
-        self.compare_to_reference_lp("assymetric_storage_investment_brown_field.lp")
+        self.compare_to_reference_lp("asymmetric_storage_investment_brown_field.lp")

@@ -96,7 +96,7 @@ class TestCases:
 
         assert capacity_in == capacity_out
 
-    def test_assymetric_storage_investment(self):
+    def test_asymemtric_storage_investment(self):
 
         bus_heat = self.prepare_es()
 
