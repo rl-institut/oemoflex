@@ -56,7 +56,7 @@ class Sensitivity(object):
         )
 
         # find the parameters that are different (comparing NaN)
-        diff = get_diff(self.lb.loc[:, self.VAR_VALUE], self.ub.loc[:, self.VAR_VALUE])
+        diff = self.get_diff()
 
         # assert lb <= ub
         assert smaller_equal(
@@ -71,14 +71,15 @@ class Sensitivity(object):
             self.eps,
         ).all(), f"The difference between lb and ub is lower than the defined minimum of {self.eps}"
 
+    def get_diff(self):
+        return get_diff(self.lb.loc[:, self.VAR_VALUE], self.ub.loc[:, self.VAR_VALUE])
+
     def get_param(self):
         # get the parameters that are varied
-        param = get_diff(self.lb, self.lb)
+        param = self.lb.index[self.get_diff()]
         return param
 
     def get_samples_oat(self):
-
-        self.sanity_check()
 
         params = self.get_param()
 
@@ -86,7 +87,7 @@ class Sensitivity(object):
         samples = []
         for param in params:
             sample = self.lb.copy()
-            sample.loc[param] = param
+            sample.loc[param] = self.ub.loc[param]
             samples.append(sample)
 
         return samples
