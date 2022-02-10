@@ -531,3 +531,48 @@ def _eng_format(ax, unit):
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
     return ax
+
+
+def plot_grouped_bar(ax, df, color_dict, unit, stacked=False):
+    r"""
+    This function plots scalar data as grouped bar plot. The index of the DataFrame
+    will be interpreted as groups (e.g. regions), the columns as different categories (e.g. energy
+    carriers) within the groups which will be plotted in different colors.
+
+    Parameters
+    ----------
+    ax: matplotlib Axes object
+        Axes to draw the plot.
+    df: pd.DataFrame
+        DataFrame with an index defining the groups and columns defining the bars of different color
+        within the group.
+    color_dict: dict
+        Dictionary defining colors of the categories
+    unit: str
+        Unit of the variables.
+    stacked : boolean
+        Stack bars of a group. False by default.
+    """
+    alpha = 0.3
+    # apply EngFormatter if power is plotted
+    ax = _eng_format(ax, unit)
+
+    df.plot.bar(
+        ax=ax,
+        color=[color_dict[key] for key in df.columns],
+        width=0.8,
+        zorder=2,
+        stacked=stacked,
+        rot=0,
+    )
+
+    ax.minorticks_on()
+    ax.tick_params(axis="both", which="both", length=0, pad=7)
+
+    ax.grid(axis="y", zorder=1, color="black", alpha=alpha)
+    ax.grid(axis="y", which="minor", zorder=1, color="darkgrey", alpha=alpha)
+    ax.set_xlabel(xlabel=None)
+    ax.legend()
+    ax.legend(title=None, frameon=True, framealpha=1)
+
+    return ax
