@@ -1,2 +1,2 @@
-name,capacity,capacity_cost,carrier,expandable,from_bus,loss,region,tech,to_bus,type
-A-B-electricity-transmission,,,electricity,,A-electricity,,A_B,transmission,B-electricity,link
+name,capacity_cost,carrier,expandable,from_bus,from_to_capacity,loss,region,tech,to_bus,to_from_capacity,type
+A-B-electricity-transmission,,electricity,,A-electricity,,,A_B,transmission,B-electricity,,link
