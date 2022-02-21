@@ -92,6 +92,23 @@ class Sensitivity(object):
 
         return samples
 
+    def get_linear_slide(self, n):
+
+        params = self.get_param()
+
+        # for each param, create n samples
+        samples = []
+
+        for i in range(n):
+            sample = self.lb.copy()
+            slider = i / (n - 1)
+            sample.loc[params, "var_value"] = (1 - slider) * self.lb.loc[
+                params, "var_value"
+            ] + slider * self.ub.loc[params, "var_value"]
+            samples.append(sample)
+
+        return samples
+
     def get_samples_lhs(self):
 
         self.sanity_check()

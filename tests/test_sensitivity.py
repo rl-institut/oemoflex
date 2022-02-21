@@ -59,5 +59,20 @@ def test_sanity_check_index_different():
         EDPSensitivity(edp_lb_stacked_copy, edp_ub_stacked)
 
 
+def test_get_linear_slide():
+
+    n = 5
+
+    sens = EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
+
+    samples = sens.get_linear_slide(n)
+
+    assert len(samples) == n
+
+    assert pd.testing.assert_frame_equal(samples[0], edp_lb_stacked.data["component"])
+
+    assert pd.testing.assert_frame_equal(samples[n - 1], edp_ub_stacked.data["component"])
+
+
 if __name__ == "__main__":
-    test_sanity_check()
+    test_get_linear_slide()
