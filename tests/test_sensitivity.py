@@ -52,10 +52,11 @@ def test_sanity_check():
 
 
 def test_sanity_check_index_different():
-    edp_lb_stacked.data["component"].reset_index(inplace=True, drop=True)
+    edp_lb_stacked_copy = copy.deepcopy(edp_lb_stacked)
+    edp_lb_stacked_copy.data["component"].reset_index(inplace=True, drop=True)
 
     with pytest.raises(AssertionError):
-        EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
+        EDPSensitivity(edp_lb_stacked_copy, edp_ub_stacked)
 
 
 if __name__ == "__main__":
