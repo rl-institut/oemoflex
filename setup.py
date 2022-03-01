@@ -19,7 +19,11 @@ setup(
         "oemoflex.model": [
             "*.yml",
             "*.csv",
-            os.path.join("component_attrs", "*.csv"),
+            os.path.join("facade_attrs", "*.csv"),
+        ],
+        "oemoflex.tools": [
+            "*.yaml",
+            "*.csv",
         ],
     },
     package_dir={"oemoflex": "oemoflex"},
