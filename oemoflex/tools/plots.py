@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
 import oemoflex.tools.helpers as helpers
+import warnings
+
 
 pd.plotting.register_matplotlib_converters()
 
@@ -102,7 +104,8 @@ def _rename_by_string_matching(columns, labels_dict):
         if len(mapped) > 1:
             raise ValueError("Multiple labels are matching.")
         elif not mapped:
-            raise KeyError(f"No label matches for {tupl}.")
+            warnings.warn(f"No label matches for {tupl}. Could not map.")
+            return str(tupl)
         else:
             mapped = mapped[0]
 
@@ -138,7 +141,8 @@ def _rename_by_string_matching(columns, labels_dict):
         if len(mapped) > 1:
             raise ValueError("Multiple labels are matching.")
         elif not mapped:
-            raise KeyError(f"No label matches for {string}.")
+            warnings.warn(f"No label matches for {string}. Could not map.")
+            return string
         else:
             mapped = mapped[0]
 
