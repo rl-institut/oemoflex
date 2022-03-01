@@ -329,6 +329,8 @@ def stackplot(ax, df, colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    assert not df.empty, "Dataframe is empty."
+
     _check_undefined_colors(df.columns, colors_odict.keys())
 
     # y is a list which gets the correct stack order from colors file
@@ -410,9 +412,12 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
     for i in y_stack_pos:
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
-    stackplot(ax, df[y_stack_pos], colors_odict)
-    # check whether the list y_stack_neg is filled
-    if y_stack_neg != []:
+
+    # stack plot if there are positive columns
+    if y_stack_pos:
+        stackplot(ax, df[y_stack_pos], colors_odict)
+    # stack plot if there are negative columns
+    if y_stack_neg:
         stackplot(ax, df[y_stack_neg], colors_odict)
 
     # plot lineplot (demand)
