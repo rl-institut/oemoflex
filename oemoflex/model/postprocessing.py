@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from oemof.network import Component
 from oemof.solph import Bus, EnergySystem
 
 
@@ -51,6 +52,24 @@ def get_scalars(dict):
     }
 
     return scalars
+
+
+def drop_component_to_component(series):
+    r"""
+    Drops those entries of an oemof_tuple indexed Series
+    where both target and source are components.
+    """
+    _series = series.copy()
+
+    component_to_component_ids = [
+        id
+        for id in series.index
+        if isinstance(id[0], Component) and isinstance(id[1], Component)
+    ]
+
+    result = _series.drop(component_to_component_ids)
+
+    return result
 
 
 def get_component_id_in_tuple(oemof_tuple):
@@ -493,18 +512,20 @@ def map_var_names(scalars):
 
 
 def add_component_info(scalars):
+    def try_get_attr(x, attr):
+        try:
+            return getattr(x, attr)
+        except AttributeError:
+            return None
 
     scalars.name = "var_value"
 
     scalars = pd.DataFrame(scalars)
 
-    scalars["region"] = scalars.index.get_level_values(0).map(lambda x: x.region)
-
-    scalars["type"] = scalars.index.get_level_values(0).map(lambda x: x.type)
-
-    scalars["carrier"] = scalars.index.get_level_values(0).map(lambda x: x.carrier)
-
-    scalars["tech"] = scalars.index.get_level_values(0).map(lambda x: x.tech)
+    for attribute in ["region", "type", "carrier", "tech"]:
+        scalars[attribute] = scalars.index.get_level_values(0).map(
+            lambda x: try_get_attr(x, attribute)
+        )
 
     return scalars
 
@@ -582,6 +603,9 @@ def run_postprocessing(es):
 
     # Take the annual sum of the sequences
     summed_flows = sum_flows(sequences)
+
+    # drop those flows between component and component
+    summed_flows = drop_component_to_component(summed_flows)
 
     # Collect the annual sum of renewable energy
     # scalars in summed_flows_re not generic and therefore
