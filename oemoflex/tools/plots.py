@@ -181,7 +181,7 @@ def _group_agg_by_column(df):
     return df_grouped
 
 
-def _replace_near_zeros(df):
+def _replace_near_zeros(df, tolerance):
     r"""
     Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
     All values which are smaller than a defined tolerance are replaced by 0.0.
@@ -191,17 +191,19 @@ def _replace_near_zeros(df):
     df : pandas.DataFrame
         Dataframe with data.
 
+    tolerance : numeric
+        Tolerance for deviation from zero
+
     Returns
     ----------
     df : pandas.DataFrame
         DataFrame with replaced near zeros.
     """
-    tolerance = 1e-3
     df[abs(df) < tolerance] = 0.0
     return df
 
 
-def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
+def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None, tolerance=1e-3):
     r"""
     The data in df is split into a DataFrame with consumers and generators and a DataFrame which
     only contains the demand data. Consumer data is made negative. The multilevel column names are
@@ -218,6 +220,8 @@ def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
         Name of the bus representing the demand.
     labels_dict : dict
         Dictionary to map the column labels.
+    tolerance : numeric
+        Tolerance for deviation from zero.
 
     Returns
     ----------
@@ -246,7 +250,7 @@ def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
     # group columns with the same name, e.g. transmission busses by import and export
     df = _group_agg_by_column(df)
     # check columns on numeric values which are practical zero and replace them with 0.0
-    df = _replace_near_zeros(df)
+    df = _replace_near_zeros(df, tolerance=tolerance)
 
     return df, df_demand
 
