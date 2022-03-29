@@ -1,7 +1,7 @@
 import os
 from shutil import rmtree
 
-from oemof.tools.helpers import extend_basic_path
+from oemof.solph.helpers import extend_basic_path
 
 from oemoflex.model.datapackage import DataFramePackage, EnergyDataPackage
 from oemoflex.tools.helpers import check_if_csv_dirs_equal
