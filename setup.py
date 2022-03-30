@@ -30,8 +30,6 @@ setup(
     install_requires=[
         "pyyaml",
         "pandas",
-        "pyomo",
-        "pyutilib",
         "oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular",
         "frictionless",
     ],
