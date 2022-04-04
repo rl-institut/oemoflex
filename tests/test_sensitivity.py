@@ -27,6 +27,26 @@ edp_lb_stacked.stack_components()
 edp_ub_stacked.stack_components()
 
 
+def frame_containing_nan_equal(df_1, df_2):
+    r"""
+    Compares two DataFrames containing NaNs.
+
+    Parameters
+    ----------
+    df_1 : pd.DataFrame
+        A dataframe
+    df_2 : pd.DataFrame
+        Another dataframe
+
+    Returns
+    -------
+    equal : boolean
+        True if Dataframes are equal.
+    """
+    equal = ((df_1 == df_1) | ((df_1 != df_1) & (df_2 != df_2))).all().all()
+    return equal
+
+
 def test_get_diff():
     assert (
         get_diff(lb["var_value"], ub["var_value"])
@@ -67,12 +87,11 @@ def test_get_linear_slide():
 
     samples = sens.get_linear_slide(n)
 
+    # assert that the correct number of samples is produced
     assert len(samples) == n
 
-    assert pd.testing.assert_frame_equal(samples[0], edp_lb_stacked.data["component"])
+    # assert that the first sample equals the lower-bound datapackage
+    assert frame_containing_nan_equal(samples[0], edp_lb_stacked.data["component"])
 
-    assert pd.testing.assert_frame_equal(samples[n - 1], edp_ub_stacked.data["component"])
-
-
-if __name__ == "__main__":
-    test_get_linear_slide()
+    # assert that the last sample equals the upper-bound datapackage
+    assert frame_containing_nan_equal(samples[n - 1], edp_ub_stacked.data["component"])
