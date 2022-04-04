@@ -1,3 +1,6 @@
+from oemoflex.model.datapackage import EnergyDataPackage
+
+
 def index_same(df_a, df_b):
     return df_a.index.equals(df_b.index)
 
@@ -130,3 +133,25 @@ class EDPSensitivity(Sensitivity):
 
     lb = property(get_lb, set_lb, del_lb)
     ub = property(get_ub, set_ub, del_ub)
+
+    def wrap_sampling(self, sampling):
+        def wrapped_sampling(*args, **kwargs):
+            samples = sampling(*args, **kwargs)
+            for name, df in samples.items():
+                edp = EnergyDataPackage(
+                    name=name,
+                    basepath=None,
+                    rel_paths=self.lb_edp.rel_paths.copy(),
+                    data=self.lb_edp.data.copy(),
+                    components=None,
+                )
+                edp.data["component"] = df
+                edp.stacked = True
+                samples[name] = edp
+
+            return samples
+
+        return wrapped_sampling
+
+    def get_linear_slide(self, n):
+        return self.wrap_sampling(super().get_linear_slide)(n)
