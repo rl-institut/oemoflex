@@ -95,6 +95,24 @@ class Sensitivity(object):
 
         return samples
 
+    def get_salib_samples_lhs(self, salib_method, **kwargs):
+
+        params = self.get_param()
+
+        print(self.lb.loc[params], self.ub.loc[params])
+
+        problem = {
+            'num_vars': len(params),
+            'names': list(params),
+            'bounds': [[-3.14159265359, 3.14159265359],
+                       [-3.14159265359, 3.14159265359],
+                       [-3.14159265359, 3.14159265359]]
+        }
+
+        samples = salib_method(problem, 2)
+
+        return samples
+
 
 class EDPSensitivity(Sensitivity):
     r"""

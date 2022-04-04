@@ -95,3 +95,15 @@ def test_get_linear_slide():
 
     # assert that the last sample equals the upper-bound datapackage
     assert frame_containing_nan_equal(samples[n - 1], edp_ub_stacked.data["component"])
+
+
+def test_salib_sample():
+    n = 5
+
+    sens = EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
+    from SALib.sample import saltelli
+    sens.get_salib_samples_lhs(saltelli.sample)
+
+
+if __name__ == "__main__":
+    test_salib_sample()
