@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from oemof.network import Component
+from oemof.network.network import Component
 from oemof.solph import Bus, EnergySystem
 
 

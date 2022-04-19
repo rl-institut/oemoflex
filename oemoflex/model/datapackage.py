@@ -4,7 +4,7 @@ import os
 import oemof.tabular.tools.postprocessing as tabular_pp
 import pandas as pd
 from frictionless import Package
-from oemof.outputlib.views import convert_to_multiindex
+from oemof.solph.views import convert_to_multiindex
 
 from oemoflex.model.inferring import infer
 from oemoflex.model.model_structure import create_default_data
