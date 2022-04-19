@@ -2,11 +2,11 @@ import copy
 import os
 
 import oemof.tabular.tools.postprocessing as tabular_pp
+from oemof.tabular.datapackage.building import infer_metadata
 import pandas as pd
 from frictionless import Package
 from oemof.solph.views import convert_to_multiindex
 
-from oemoflex.model.inferring import infer
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.postprocessing import group_by_element, run_postprocessing
 
@@ -239,27 +239,15 @@ class EnergyDataPackage(DataFramePackage):
 
         return cls(dir, data, rel_paths)
 
-    def infer_metadata(
-        self, foreign_keys_update=None, foreign_key_descriptors_update=None
-    ):
+    def infer_metadata(self, foreign_keys_update):
         r"""
         Infers metadata of the EnergyDataPackage and save it
         in basepath as `datapackage.json`.
-
-        Parameters
-        ----------
-        foreign_keys_update
-
-        Returns
-        -------
-
         """
-        infer(
-            select_components=self.components,
+        infer_metadata(
             package_name=self.name,
             path=self.basepath,
-            foreign_keys_update=foreign_keys_update,
-            foreign_key_descriptors_update=foreign_key_descriptors_update,
+            foreign_keys=foreign_keys_update,
         )
 
     def parametrize(self, frame, column, values):
