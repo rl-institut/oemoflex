@@ -83,6 +83,65 @@ def test_edp_setup_default_select():
     )
 
 
+def test_edp_setup_default_with_updates():
+
+    # Define the name of the datapackage
+    name = "test_edp_with_updates"
+
+    # Define some paths
+    here = os.path.dirname(__file__)
+    defaultpath = os.path.join(here, "_files", "default_edp_with_updates")
+    tmp = extend_basic_path("tmp")
+    basepath = os.path.join(tmp, name)
+
+    components = ["h2-fuel_cell", "electricity-heatpump", "ch4-boiler"]
+    busses = ["h2", "electricity", "heat"]
+    regions = ["A", "B"]
+    links = ["A-B"]
+
+    # Define the attributes of some custom busses, components and facades
+    bus_attrs_update = {"h2": {"balanced": True}}
+
+    component_attrs_update = {
+        "h2-fuel_cell": {
+            "carrier": "h2",
+            "tech": "fuel_cell",
+            "type": "fuel_cell",
+            "foreign_keys": {
+                "h2_bus": "h2",
+                "electricity_bus": "electricity",
+                "heat_bus": "heat",
+            },
+            "defaults": {
+                "input_parameters": "{}",
+                "output_parameters": "{}",
+            },
+        },
+    }
+
+    facade_attrs_update = os.path.join(here, "_files", "facade_attrs_update")
+
+    # Setup the energy datapackage
+    edp = EnergyDataPackage.setup_default(
+        name=name,
+        components=components,
+        busses=busses,
+        basepath=basepath,
+        datetimeindex=None,
+        regions=regions,
+        links=links,
+        bus_attrs_update=bus_attrs_update,
+        component_attrs_update=component_attrs_update,
+        facade_attrs_update=facade_attrs_update,
+    )
+
+    clean_path(basepath)
+
+    edp.to_csv_dir(basepath, overwrite=True)
+
+    check_if_csv_dirs_equal(basepath, defaultpath)
+
+
 def test_edp_stack_unstack():
 
     tmp = extend_basic_path("tmp")
