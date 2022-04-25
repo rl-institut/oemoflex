@@ -4,7 +4,7 @@ from shutil import rmtree
 from oemof.solph.helpers import extend_basic_path
 
 from oemoflex.model.datapackage import DataFramePackage, EnergyDataPackage
-from oemoflex.tools.helpers import check_if_csv_dirs_equal
+from oemoflex.tools.helpers import check_if_csv_dirs_equal, load_yaml
 
 
 def clean_path(path):
@@ -140,6 +140,22 @@ def test_edp_setup_default_with_updates():
     edp.to_csv_dir(basepath, overwrite=True)
 
     check_if_csv_dirs_equal(basepath, defaultpath)
+
+    # set custom foreign keys and foreign key descriptors
+    foreign_keys_update = {
+        "bus": [
+            "h2-fuel_cell",
+        ]
+    }
+
+    foreign_key_descriptors_update = load_yaml(
+        os.path.join(here, "_files", "foreign_key_descriptors_update.yml")
+    )
+
+    edp.infer_metadata(
+        foreign_keys_update=foreign_keys_update,
+        foreign_key_descriptors_update=foreign_key_descriptors_update,
+    )
 
 
 def test_edp_stack_unstack():
