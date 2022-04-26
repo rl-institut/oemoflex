@@ -150,7 +150,9 @@ def test_edp_setup_default_with_updates(monkeypatch):
 
     importlib.reload(oemof.tabular.config.config)
 
-    edp.infer_metadata(foreign_keys_update=foreign_keys_update,)
+    edp.infer_metadata(
+        foreign_keys_update=foreign_keys_update,
+    )
 
 
 def test_edp_stack_unstack():
