@@ -2,6 +2,7 @@ import os
 from shutil import rmtree
 
 from oemof.solph.helpers import extend_basic_path
+import oemof.tabular
 
 from oemoflex.model.datapackage import DataFramePackage, EnergyDataPackage
 from oemoflex.tools.helpers import check_if_csv_dirs_equal, load_yaml
@@ -83,7 +84,7 @@ def test_edp_setup_default_select():
     )
 
 
-def test_edp_setup_default_with_updates():
+def test_edp_setup_default_with_updates(monkeypatch):
 
     # Define the name of the datapackage
     name = "test_edp_with_updates"
@@ -148,13 +149,15 @@ def test_edp_setup_default_with_updates():
         ]
     }
 
-    foreign_key_descriptors_update = load_yaml(
-        os.path.join(here, "_files", "foreign_key_descriptors_update.yml")
+    monkeypatch.setenv(
+        "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
+        os.path.join(here, "_files", "foreign_key_descriptors_update.json")
     )
+    import importlib
+    importlib.reload(oemof.tabular.config.config)
 
     edp.infer_metadata(
         foreign_keys_update=foreign_keys_update,
-        foreign_key_descriptors_update=foreign_key_descriptors_update,
     )
 
 
