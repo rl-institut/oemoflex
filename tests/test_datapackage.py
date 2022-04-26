@@ -5,7 +5,7 @@ from oemof.solph.helpers import extend_basic_path
 import oemof.tabular
 
 from oemoflex.model.datapackage import DataFramePackage, EnergyDataPackage
-from oemoflex.tools.helpers import check_if_csv_dirs_equal, load_yaml
+from oemoflex.tools.helpers import check_if_csv_dirs_equal
 
 
 def clean_path(path):
@@ -113,10 +113,7 @@ def test_edp_setup_default_with_updates(monkeypatch):
                 "electricity_bus": "electricity",
                 "heat_bus": "heat",
             },
-            "defaults": {
-                "input_parameters": "{}",
-                "output_parameters": "{}",
-            },
+            "defaults": {"input_parameters": "{}", "output_parameters": "{}"},
         },
     }
 
@@ -143,22 +140,17 @@ def test_edp_setup_default_with_updates(monkeypatch):
     check_if_csv_dirs_equal(basepath, defaultpath)
 
     # set custom foreign keys and foreign key descriptors
-    foreign_keys_update = {
-        "bus": [
-            "h2-fuel_cell",
-        ]
-    }
+    foreign_keys_update = {"bus": ["h2-fuel_cell"]}
 
     monkeypatch.setenv(
         "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
-        os.path.join(here, "_files", "foreign_key_descriptors_update.json")
+        os.path.join(here, "_files", "foreign_key_descriptors_update.json"),
     )
     import importlib
+
     importlib.reload(oemof.tabular.config.config)
 
-    edp.infer_metadata(
-        foreign_keys_update=foreign_keys_update,
-    )
+    edp.infer_metadata(foreign_keys_update=foreign_keys_update,)
 
 
 def test_edp_stack_unstack():
