@@ -9,6 +9,14 @@ from oemof.solph.views import convert_to_multiindex
 
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.postprocessing import group_by_element, run_postprocessing
+from oemoflex.tools.helpers import load_yaml
+
+
+module_path = os.path.dirname(os.path.abspath(__file__))
+
+FOREIGN_KEYS = "foreign_keys.yml"
+
+foreign_keys = load_yaml(os.path.join(module_path, FOREIGN_KEYS))
 
 
 class DataFramePackage:
@@ -239,15 +247,21 @@ class EnergyDataPackage(DataFramePackage):
 
         return cls(dir, data, rel_paths)
 
-    def infer_metadata(self, foreign_keys_update):
+    def infer_metadata(self, foreign_keys_update=None):
         r"""
         Infers metadata of the EnergyDataPackage and save it
         in basepath as `datapackage.json`.
         """
+        if foreign_keys_update:
+            for key, value in foreign_keys.items():
+                if key in foreign_keys_update:
+                    value.extend(foreign_keys_update[key])
+                    print(f"Updated foreign keys for {key}.")
+
         infer_metadata(
             package_name=self.name,
             path=self.basepath,
-            foreign_keys=foreign_keys_update,
+            foreign_keys=foreign_keys,
         )
 
     def parametrize(self, frame, column, values):
