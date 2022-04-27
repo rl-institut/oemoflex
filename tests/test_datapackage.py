@@ -144,7 +144,7 @@ def test_edp_setup_default_with_updates(monkeypatch):
 
     monkeypatch.setenv(
         "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
-        os.path.join(here, "_files", "foreign_key_descriptors_update.json"),
+        os.path.join(here, "_files", "foreign_key_descriptors.json"),
     )
     import importlib
 
