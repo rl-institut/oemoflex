@@ -148,7 +148,7 @@ def test_edp_setup_default_with_updates(monkeypatch):
     )
     import importlib
 
-    # importlib.reload(oemof.tabular.config.config)
+    importlib.reload(oemof.tabular.config.config)
 
     edp.infer_metadata(
         foreign_keys_update=foreign_keys_update,
