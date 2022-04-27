@@ -253,10 +253,13 @@ class EnergyDataPackage(DataFramePackage):
         in basepath as `datapackage.json`.
         """
         if foreign_keys_update:
-            for key, value in foreign_keys.items():
-                if key in foreign_keys_update:
-                    value.extend(foreign_keys_update[key])
+            for key, value in foreign_keys_update.items():
+                if key in foreign_keys:
+                    foreign_keys[key].extend(value)
                     print(f"Updated foreign keys for {key}.")
+                else:
+                    foreign_keys[key] = value
+                    print(f"Added foreign key for {key}.")
 
         infer_metadata(
             package_name=self.name,
