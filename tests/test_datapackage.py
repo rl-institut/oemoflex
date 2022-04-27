@@ -140,21 +140,7 @@ def test_edp_setup_default_with_updates(monkeypatch):
     check_if_csv_dirs_equal(basepath, defaultpath)
 
     # set custom foreign keys and foreign key descriptors
-    foreign_keys_update = {
-        "bus": [
-            "volatile",
-            "dispatchable",
-            "storage",
-            "load",
-            "reservoir",
-            "shortage",
-            "excess",
-            "h2-fuel_cell"
-        ],
-        "profile": ["load", "volatile", "ror"],
-        "from_to_bus": ["connection", "line", "conversion"],
-        "chp": ["backpressure", "extraction", "chp"],
-    }
+    foreign_keys_update = {"bus": ["h2-fuel_cell"]}
 
     monkeypatch.setenv(
         "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
