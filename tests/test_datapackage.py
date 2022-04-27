@@ -140,15 +140,29 @@ def test_edp_setup_default_with_updates(monkeypatch):
     check_if_csv_dirs_equal(basepath, defaultpath)
 
     # set custom foreign keys and foreign key descriptors
-    foreign_keys_update = {"bus": ["h2-fuel_cell"]}
+    foreign_keys_update = {
+        "bus": [
+            "volatile",
+            "dispatchable",
+            "storage",
+            "load",
+            "reservoir",
+            "shortage",
+            "excess",
+            "h2-fuel_cell"
+        ],
+        "profile": ["load", "volatile", "ror"],
+        "from_to_bus": ["connection", "line", "conversion"],
+        "chp": ["backpressure", "extraction", "chp"],
+    }
 
     monkeypatch.setenv(
         "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
-        os.path.join(here, "_files", "foreign_key_descriptors_update.json"),
+        os.path.join(here, "_files", "foreign_key_descriptors.json"),
     )
     import importlib
 
-    importlib.reload(oemof.tabular.config.config)
+    # importlib.reload(oemof.tabular.config.config)
 
     edp.infer_metadata(
         foreign_keys_update=foreign_keys_update,
