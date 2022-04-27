@@ -383,6 +383,8 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    assert not df.empty, "DataFrame is empty. Cannot plot empty data."
+
     if colors_odict is None:
         colors_odict = default_colors_odict
 
