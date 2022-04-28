@@ -143,7 +143,9 @@ def test_edp_setup_default_with_updates(monkeypatch):
     # set custom foreign keys and foreign key descriptors
     foreign_keys_update = {"fuel_cell": ["h2-fuel_cell"]}
 
-    edp.infer_metadata(foreign_keys_update=foreign_keys_update,)
+    edp.infer_metadata(
+        foreign_keys_update=foreign_keys_update,
+    )
 
     # Check datapackage without custom descriptor file:
     assert os.path.exists(basepath)
@@ -161,7 +163,9 @@ def test_edp_setup_default_with_updates(monkeypatch):
 
     importlib.reload(oemof.tabular.config.config)
 
-    edp.infer_metadata(foreign_keys_update=foreign_keys_update,)
+    edp.infer_metadata(
+        foreign_keys_update=foreign_keys_update,
+    )
 
     # Check datapackage with custom descriptor file including 'fuel_cell':
     assert os.path.exists(basepath)
