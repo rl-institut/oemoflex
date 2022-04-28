@@ -4,7 +4,6 @@ import os
 import numpy as np
 import pandas as pd
 
-from oemof.network.network import Component
 from oemof.solph import Bus, EnergySystem
 
 
@@ -64,7 +63,7 @@ def drop_component_to_component(series):
     component_to_component_ids = [
         id
         for id in series.index
-        if isinstance(id[0], Component) and isinstance(id[1], Component)
+        if not isinstance(id[0], Bus) and not isinstance(id[1], Bus)
     ]
 
     result = _series.drop(component_to_component_ids)
