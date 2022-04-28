@@ -1,0 +1,55 @@
+{
+  "bus": [
+    {
+      "fields": "bus",
+      "reference": {"resource": "bus", "fields": "name"}
+    }
+  ],
+  "from_to_bus": [
+    {
+      "fields": "from_bus",
+      "reference": {"resource": "bus", "fields": "name"}
+    },
+    {
+      "fields": "to_bus",
+      "reference": {"resource": "bus", "fields": "name"}
+    }
+  ],
+  "chp": [
+    {
+      "fields": "fuel_bus",
+      "reference": {"resource": "bus", "fields": "name"}
+    },
+    {
+      "fields": "electricity_bus",
+      "reference": {"resource": "bus", "fields": "name"}
+    },
+    {
+      "fields": "heat_bus",
+      "reference": {"resource": "bus", "fields": "name"}
+    }
+  ],
+  "fuel_cell": [
+    {
+      "fields": "h2_bus",
+      "reference": {
+        "resource": "bus",
+        "fields": "name"
+      }
+    },
+    {
+      "fields": "electricity_bus",
+      "reference": {
+        "resource": "bus",
+        "fields": "name"
+      }
+    },
+    {
+      "fields": "heat_bus",
+      "reference": {
+        "resource": "bus",
+        "fields": "name"
+      }
+    }
+  ]
+}
