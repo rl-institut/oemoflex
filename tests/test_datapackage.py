@@ -1,4 +1,5 @@
 import os
+import json
 from shutil import rmtree
 
 from oemof.solph.helpers import extend_basic_path
@@ -142,17 +143,39 @@ def test_edp_setup_default_with_updates(monkeypatch):
     # set custom foreign keys and foreign key descriptors
     foreign_keys_update = {"fuel_cell": ["h2-fuel_cell"]}
 
+    edp.infer_metadata(
+        foreign_keys_update=foreign_keys_update,
+    )
+
+    # Check datapackage without custom descriptor file:
+    assert os.path.exists(basepath)
+    assert os.path.exists(os.path.join(basepath, "datapackage.json"))
+    with open(os.path.join(basepath, "datapackage.json"), "r") as dp_file:
+        datapackage = json.load(dp_file)
+    assert datapackage["resources"][0]["name"] == "h2-fuel_cell"
+    assert len(datapackage["resources"][0]["schema"]["foreignKeys"]) == 1
+
     monkeypatch.setenv(
         "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
         os.path.join(here, "_files", "foreign_key_descriptors.json"),
     )
     import importlib
-
     importlib.reload(oemof.tabular.config.config)
 
     edp.infer_metadata(
         foreign_keys_update=foreign_keys_update,
     )
+
+    # Check datapackage with custom descriptor file including 'fuel_cell':
+    assert os.path.exists(basepath)
+    assert os.path.exists(os.path.join(basepath, "datapackage.json"))
+    with open(os.path.join(basepath, "datapackage.json"), "r") as dp_file:
+        datapackage = json.load(dp_file)
+    assert datapackage["resources"][0]["name"] == "h2-fuel_cell"
+    assert len(datapackage["resources"][0]["schema"]["foreignKeys"]) == 3
+    assert [
+        fk["fields"] for fk in datapackage["resources"][0]["schema"]["foreignKeys"]
+    ] == ["h2_bus", "electricity_bus", "heat_bus"]
 
 
 def test_edp_stack_unstack():
