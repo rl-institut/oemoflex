@@ -152,8 +152,12 @@ def test_edp_setup_default_with_updates(monkeypatch):
     assert os.path.exists(os.path.join(basepath, "datapackage.json"))
     with open(os.path.join(basepath, "datapackage.json"), "r") as dp_file:
         datapackage = json.load(dp_file)
-    assert datapackage["resources"][0]["name"] == "h2-fuel_cell"
-    assert len(datapackage["resources"][0]["schema"]["foreignKeys"]) == 1
+    fuel_cell_index = next(
+        i
+        for i, resource in enumerate(datapackage["resources"])
+        if resource["name"] == "h2-fuel_cell"
+    )
+    assert len(datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]) == 1
 
     monkeypatch.setenv(
         "OEMOF_TABULAR_FOREIGN_KEY_DESCRIPTORS_FILE",
@@ -172,10 +176,15 @@ def test_edp_setup_default_with_updates(monkeypatch):
     assert os.path.exists(os.path.join(basepath, "datapackage.json"))
     with open(os.path.join(basepath, "datapackage.json"), "r") as dp_file:
         datapackage = json.load(dp_file)
-    assert datapackage["resources"][0]["name"] == "h2-fuel_cell"
-    assert len(datapackage["resources"][0]["schema"]["foreignKeys"]) == 3
+    fuel_cell_index = next(
+        i
+        for i, resource in enumerate(datapackage["resources"])
+        if resource["name"] == "h2-fuel_cell"
+    )
+    assert len(datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]) == 3
     assert [
-        fk["fields"] for fk in datapackage["resources"][0]["schema"]["foreignKeys"]
+        fk["fields"]
+        for fk in datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]
     ] == ["h2_bus", "electricity_bus", "heat_bus"]
 
 
