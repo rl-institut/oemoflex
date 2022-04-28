@@ -157,6 +157,8 @@ def test_edp_setup_default_with_updates(monkeypatch):
         for i, resource in enumerate(datapackage["resources"])
         if resource["name"] == "h2-fuel_cell"
     )
+    # With no custom foreign_key descriptors given, oemof.tabular assumes that 'fuel_cell' refers to
+    # a profile. The foreign keys thus have only one entry.
     assert len(datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]) == 1
 
     monkeypatch.setenv(
@@ -181,6 +183,7 @@ def test_edp_setup_default_with_updates(monkeypatch):
         for i, resource in enumerate(datapackage["resources"])
         if resource["name"] == "h2-fuel_cell"
     )
+    # With custom foreign_key descriptors given, oemof.tabular uses them to set the foreign keys.
     assert len(datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]) == 3
     assert [
         fk["fields"]
