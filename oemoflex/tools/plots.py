@@ -181,7 +181,7 @@ def _group_agg_by_column(df):
     return df_grouped
 
 
-def _replace_near_zeros(df):
+def _replace_near_zeros(df, tolerance=1e-3):
     r"""
     Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
     All values which are smaller than a defined tolerance are replaced by 0.0.
@@ -196,7 +196,6 @@ def _replace_near_zeros(df):
     df : pandas.DataFrame
         DataFrame with replaced near zeros.
     """
-    tolerance = 1e-3
     df[abs(df) < tolerance] = 0.0
     return df
 
