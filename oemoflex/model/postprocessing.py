@@ -658,25 +658,40 @@ def run_postprocessing(es):
 
     ep_costs = filter_by_var_name(scalar_params, "investment_ep_costs")
     ep_costs.index = ep_costs.reset_index(level=2, drop=True).index.map(
-        lambda x: (x[0].label, x[1].label if not isinstance(x[1], float) else x[1]))
+        lambda x: (x[0].label, x[1].label if not isinstance(x[1], float) else x[1])
+    )
 
     invested_capacity_costs = invested_capacity.copy()
-    invested_capacity_costs.index = invested_capacity.reset_index(level=2, drop=True).index.map(
-        lambda x: (x[0].label, x[1].label if not isinstance(x[1], float) else x[1]))
-    invested_capacity_costs = invested_capacity_costs.multiply(ep_costs.reindex(invested_capacity_costs.index))
+    invested_capacity_costs.index = invested_capacity.reset_index(
+        level=2, drop=True
+    ).index.map(
+        lambda x: (x[0].label, x[1].label if not isinstance(x[1], float) else x[1])
+    )
+    invested_capacity_costs = invested_capacity_costs.multiply(
+        ep_costs.reindex(invested_capacity_costs.index)
+    )
     invested_capacity_costs.index = invested_capacity.index
     invested_capacity_costs = invested_capacity_costs.dropna()
     invested_capacity_costs.index = invested_capacity_costs.index.set_levels(
-        invested_capacity_costs.index.levels[2] + "_costs", level=2)
+        invested_capacity_costs.index.levels[2] + "_costs", level=2
+    )
 
     invested_storage_capacity_costs = invested_storage_capacity.copy()
-    invested_storage_capacity_costs.index = invested_storage_capacity.reset_index(level=2, drop=True).index.map(
-        lambda x: (x[0].label, x[1].label if not isinstance(x[1], float) else x[1]))
-    invested_storage_capacity_costs = invested_storage_capacity_costs.multiply(ep_costs.reindex(invested_storage_capacity_costs.index))
+    invested_storage_capacity_costs.index = invested_storage_capacity.reset_index(
+        level=2, drop=True
+    ).index.map(
+        lambda x: (x[0].label, x[1].label if not isinstance(x[1], float) else x[1])
+    )
+    invested_storage_capacity_costs = invested_storage_capacity_costs.multiply(
+        ep_costs.reindex(invested_storage_capacity_costs.index)
+    )
     invested_storage_capacity_costs.index = invested_storage_capacity.index
     invested_storage_capacity_costs = invested_storage_capacity_costs.dropna()
-    invested_storage_capacity_costs.index = invested_storage_capacity_costs.index.set_levels(
-        invested_storage_capacity_costs.index.levels[2] + "_costs", level=2)
+    invested_storage_capacity_costs.index = (
+        invested_storage_capacity_costs.index.set_levels(
+            invested_storage_capacity_costs.index.levels[2] + "_costs", level=2
+        )
+    )
 
     # Calculate summed variable costs
     summed_variable_costs = get_summed_variable_costs(summed_flows, scalar_params)
