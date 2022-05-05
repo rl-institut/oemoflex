@@ -386,6 +386,17 @@ def get_summed_variable_costs(summed_flows, scalar_params):
     return summed_variable_costs
 
 
+def get_total_system_cost(*args):
+
+    all_costs = pd.concat(args)
+
+    index = pd.MultiIndex.from_tuples([("system", "total_system_cost")])
+
+    total_system_cost = pd.DataFrame({"var_value": [all_costs.sum()]}, index=index)
+
+    return total_system_cost
+
+
 def set_index_level(series, level, value):
     r"""
     Sets a value to a multiindex level. If the level does not exist, it
@@ -701,6 +712,13 @@ def run_postprocessing(es):
 
     summed_marginal_costs = get_outputs(summed_variable_costs)
 
+    total_system_cost = get_total_system_cost(
+        invested_capacity_costs,
+        invested_storage_capacity_costs,
+        summed_carrier_costs,
+        summed_marginal_costs,
+    )
+
     # # Get flows with emissions
     # carriers_with_emissions = 'ch4'
     #
@@ -755,12 +773,14 @@ def run_postprocessing(es):
 
     all_scalars = add_component_info(all_scalars)
 
-    all_scalars = sort_scalars(all_scalars)
-
     # Set index to string
     # TODO: Check if this can be done far earlier, also for performance reasons.
     # TODO: To do so, the information drawn from the components in add_component_info has
     # TODO: to be provided differently.
     all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
+
+    all_scalars = pd.concat([all_scalars, total_system_cost], axis=0)
+
+    all_scalars = sort_scalars(all_scalars)
 
     return all_scalars
