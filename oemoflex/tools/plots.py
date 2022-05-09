@@ -125,9 +125,11 @@ def _rename_by_string_matching(columns, labels_dict):
 
         mapped_where = pd.Series(mapped_where)
 
-        columns_mapped.loc[columns_duplicated & (mapped_where == 0)] += " out"
+        if (columns_duplicated & mapped_where == 0).any():
+            columns_mapped.loc[columns_duplicated & mapped_where == 0] += " out"
 
-        columns_mapped.loc[columns_duplicated & mapped_where == 1] += " in"
+        if (columns_duplicated & mapped_where == 1).any():
+            columns_mapped.loc[columns_duplicated & mapped_where == 1] += " in"
 
         return columns_mapped
 
