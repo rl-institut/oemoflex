@@ -230,29 +230,31 @@ def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
     df_demand: pandas.DataFrame
         DataFrame with prepared data for dispatch plotting of demand.
     """
+    _df = df.copy()
+
     if labels_dict is None:
         labels_dict = default_labels_dict
 
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
-    df.columns = df.columns.to_flat_index()
-    for i in df.columns:
+    _df.columns = _df.columns.to_flat_index()
+    for i in _df.columns:
         if i[0] == bus_name:
-            df[i] = df[i] * -1
+            _df[i] = _df[i] * -1
         if demand_name in i[1]:
-            df_demand = (df[i] * -1).to_frame()
-            df.drop(columns=[i], inplace=True)
+            df_demand = (_df[i] * -1).to_frame()
+            _df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    df = map_labels(df, labels_dict)
+    _df = map_labels(_df, labels_dict)
     df_demand = map_labels(df_demand, labels_dict)
 
     # group columns with the same name, e.g. transmission busses by import and export
-    df = _group_agg_by_column(df)
+    _df = _group_agg_by_column(_df)
     # check columns on numeric values which are practical zero and replace them with 0.0
-    df = _replace_near_zeros(df)
+    _df = _replace_near_zeros(_df)
 
-    return df, df_demand
+    return _df, df_demand
 
 
 def filter_timeseries(df, start_date=None, end_date=None):
