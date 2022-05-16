@@ -385,7 +385,9 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
         Ordered dictionary with labels as keys and colourcodes as values.
     """
     assert not df.empty, "DataFrame is empty. Cannot plot empty data."
-    assert not df.columns.duplicated, "Cannot plot DataFrame with duplicate columns."
+    assert (
+        not df.columns.duplicated().any()
+    ), "Cannot plot DataFrame with duplicate columns."
 
     if colors_odict is None:
         colors_odict = default_colors_odict
