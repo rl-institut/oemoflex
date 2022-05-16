@@ -413,11 +413,12 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
 
-    # stack plot if there are positive columns
-    if y_stack_pos:
+    # plot if there is positive data
+    if not df[y_stack_pos].empty:
         stackplot(ax, df[y_stack_pos], colors_odict)
-    # stack plot if there are negative columns
-    if y_stack_neg:
+
+    # plot if there is negative data
+    if not df[y_stack_neg].empty:
         stackplot(ax, df[y_stack_neg], colors_odict)
 
     # plot lineplot (demand)
