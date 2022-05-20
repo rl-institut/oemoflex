@@ -147,6 +147,7 @@ class EDPSensitivity(Sensitivity):
                 )
                 edp.data["component"] = df
                 edp.stacked = True
+                edp.metadata = self.lb_edp.metadata
                 samples[name] = edp
 
             return samples

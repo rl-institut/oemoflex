@@ -177,6 +177,8 @@ class EnergyDataPackage(DataFramePackage):
 
         self.components = kwargs.get("components")
 
+        self.metadata = kwargs.get("metadata", None)
+
         self.stacked = False
 
     @classmethod
@@ -247,7 +249,11 @@ class EnergyDataPackage(DataFramePackage):
 
         data = cls._load_csv(cls, dir, rel_paths)
 
-        return cls(dir, data, rel_paths)
+        return cls(dir, data, rel_paths, metadata=dp)
+
+    def save_metadata(self, destination):
+        if self.metadata is not None:
+            self.metadata.to_json(destination)
 
     def infer_metadata(self, foreign_keys_update=None):
         r"""
@@ -333,6 +339,11 @@ class EnergyDataPackage(DataFramePackage):
             raise UserWarning("Saving stacked EnergyDatapackages is not supported yet.")
 
         super().to_csv_dir(destination, overwrite)
+
+        if self.metadata is not None:
+            destination = os.path.join(self.basepath, "datapackage.json")
+            print(f"Saving metadata to {destination}")
+            self.save_metadata(destination)
 
 
 class ResultsDataPackage(DataFramePackage):
