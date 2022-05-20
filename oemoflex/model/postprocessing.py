@@ -53,6 +53,24 @@ def get_scalars(dict):
     return scalars
 
 
+def drop_component_to_component(series):
+    r"""
+    Drops those entries of an oemof_tuple indexed Series
+    where both target and source are components.
+    """
+    _series = series.copy()
+
+    component_to_component_ids = [
+        id
+        for id in series.index
+        if not isinstance(id[0], Bus) and not isinstance(id[1], Bus)
+    ]
+
+    result = _series.drop(component_to_component_ids)
+
+    return result
+
+
 def get_component_id_in_tuple(oemof_tuple):
     r"""
     Returns the id of the component in an oemof tuple.
@@ -368,6 +386,17 @@ def get_summed_variable_costs(summed_flows, scalar_params):
     return summed_variable_costs
 
 
+def get_total_system_cost(*args):
+
+    all_costs = pd.concat(args)
+
+    index = pd.MultiIndex.from_tuples([("system", "total_system_cost")])
+
+    total_system_cost = pd.DataFrame({"var_value": [all_costs.sum()]}, index=index)
+
+    return total_system_cost
+
+
 def set_index_level(series, level, value):
     r"""
     Sets a value to a multiindex level. If the level does not exist, it
@@ -493,18 +522,20 @@ def map_var_names(scalars):
 
 
 def add_component_info(scalars):
+    def try_get_attr(x, attr):
+        try:
+            return getattr(x, attr)
+        except AttributeError:
+            return None
 
     scalars.name = "var_value"
 
     scalars = pd.DataFrame(scalars)
 
-    scalars["region"] = scalars.index.get_level_values(0).map(lambda x: x.region)
-
-    scalars["type"] = scalars.index.get_level_values(0).map(lambda x: x.type)
-
-    scalars["carrier"] = scalars.index.get_level_values(0).map(lambda x: x.carrier)
-
-    scalars["tech"] = scalars.index.get_level_values(0).map(lambda x: x.tech)
+    for attribute in ["region", "type", "carrier", "tech"]:
+        scalars[attribute] = scalars.index.get_level_values(0).map(
+            lambda x: try_get_attr(x, attribute)
+        )
 
     return scalars
 
@@ -583,6 +614,9 @@ def run_postprocessing(es):
     # Take the annual sum of the sequences
     summed_flows = sum_flows(sequences)
 
+    # drop those flows between component and component
+    summed_flows = drop_component_to_component(summed_flows)
+
     # Collect the annual sum of renewable energy
     # scalars in summed_flows_re not generic and therefore
     # not used in the following but held here as an alternative.
@@ -633,6 +667,24 @@ def run_postprocessing(es):
 
         invested_storage_capacity = invest.loc[target_is_none]
 
+    ep_costs = filter_by_var_name(scalar_params, "investment_ep_costs")
+
+    invested_capacity_costs = multiply_var_with_param(
+        invested_capacity, ep_costs.unstack(2)["investment_ep_costs"]
+    )
+    invested_capacity_costs.index = invested_capacity_costs.index.set_levels(
+        invested_capacity_costs.index.levels[2] + "_costs", level=2
+    )
+
+    invested_storage_capacity_costs = multiply_var_with_param(
+        invested_storage_capacity, ep_costs.unstack(2)["investment_ep_costs"]
+    )
+    invested_storage_capacity_costs.index = (
+        invested_storage_capacity_costs.index.set_levels(
+            invested_storage_capacity_costs.index.levels[2] + "_costs", level=2
+        )
+    )
+
     # Calculate summed variable costs
     summed_variable_costs = get_summed_variable_costs(summed_flows, scalar_params)
 
@@ -640,6 +692,13 @@ def run_postprocessing(es):
     summed_carrier_costs = get_inputs(summed_variable_costs)
 
     summed_marginal_costs = get_outputs(summed_variable_costs)
+
+    total_system_cost = get_total_system_cost(
+        invested_capacity_costs,
+        invested_storage_capacity_costs,
+        summed_carrier_costs,
+        summed_marginal_costs,
+    )
 
     # # Get flows with emissions
     # carriers_with_emissions = 'ch4'
@@ -683,6 +742,8 @@ def run_postprocessing(es):
         to_from_capacity,
         invested_capacity,
         invested_storage_capacity,
+        invested_capacity_costs,
+        invested_storage_capacity_costs,
         summed_carrier_costs,
         summed_marginal_costs,
     ]
@@ -693,12 +754,14 @@ def run_postprocessing(es):
 
     all_scalars = add_component_info(all_scalars)
 
-    all_scalars = sort_scalars(all_scalars)
-
     # Set index to string
     # TODO: Check if this can be done far earlier, also for performance reasons.
     # TODO: To do so, the information drawn from the components in add_component_info has
     # TODO: to be provided differently.
     all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
+
+    all_scalars = pd.concat([all_scalars, total_system_cost], axis=0)
+
+    all_scalars = sort_scalars(all_scalars)
 
     return all_scalars

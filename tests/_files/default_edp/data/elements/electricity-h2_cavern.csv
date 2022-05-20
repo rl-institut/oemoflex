@@ -1,3 +1,3 @@
-name,bus,capacity_charge,capacity_cost_charge,capacity_cost_discharge,capacity_discharge,carrier,efficiency_charge,efficiency_discharge,expandable,input_parameters,loss_rate,marginal_cost,output_parameters,region,storage_capacity,storage_capacity_cost,tech,type
-A-electricity-h2_cavern,A-electricity,,,,,electricity,,,,{},,,{},A,,,h2_cavern,asymmetric_storage
-B-electricity-h2_cavern,B-electricity,,,,,electricity,,,,{},,,{},B,,,h2_cavern,asymmetric_storage
+name,bus,capacity_charge,capacity_cost_charge,capacity_cost_discharge,capacity_discharge,capacity_potential_charge,capacity_potential_discharge,carrier,efficiency_charge,efficiency_discharge,expandable,input_parameters,loss_rate,marginal_cost,output_parameters,region,storage_capacity,storage_capacity_cost,storage_capacity_potential,tech,type
+A-electricity-h2_cavern,A-electricity,,,,,,,electricity,,,,{},,,{},A,,,,h2_cavern,asymmetric_storage
+B-electricity-h2_cavern,B-electricity,,,,,,,electricity,,,,{},,,{},B,,,,h2_cavern,asymmetric_storage

@@ -19,15 +19,17 @@ setup(
         "oemoflex.model": [
             "*.yml",
             "*.csv",
-            os.path.join("component_attrs", "*.csv"),
+            os.path.join("facade_attrs", "*.csv"),
+        ],
+        "oemoflex.tools": [
+            "*.yaml",
+            "*.csv",
         ],
     },
     package_dir={"oemoflex": "oemoflex"},
     install_requires=[
         "pyyaml",
         "pandas",
-        "pyomo<5.6.9",
-        "pyutilib<6.0.0",
         "oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular",
         "frictionless",
     ],

@@ -125,9 +125,11 @@ def _rename_by_string_matching(columns, labels_dict):
 
         mapped_where = pd.Series(mapped_where)
 
-        columns_mapped.loc[columns_duplicated & (mapped_where == 0)] += " out"
+        if (columns_duplicated & (mapped_where == 0)).any():
+            columns_mapped.loc[columns_duplicated & (mapped_where == 0)] += " out"
 
-        columns_mapped.loc[columns_duplicated & mapped_where == 1] += " in"
+        if (columns_duplicated & (mapped_where == 1)).any():
+            columns_mapped.loc[columns_duplicated & (mapped_where == 1)] += " in"
 
         return columns_mapped
 
@@ -181,7 +183,7 @@ def _group_agg_by_column(df):
     return df_grouped
 
 
-def _replace_near_zeros(df):
+def _replace_near_zeros(df, tolerance=1e-3):
     r"""
     Due to numerical reasons, values are sometime really small, e.g. 1e-8, instead of zero.
     All values which are smaller than a defined tolerance are replaced by 0.0.
@@ -196,7 +198,6 @@ def _replace_near_zeros(df):
     df : pandas.DataFrame
         DataFrame with replaced near zeros.
     """
-    tolerance = 1e-3
     df[abs(df) < tolerance] = 0.0
     return df
 
@@ -383,6 +384,11 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    assert not df.empty, "DataFrame is empty. Cannot plot empty data."
+    assert (
+        not df.columns.duplicated().any()
+    ), "Cannot plot DataFrame with duplicate columns."
+
     if colors_odict is None:
         colors_odict = default_colors_odict
 
@@ -530,4 +536,49 @@ def _eng_format(ax, unit):
     """
     formatter0 = EngFormatter(unit=unit)
     ax.yaxis.set_major_formatter(formatter0)
+    return ax
+
+
+def plot_grouped_bar(ax, df, color_dict, unit, stacked=False):
+    r"""
+    This function plots scalar data as grouped bar plot. The index of the DataFrame
+    will be interpreted as groups (e.g. regions), the columns as different categories (e.g. energy
+    carriers) within the groups which will be plotted in different colors.
+
+    Parameters
+    ----------
+    ax: matplotlib Axes object
+        Axes to draw the plot.
+    df: pd.DataFrame
+        DataFrame with an index defining the groups and columns defining the bars of different color
+        within the group.
+    color_dict: dict
+        Dictionary defining colors of the categories
+    unit: str
+        Unit of the variables.
+    stacked : boolean
+        Stack bars of a group. False by default.
+    """
+    alpha = 0.3
+    # apply EngFormatter if power is plotted
+    ax = _eng_format(ax, unit)
+
+    df.plot.bar(
+        ax=ax,
+        color=[color_dict[key] for key in df.columns],
+        width=0.8,
+        zorder=2,
+        stacked=stacked,
+        rot=0,
+    )
+
+    ax.minorticks_on()
+    ax.tick_params(axis="both", which="both", length=0, pad=7)
+
+    ax.grid(axis="y", zorder=1, color="black", alpha=alpha)
+    ax.grid(axis="y", which="minor", zorder=1, color="darkgrey", alpha=alpha)
+    ax.set_xlabel(xlabel=None)
+    ax.legend()
+    ax.legend(title=None, frameon=True, framealpha=1)
+
     return ax

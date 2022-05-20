@@ -2,13 +2,21 @@ import copy
 import os
 
 import oemof.tabular.tools.postprocessing as tabular_pp
+from oemof.tabular.datapackage.building import infer_metadata
 import pandas as pd
 from frictionless import Package
-from oemof.outputlib.views import convert_to_multiindex
+from oemof.solph.views import convert_to_multiindex
 
-from oemoflex.model.inferring import infer
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.postprocessing import group_by_element, run_postprocessing
+from oemoflex.tools.helpers import load_yaml
+
+
+module_path = os.path.dirname(os.path.abspath(__file__))
+
+FOREIGN_KEYS = "foreign_keys.yml"
+
+foreign_keys = load_yaml(os.path.join(module_path, FOREIGN_KEYS))
 
 
 class DataFramePackage:
@@ -245,20 +253,20 @@ class EnergyDataPackage(DataFramePackage):
         r"""
         Infers metadata of the EnergyDataPackage and save it
         in basepath as `datapackage.json`.
-
-        Parameters
-        ----------
-        foreign_keys_update
-
-        Returns
-        -------
-
         """
-        infer(
-            select_components=self.components,
+        if foreign_keys_update:
+            for key, value in foreign_keys_update.items():
+                if key in foreign_keys:
+                    foreign_keys[key].extend(value)
+                    print(f"Updated foreign keys for {key}.")
+                else:
+                    foreign_keys[key] = value
+                    print(f"Added foreign key for {key}.")
+
+        infer_metadata(
             package_name=self.name,
             path=self.basepath,
-            foreign_keys_update=foreign_keys_update,
+            foreign_keys=foreign_keys,
         )
 
     def parametrize(self, frame, column, values):

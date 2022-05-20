@@ -1,3 +1,3 @@
-name,capacity,carrier,carrier_cost,electric_efficiency,electricity_bus,fuel_bus,heat_bus,marginal_cost,region,tech,thermal_efficiency,type
-A-ch4-bpchp,,ch4,,,A-electricity,A-ch4,A-heat,,A,bpchp,,backpressure
-B-ch4-bpchp,,ch4,,,B-electricity,B-ch4,B-heat,,B,bpchp,,backpressure
+name,capacity,capacity_cost,carrier,carrier_cost,electric_efficiency,electricity_bus,expandable,fuel_bus,heat_bus,marginal_cost,region,tech,thermal_efficiency,type
+A-ch4-bpchp,,,ch4,,,A-electricity,,A-ch4,A-heat,,A,bpchp,,backpressure
+B-ch4-bpchp,,,ch4,,,B-electricity,,B-ch4,B-heat,,B,bpchp,,backpressure

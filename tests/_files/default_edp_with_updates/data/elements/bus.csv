@@ -1,0 +1,7 @@
+name,region,type,balanced
+A-h2,A,bus,True
+A-electricity,A,bus,True
+A-heat,A,bus,True
+B-h2,B,bus,True
+B-electricity,B,bus,True
+B-heat,B,bus,True
