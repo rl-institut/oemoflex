@@ -98,13 +98,12 @@ def test_get_linear_slide():
 
 
 def test_salib_sample():
+    from SALib.sample import latin
+
     n = 5
 
     sens = EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
-    from SALib.sample import saltelli
 
-    samples = sens.get_salib_samples_lhs(saltelli.sample, N=2)
+    s = sens.get_salib_samples(latin.sample, N=n)
 
-
-if __name__ == "__main__":
-    test_salib_sample()
+    assert len(s) == n
