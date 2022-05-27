@@ -99,19 +99,23 @@ class Sensitivity(object):
 
         params = self.get_param()
 
-        print(self.lb.loc[params], self.ub.loc[params])
-
         problem = {
-            'num_vars': len(params),
-            'names': list(params),
-            'bounds': [[-3.14159265359, 3.14159265359],
-                       [-3.14159265359, 3.14159265359],
-                       [-3.14159265359, 3.14159265359]]
+            "num_vars": len(params),
+            "names": list(params),
+            "bounds": list(
+                zip(self.lb.loc[params, "var_value"], self.ub.loc[params, "var_value"])
+            ),
         }
 
-        samples = salib_method(problem, 2)
+        samples = salib_method(problem, **kwargs)
 
-        return samples
+        full_samples = []
+        for sample in samples:
+            full_sample = self.lb.copy()
+            full_sample.loc[params, "var_value"] = sample
+            full_samples.append(full_sample)
+
+        return full_samples
 
 
 class EDPSensitivity(Sensitivity):
