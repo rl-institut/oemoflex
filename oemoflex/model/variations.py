@@ -95,7 +95,7 @@ class Sensitivity(object):
 
         return samples
 
-    def get_salib_samples_lhs(self, salib_method, **kwargs):
+    def get_salib_samples(self, salib_method, **kwargs):
 
         params = self.get_param()
 
@@ -179,5 +179,5 @@ class EDPSensitivity(Sensitivity):
     def get_linear_slide(self, n):
         return self.wrap_sampling(super().get_linear_slide)(n)
 
-    def get_salib_samples_lhs(self, salib_method, **kwargs):
-        return self.wrap_sampling(super().get_salib_samples_lhs)(salib_method, **kwargs)
+    def get_salib_samples(self, salib_method, **kwargs):
+        return self.wrap_sampling(super().get_salib_samples)(salib_method, **kwargs)

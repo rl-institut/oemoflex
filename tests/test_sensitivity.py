@@ -102,7 +102,8 @@ def test_salib_sample():
 
     sens = EDPSensitivity(edp_lb_stacked, edp_ub_stacked)
     from SALib.sample import saltelli
-    sens.get_salib_samples_lhs(saltelli.sample)
+
+    samples = sens.get_salib_samples_lhs(saltelli.sample, N=2)
 
 
 if __name__ == "__main__":
