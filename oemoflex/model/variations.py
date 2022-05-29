@@ -95,6 +95,28 @@ class Sensitivity(object):
 
         return samples
 
+    def get_salib_samples(self, salib_method, **kwargs):
+
+        params = self.get_param()
+
+        problem = {
+            "num_vars": len(params),
+            "names": list(params),
+            "bounds": list(
+                zip(self.lb.loc[params, "var_value"], self.ub.loc[params, "var_value"])
+            ),
+        }
+
+        samples = salib_method(problem, **kwargs)
+
+        full_samples = {}
+        for n, sample in enumerate(samples):
+            full_sample = self.lb.copy()
+            full_sample.loc[params, "var_value"] = sample
+            full_samples[n] = full_sample
+
+        return full_samples
+
 
 class EDPSensitivity(Sensitivity):
     r"""
@@ -156,3 +178,6 @@ class EDPSensitivity(Sensitivity):
 
     def get_linear_slide(self, n):
         return self.wrap_sampling(super().get_linear_slide)(n)
+
+    def get_salib_samples(self, salib_method, **kwargs):
+        return self.wrap_sampling(super().get_salib_samples)(salib_method, **kwargs)
