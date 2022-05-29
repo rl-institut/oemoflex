@@ -91,7 +91,8 @@ class Sensitivity(object):
             sample.loc[params, "var_value"] = (1 - slider) * self.lb.loc[
                 params, "var_value"
             ] + slider * self.ub.loc[params, "var_value"]
-            samples[i] = sample
+            sample_name = "sample_" + str(i)
+            samples[sample_name] = sample
 
         return samples
 
@@ -110,10 +111,11 @@ class Sensitivity(object):
         samples = salib_method(problem, **kwargs)
 
         full_samples = {}
-        for n, sample in enumerate(samples):
+        for i, sample in enumerate(samples):
             full_sample = self.lb.copy()
             full_sample.loc[params, "var_value"] = sample
-            full_samples[n] = full_sample
+            sample_name = "sample_" + str(i)
+            full_samples[sample_name] = full_sample
 
         return full_samples
 
