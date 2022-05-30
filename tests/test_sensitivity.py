@@ -91,10 +91,14 @@ def test_get_linear_slide():
     assert len(samples) == n
 
     # assert that the first sample equals the lower-bound datapackage
-    assert frame_containing_nan_equal(samples[0], edp_lb_stacked.data["component"])
+    assert frame_containing_nan_equal(
+        samples["sample_0"], edp_lb_stacked.data["component"]
+    )
 
     # assert that the last sample equals the upper-bound datapackage
-    assert frame_containing_nan_equal(samples[n - 1], edp_ub_stacked.data["component"])
+    assert frame_containing_nan_equal(
+        samples["sample_" + str(n - 1)], edp_ub_stacked.data["component"]
+    )
 
 
 def test_salib_sample():
