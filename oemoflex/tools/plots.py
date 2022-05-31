@@ -1,12 +1,14 @@
+import logging
+import os
+import warnings
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
-import os
 import plotly.graph_objects as go
-from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
+
 import oemoflex.tools.helpers as helpers
-import warnings
-import logging
 
 pd.plotting.register_matplotlib_converters()
 
