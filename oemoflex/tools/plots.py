@@ -1,12 +1,14 @@
+import logging
+import os
+import warnings
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
-import os
 import plotly.graph_objects as go
-from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
-import oemoflex.tools.helpers as helpers
-import warnings
 
+import oemoflex.tools.helpers as helpers
 
 pd.plotting.register_matplotlib_converters()
 
@@ -97,18 +99,23 @@ def _rename_by_string_matching(columns, labels_dict):
         mapped : string
             String with new column name.
         """
-        mapped = [
-            value for key, value in dictionary.items() if any([key in y for y in tupl])
-        ]
+        mapped = {
+            key: value
+            for key, value in dictionary.items()
+            if any([key in y for y in tupl])
+        }
 
-        if len(mapped) > 1:
-            raise ValueError(f"Multiple labels are matching for {tupl}: {mapped}")
-        elif not mapped:
+        if not mapped:
             warnings.warn(f"No label matches for {tupl}. Could not map.")
             return str(tupl)
-        else:
-            mapped = mapped[0]
-
+        elif len(mapped) == 1:
+            mapped = list(mapped.values())[0]
+        elif len(mapped) > 1:
+            logging.info(f"Found multiple matches for {tupl}: {mapped.values()}")
+            # map to longest key
+            longest_key = max(mapped, key=lambda x: len(x))
+            mapped = mapped[longest_key]
+            logging.info(f"Mapped {tupl} to {mapped}")
         return mapped
 
     def rename_duplicated(columns_tuple, columns_mapped, dictionary):
