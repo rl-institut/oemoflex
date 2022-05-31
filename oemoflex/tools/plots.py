@@ -102,7 +102,7 @@ def _rename_by_string_matching(columns, labels_dict):
         ]
 
         if len(mapped) > 1:
-            raise ValueError("Multiple labels are matching.")
+            raise ValueError(f"Multiple labels are matching for {tupl}: {mapped}")
         elif not mapped:
             warnings.warn(f"No label matches for {tupl}. Could not map.")
             return str(tupl)
@@ -141,7 +141,7 @@ def _rename_by_string_matching(columns, labels_dict):
         mapped = [value for key, value in dictionary.items() if key in string]
 
         if len(mapped) > 1:
-            raise ValueError("Multiple labels are matching.")
+            raise ValueError(f"Multiple labels are matching for {string}: {mapped}")
         elif not mapped:
             warnings.warn(f"No label matches for {string}. Could not map.")
             return string
