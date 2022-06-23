@@ -1,10 +1,12 @@
 import copy
 import os
+from itertools import repeat
 
 import numpy as np
 import pandas as pd
 
 from oemof.solph import Bus, EnergySystem
+from oemof.tabular.facades import BackpressureTurbine
 
 
 def get_sequences(dict):
@@ -591,6 +593,26 @@ def restore_es(path):
     return es
 
 
+def calculate_bpchp_heat_capacity(invested_capacity, scalar_params):
+    bpchp_electricity_capacity_index = [(from_com, to_com, _) for (from_com, to_com, _) in invested_capacity.index if isinstance(from_com, BackpressureTurbine)]
+    bpchp_electric_original = invested_capacity[bpchp_electricity_capacity_index]
+    bpchp_electric = bpchp_electric_original.droplevel([1, 2])
+    bpchp_electric.index = bpchp_electric.index.map(str)
+
+    bpchp_thermal_efficiency = scalar_params[[coms for coms in scalar_params.index if (isinstance(coms[0], BackpressureTurbine) and coms[2] == "thermal_efficiency")]].droplevel([1,2])
+    bpchp_electric_efficiency = scalar_params[[coms for coms in scalar_params.index if (
+                isinstance(coms[0], BackpressureTurbine) and coms[2] == "electric_efficiency")]].droplevel([1, 2])
+    eff = (bpchp_thermal_efficiency / bpchp_electric_efficiency)
+    eff.index = eff.index.map(str)
+    bpchp_thermal = bpchp_electric.multiply(eff, "index")
+    bpchp_thermal.index = bpchp_electric_original.index.get_level_values(0)
+
+    heat_central_busses = {coms[1].label.split("-")[0]: coms[1] for coms in invested_capacity.index if "heat_central" in coms[1].label and isinstance(coms[1], Bus)}
+    bus_index = bpchp_thermal.index.map(lambda x: heat_central_busses[x.label.split("-")[0]])
+    thermal_index = pd.MultiIndex.from_tuples(zip(bpchp_thermal.index, bus_index, repeat("invest")))
+    bpchp_thermal.index = thermal_index
+    return bpchp_thermal
+
 def run_postprocessing(es):
 
     # separate scalar and sequences in results
@@ -666,6 +688,10 @@ def run_postprocessing(es):
         invested_capacity = invest.loc[~target_is_none]
 
         invested_storage_capacity = invest.loc[target_is_none]
+
+    # Add Backpressure capacity for heat_central bus:
+    bpchp_thermal = calculate_bpchp_heat_capacity(invested_capacity, scalar_params)  # TODO: Hardcoded! Refactor into general calculation
+    invested_capacity = invested_capacity.append(bpchp_thermal)
 
     ep_costs = filter_by_var_name(scalar_params, "investment_ep_costs")
 
