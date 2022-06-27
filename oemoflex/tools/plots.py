@@ -361,7 +361,7 @@ def stackplot(ax, df, colors_odict):
     ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_odict):
+def lineplot(ax, df, colors_odict, linewidth):
     r"""
     Plots data as a lineplot.
 
@@ -373,14 +373,16 @@ def lineplot(ax, df, colors_odict):
         Dataframe with data.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
+    linewidth: float
+        Width of the line - set by default to 1.
     """
     _check_undefined_colors(df.columns, colors_odict.keys())
 
     for i in df.columns:
-        ax.plot(df.index, df[i], color=colors_odict[i], label=i)
+        ax.plot(df.index, df[i], color=colors_odict[i], linewidth=linewidth, label=i)
 
 
-def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
+def plot_dispatch(ax, df, df_demand, unit, colors_odict=None, linewidth=1):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
     suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
@@ -398,6 +400,8 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
         String with unit sign of plotted data on y-axis.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
+    linewidth: float
+        Width of the line - set by default to 1.
     """
     assert not df.empty, "DataFrame is empty. Cannot plot empty data."
     assert (
@@ -437,7 +441,7 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
         stackplot(ax, df[y_stack_neg], colors_odict)
 
     # plot lineplot (demand)
-    lineplot(ax, df_demand, colors_odict)
+    lineplot(ax, df_demand, colors_odict, linewidth)
 
 
 def plot_dispatch_plotly(
