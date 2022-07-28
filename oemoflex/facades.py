@@ -528,7 +528,13 @@ class ReservoirWithPump(GenericStorage, Facade):
 class ExtractionTurbine(
     ExtractionTurbineCHP, Facade
 ):  # pylint: disable=too-many-ancestors
-    r""" Combined Heat and Power (extraction) unit with one input and
+    r"""
+    **This is a quick fix for this [issue](https://github.com/oemof/oemof-tabular/issues/26)
+    affecting the oemof-tabular ExtractionTurbine. The original class is modified to ensure
+    that electricity output does reduce when more heat is extracted. To do so, investment
+    had to be disabled.**
+
+    Combined Heat and Power (extraction) unit with one input and
     two outputs.
 
     Parameters
