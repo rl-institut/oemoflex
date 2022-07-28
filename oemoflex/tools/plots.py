@@ -361,7 +361,7 @@ def stackplot(ax, df, colors_odict):
     ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_odict, linewidth):
+def lineplot(ax, df, colors_odict, linewidth=1):
     r"""
     Plots data as a lineplot.
 
