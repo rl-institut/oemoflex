@@ -1,5 +1,4 @@
 import copy
-import os
 
 import numpy as np
 import pandas as pd
@@ -563,21 +562,6 @@ def sort_scalars(scalars):
     scalars = scalars.sort_values(by=["carrier", "tech", "var_name"])
 
     return scalars
-
-
-def save_dataframes_to(dict, destination):
-    r"""
-    Saves a dictionary containing pandas.DataFrames to
-    destination. The keys of the dictionary are used
-    as the filenames.
-    """
-    if not os.path.exists(destination):
-        os.makedirs(destination)
-
-    for key, value in dict.items():
-        path = os.path.join(destination, key + ".csv")
-
-        value.to_csv(path)
 
 
 def restore_es(path):
