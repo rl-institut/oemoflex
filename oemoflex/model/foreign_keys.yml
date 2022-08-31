@@ -36,6 +36,7 @@
     'electricity-pth',
     'electricity-heatpump',
     'wood-oven',
+    'coal-oven',
 ]
 
 'chp': [

@@ -35,6 +35,33 @@ wood-oven:
   defaults:
     output_parameters: "{}"
 
+coal-oven:
+  carrier: lignite
+  tech: oven
+  type: conversion
+  foreign_keys:
+    from_bus: lignite
+    to_bus: heat
+  defaults:
+    output_parameters: "{}"
+
+lignite-import:
+  carrier: lignite
+  tech: import
+  type: shortage
+  foreign_keys:
+    bus: lignite
+  defaults:
+    output_parameters: "{}"
+
+lignite-demand:
+  carrier: lignite
+  tech: demand
+  type: load
+  foreign_keys:
+    bus: lignite
+    profile: lignite-demand-profile
+
 ch4-boiler:
   carrier: ch4
   tech: boiler
