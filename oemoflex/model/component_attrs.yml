@@ -186,6 +186,16 @@ electricity-liion_battery:
     input_parameters: "{}"
     output_parameters: "{}"
 
+electricity-large_scale_battery:
+  carrier: electricity
+  tech: large_scale_battery
+  type: storage
+  foreign_keys:
+    bus: electricity
+  defaults:
+    input_parameters: "{}"
+    output_parameters: "{}"
+
 electricity-pth:
   carrier: electricity
   tech: pth
