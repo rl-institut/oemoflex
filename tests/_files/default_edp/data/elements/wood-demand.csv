@@ -1,0 +1,3 @@
+name,amount,bus,carrier,profile,region,tech,type
+A-wood-demand,,A-wood,wood,A-wood-demand-profile,A,demand,load
+B-wood-demand,,B-wood,wood,B-wood-demand-profile,B,demand,load

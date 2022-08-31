@@ -1,0 +1,3 @@
+name,bus,capacity,capacity_cost,capacity_potential,carrier,efficiency,expandable,input_parameters,loss_rate,marginal_cost,output_parameters,region,storage_capacity,storage_capacity_cost,storage_capacity_potential,tech,type
+A-electricity-large_scale_battery,A-electricity,,,,electricity,,,{},,,{},A,,,,large_scale_battery,storage
+B-electricity-large_scale_battery,B-electricity,,,,electricity,,,{},,,{},B,,,,large_scale_battery,storage

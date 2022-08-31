@@ -1,0 +1,3 @@
+name,capacity,capacity_cost,capacity_potential,carrier,carrier_cost,efficiency,expandable,from_bus,marginal_cost,output_parameters,region,tech,to_bus,type
+A-lignite-oven,,,,lignite,,,,A-lignite,,{},A,oven,A-heat,conversion
+B-lignite-oven,,,,lignite,,,,B-lignite,,{},B,oven,B-heat,conversion
