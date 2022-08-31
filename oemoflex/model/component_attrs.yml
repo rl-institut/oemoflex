@@ -8,6 +8,33 @@ biomass-gt:
   defaults:
     output_parameters: "{}"
 
+wood-import:
+  carrier: wood
+  tech: import
+  type: shortage
+  foreign_keys:
+    bus: wood
+  defaults:
+    output_parameters: "{}"
+
+wood-demand:
+  carrier: wood
+  tech: demand
+  type: load
+  foreign_keys:
+    bus: wood
+    profile: wood-demand-profile
+
+wood-oven:
+  carrier: wood
+  tech: oven
+  type: conversion
+  foreign_keys:
+    from_bus: wood
+    to_bus: heat
+  defaults:
+    output_parameters: "{}"
+
 ch4-boiler:
   carrier: ch4
   tech: boiler

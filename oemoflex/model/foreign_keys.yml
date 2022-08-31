@@ -35,6 +35,7 @@
     'ch4-boiler',
     'electricity-pth',
     'electricity-heatpump',
+    'wood-oven',
 ]
 
 'chp': [
