@@ -209,6 +209,9 @@ class EnergyDataPackage(DataFramePackage):
         component_attrs_update : dict
             Update with custom-defined components
         """
+        if links is None:
+            components.remove("electricity-transmission")
+
         data, rel_paths = create_default_data(
             select_regions=regions,
             select_links=links,
