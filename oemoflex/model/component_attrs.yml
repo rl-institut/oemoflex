@@ -45,7 +45,7 @@ wood-oven:
   defaults:
     output_parameters: "{}"
 
-coal-oven:
+lignite-oven:
   carrier: lignite
   tech: oven
   type: conversion
