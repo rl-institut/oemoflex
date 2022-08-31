@@ -8,6 +8,16 @@ biomass-gt:
   defaults:
     output_parameters: "{}"
 
+biomass-fermenter:
+  carrier: biomass
+  tech: fermenter
+  type: conversion
+  foreign_keys:
+    from_bus: biomass
+    to_bus: ch4
+  defaults:
+    output_parameters: "{}"
+
 wood-import:
   carrier: wood
   tech: import

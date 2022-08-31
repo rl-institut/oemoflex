@@ -15,6 +15,7 @@
     'electricity-bev',
     'hydro-ror',
     'ch4-excess',
+    'biomass-fermenter',
 ]
 
 'profile': [
