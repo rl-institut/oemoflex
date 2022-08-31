@@ -302,6 +302,17 @@ solar-pv:
     marginal_cost: 0
     output_parameters: "{}"
 
+solar-thermal-collector:
+  carrier: solar
+  tech: solar-thermal-collector
+  type: volatile
+  foreign_keys:
+    bus: heat
+    profile: solar-thermal-collector-profile
+  defaults:
+    marginal_cost: 0
+    output_parameters: "{}"
+
 uranium-nuclear_st:
   carrier: uranium
   tech: nuclear_st
