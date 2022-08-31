@@ -304,7 +304,7 @@ solar-pv:
 
 solar-thermal-collector:
   carrier: solar
-  tech: solar-thermal-collector
+  tech: thermal-collector
   type: volatile
   foreign_keys:
     bus: heat
