@@ -1,0 +1,3 @@
+name,bus,capacity,capacity_cost,capacity_potential,carrier,expandable,marginal_cost,output_parameters,profile,region,tech,type
+A-solar-thermal_collector,A-heat,,,,solar,,0,{},A-solar-thermal_collector-profile,A,thermal_collector,volatile
+B-solar-thermal_collector,B-heat,,,,solar,,0,{},B-solar-thermal_collector-profile,B,thermal_collector,volatile

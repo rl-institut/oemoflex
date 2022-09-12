@@ -319,13 +319,13 @@ solar-pv:
     marginal_cost: 0
     output_parameters: "{}"
 
-solar-thermal-collector:
+solar-thermal_collector:
   carrier: solar
-  tech: thermal-collector
+  tech: thermal_collector
   type: volatile
   foreign_keys:
     bus: heat
-    profile: solar-thermal-collector-profile
+    profile: solar-thermal_collector-profile
   defaults:
     marginal_cost: 0
     output_parameters: "{}"
