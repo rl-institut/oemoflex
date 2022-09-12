@@ -1,0 +1,3 @@
+name,amount,bus,carrier,profile,region,tech,type
+A-biomass-demand,,A-biomass,biomass,A-biomass-demand-profile,A,demand,load
+B-biomass-demand,,B-biomass,biomass,B-biomass-demand-profile,B,demand,load
