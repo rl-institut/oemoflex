@@ -1,3 +1,20 @@
+biomass-import:
+  carrier: biomass
+  tech: import
+  type: shortage
+  foreign_keys:
+    bus: biomass
+  defaults:
+    output_parameters: "{}"
+
+biomass-demand:
+  carrier: biomass
+  tech: demand
+  type: load
+  foreign_keys:
+    bus: biomass
+    profile: biomass-demand-profile
+
 biomass-gt:
   carrier: biomass
   tech: gt
