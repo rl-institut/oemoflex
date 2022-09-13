@@ -29,6 +29,7 @@ setup(
     package_dir={"oemoflex": "oemoflex"},
     install_requires=[
         "pyyaml",
+        "dynaconf",
         "pandas",
         "oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular",
         "frictionless",
