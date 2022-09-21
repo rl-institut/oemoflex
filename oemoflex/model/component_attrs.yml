@@ -324,7 +324,7 @@ solar-thermalcollector:
   tech: thermalcollector
   type: volatile
   foreign_keys:
-    bus: heat_decentral
+    bus: heat
     profile: solar-thermalcollector-profile
   defaults:
     marginal_cost: 0
