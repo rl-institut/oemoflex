@@ -32,6 +32,7 @@ setup(
         "dynaconf",
         "pandas",
         "oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular",
+        "plotly",
         "frictionless",
     ],
     # black version is specified so that each contributor uses the same one
