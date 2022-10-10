@@ -622,19 +622,6 @@ def run_postprocessing(es):
         summed_flows_transmission, var_name="transmission_losses"
     )
 
-    # Collect existing (exogenous) capacity (units of power) and storage capacity (units of energy)
-    # Keep in mind - this has an index of the form (component, None).
-    # It is not attributed to a flow
-    capacity = filter_by_var_name(scalar_params, "capacity")
-
-    from_to_capacity = filter_by_var_name(scalar_params, "from_to_capacity")
-
-    to_from_capacity = filter_by_var_name(scalar_params, "to_from_capacity")
-
-    # Keep in mind - this has an index of the form (component, None).
-    # It is not attributed to a flow
-    storage_capacity = filter_by_var_name(scalar_params, "storage_capacity")
-
     # Collect invested (endogenous) capacity (units of power) and
     # storage capacity (units of energy)
 
@@ -720,10 +707,6 @@ def run_postprocessing(es):
         summed_flows,
         storage_losses,
         transmission_losses,
-        capacity,
-        storage_capacity,
-        from_to_capacity,
-        to_from_capacity,
         invested_capacity,
         invested_storage_capacity,
         invested_capacity_costs,
