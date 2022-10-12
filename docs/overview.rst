@@ -45,5 +45,27 @@ set the values of parameters for all components.
 **Postprocess results.** Results of an oemof.solph optimisation can be postprocessed and saved as
 a :class:`ResultsDataPackage <oemoflex.model.datapackage.ResultsDataPackage>`.
 
+Postprocessed results are stored as `csv` files in the following directory structure:
+
+.. code-block::
+
+    postprocessed
+    ├── sequences
+    │     ├── bus
+    │     ├── by_variable
+    │     ├── component
+    ├── objective.csv
+    ├── scalars.csv
+
+The directory `sequences` contains time series of flows. In directory `bus` flows from and to each bus can be found.
+In the directory `by_variable` a `csv` file contains all time series of the flows and another `csv` file contains the
+time series of the storage content of each storage component.
+In `component` there is a `csv` file for each component which contains the time series of flows from and to it.
+
+The result of the objective function of the optimized energy system is stored in `objective.csv`.
+The file `scalars.csv` includes the results aggregated over the optimisations time horizon.
+These include summed flows, storage losses, transmission losses, invested capacity, invested storage capacity,
+invested capacity costs, invested storage capacity costs, summed carrier costs, and summed marginal costs.
+
 **Plot results.** Plot methods help to visualize and understand the results of a scenario. Read the
 API documentation of :mod:`oemoflex.tools.plots <oemoflex.tools.plots>` for more details.
