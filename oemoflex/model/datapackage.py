@@ -134,56 +134,6 @@ class DataFramePackage:
         data.to_csv(path, sep=settings.SEPARATOR)
 
 
-def _separate_stacked_frame(dfp, frame_name, target_dir, group_by):
-    r"""
-    Separates a frame of the DataFramepackage with the structure
-    "name", "var_name", "var_value" into several frames according
-    to groupby into a target directory
-    """
-    assert frame_name in dfp.data, (
-        "Cannot group by component if stacked frame is " "missing."
-    )
-    # TODO: The method assumes a certain structure but does not assert it.
-
-    frame_to_separate = dfp.data.pop(frame_name)  # pop frame from data
-
-    dfp.rel_paths.pop(frame_name)  # pop path of frame from paths
-
-    separate_dfs = group_by_pivot(frame_to_separate, group_by=group_by)
-
-    dfp.data.update(separate_dfs)  # add separate frames to data
-
-    # add paths of separate frames
-    dfp.rel_paths.update(
-        {key: os.path.join(target_dir, key + ".csv") for key in separate_dfs.keys()}
-    )
-
-
-def _stack_frames(
-    dfp, frame_names, target_name, target_dir, unstacked_vars, index_vars
-):
-    r"""
-    Stacks given frames of a DataFramePackage into a single frame with a target name
-    and directory. The columns of the frames fall in two categories: index_vars that
-    remain unstack and unstacked_vars that will be stacked.
-    """
-    assert frame_names, "Cannot stack scalars if frames are not in ."
-
-    frames_to_stack = {}
-    for name in frame_names:
-        # pop the frames that should be stacked
-        frames_to_stack[name] = dfp.data.pop(name)
-
-        # pop the paths of the frames that should be stacked
-        dfp.rel_paths.pop(name)
-
-    # Write stacked data
-    dfp.data[target_name] = stack_frames(frames_to_stack, unstacked_vars, index_vars)
-
-    # set path for stacked data
-    dfp.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
-
-
 class EnergyDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -512,6 +462,31 @@ class ResultsDataPackage(DataFramePackage):
         )
 
 
+def _separate_stacked_frame(dfp, frame_name, target_dir, group_by):
+    r"""
+    Separates a frame of the DataFramepackage with the structure
+    "name", "var_name", "var_value" into several frames according
+    to groupby into a target directory
+    """
+    assert frame_name in dfp.data, (
+        "Cannot group by component if stacked frame is " "missing."
+    )
+    # TODO: The method assumes a certain structure but does not assert it.
+
+    frame_to_separate = dfp.data.pop(frame_name)  # pop frame from data
+
+    dfp.rel_paths.pop(frame_name)  # pop path of frame from paths
+
+    separate_dfs = group_by_pivot(frame_to_separate, group_by=group_by)
+
+    dfp.data.update(separate_dfs)  # add separate frames to data
+
+    # add paths of separate frames
+    dfp.rel_paths.update(
+        {key: os.path.join(target_dir, key + ".csv") for key in separate_dfs.keys()}
+    )
+
+
 def group_by_pivot(stacked_frame, group_by):
     def pivot_pandas_0_25_3_compatible(df, index, columns, values):
         _df = df.copy()
@@ -548,6 +523,31 @@ def group_by_pivot(stacked_frame, group_by):
         elements[name] = df
 
     return elements
+
+
+def _stack_frames(
+    dfp, frame_names, target_name, target_dir, unstacked_vars, index_vars
+):
+    r"""
+    Stacks given frames of a DataFramePackage into a single frame with a target name
+    and directory. The columns of the frames fall in two categories: index_vars that
+    remain unstack and unstacked_vars that will be stacked.
+    """
+    assert frame_names, "Cannot stack scalars if frames are not in ."
+
+    frames_to_stack = {}
+    for name in frame_names:
+        # pop the frames that should be stacked
+        frames_to_stack[name] = dfp.data.pop(name)
+
+        # pop the paths of the frames that should be stacked
+        dfp.rel_paths.pop(name)
+
+    # Write stacked data
+    dfp.data[target_name] = stack_frames(frames_to_stack, unstacked_vars, index_vars)
+
+    # set path for stacked data
+    dfp.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
 
 
 def stack_frames(frames_to_stack, vars_to_stack, index_vars):
