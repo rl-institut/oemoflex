@@ -10,6 +10,7 @@ from oemof.solph.views import convert_to_multiindex
 from oemoflex.model.model_structure import create_default_data
 from oemoflex.model.postprocessing import group_by_element, run_postprocessing
 from oemoflex.tools.helpers import load_yaml
+from oemoflex.config.config import settings
 
 
 module_path = os.path.dirname(os.path.abspath(__file__))
@@ -121,7 +122,7 @@ class DataFramePackage:
 
     @staticmethod
     def _read_resource(path):
-        return pd.read_csv(path, index_col=0)
+        return pd.read_csv(path, index_col=0, sep=settings.SEPARATOR)
 
     @staticmethod
     def _write_resource(data, path):
@@ -130,7 +131,7 @@ class DataFramePackage:
         if not os.path.exists(root):
             os.makedirs(root)
 
-        data.to_csv(path)
+        data.to_csv(path, sep=settings.SEPARATOR)
 
     def _separate_stacked_frame(self, frame_name, target_dir, group_by):
 

@@ -1,9 +1,13 @@
+import logging
+import os
+import warnings
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
-import os
 import plotly.graph_objects as go
-from collections import OrderedDict
 from matplotlib.ticker import EngFormatter
+
 import oemoflex.tools.helpers as helpers
 
 pd.plotting.register_matplotlib_converters()
@@ -95,17 +99,23 @@ def _rename_by_string_matching(columns, labels_dict):
         mapped : string
             String with new column name.
         """
-        mapped = [
-            value for key, value in dictionary.items() if any([key in y for y in tupl])
-        ]
+        mapped = {
+            key: value
+            for key, value in dictionary.items()
+            if any([key in y for y in tupl])
+        }
 
-        if len(mapped) > 1:
-            raise ValueError("Multiple labels are matching.")
-        elif not mapped:
-            raise KeyError(f"No label matches for {tupl}.")
-        else:
-            mapped = mapped[0]
-
+        if not mapped:
+            warnings.warn(f"No label matches for {tupl}. Could not map.")
+            return str(tupl)
+        elif len(mapped) == 1:
+            mapped = list(mapped.values())[0]
+        elif len(mapped) > 1:
+            logging.info(f"Found multiple matches for {tupl}: {mapped.values()}")
+            # map to longest key
+            longest_key = max(mapped, key=lambda x: len(x))
+            mapped = mapped[longest_key]
+            logging.info(f"Mapped {tupl} to {mapped}")
         return mapped
 
     def rename_duplicated(columns_tuple, columns_mapped, dictionary):
@@ -138,9 +148,10 @@ def _rename_by_string_matching(columns, labels_dict):
         mapped = [value for key, value in dictionary.items() if key in string]
 
         if len(mapped) > 1:
-            raise ValueError("Multiple labels are matching.")
+            raise ValueError(f"Multiple labels are matching for {string}: {mapped}")
         elif not mapped:
-            raise KeyError(f"No label matches for {string}.")
+            warnings.warn(f"No label matches for {string}. Could not map.")
+            return string
         else:
             mapped = mapped[0]
 
@@ -227,29 +238,31 @@ def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
     df_demand: pandas.DataFrame
         DataFrame with prepared data for dispatch plotting of demand.
     """
+    _df = df.copy()
+
     if labels_dict is None:
         labels_dict = default_labels_dict
 
     # identify consumers, which shall be plotted negative and
     # isolate column with demand and make its data positive again
-    df.columns = df.columns.to_flat_index()
-    for i in df.columns:
+    _df.columns = _df.columns.to_flat_index()
+    for i in _df.columns:
         if i[0] == bus_name:
-            df[i] = df[i] * -1
+            _df[i] = _df[i] * -1
         if demand_name in i[1]:
-            df_demand = (df[i] * -1).to_frame()
-            df.drop(columns=[i], inplace=True)
+            df_demand = (_df[i] * -1).to_frame()
+            _df.drop(columns=[i], inplace=True)
 
     # rename column names to match labels
-    df = map_labels(df, labels_dict)
+    _df = map_labels(_df, labels_dict)
     df_demand = map_labels(df_demand, labels_dict)
 
     # group columns with the same name, e.g. transmission busses by import and export
-    df = _group_agg_by_column(df)
+    _df = _group_agg_by_column(_df)
     # check columns on numeric values which are practical zero and replace them with 0.0
-    df = _replace_near_zeros(df)
+    _df = _replace_near_zeros(_df)
 
-    return df, df_demand
+    return _df, df_demand
 
 
 def filter_timeseries(df, start_date=None, end_date=None):
@@ -326,6 +339,8 @@ def stackplot(ax, df, colors_odict):
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
     """
+    assert not df.empty, "Dataframe is empty."
+
     _check_undefined_colors(df.columns, colors_odict.keys())
 
     # y is a list which gets the correct stack order from colors file
@@ -346,7 +361,7 @@ def stackplot(ax, df, colors_odict):
     ax.stackplot(df.index, y, colors=colors, labels=labels)
 
 
-def lineplot(ax, df, colors_odict):
+def lineplot(ax, df, colors_odict, linewidth=1):
     r"""
     Plots data as a lineplot.
 
@@ -358,14 +373,16 @@ def lineplot(ax, df, colors_odict):
         Dataframe with data.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
+    linewidth: float
+        Width of the line - set by default to 1.
     """
     _check_undefined_colors(df.columns, colors_odict.keys())
 
     for i in df.columns:
-        ax.plot(df.index, df[i], color=colors_odict[i], label=i)
+        ax.plot(df.index, df[i], color=colors_odict[i], linewidth=linewidth, label=i)
 
 
-def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
+def plot_dispatch(ax, df, df_demand, unit, colors_odict=None, linewidth=1):
     r"""
     Plots data as a dispatch plot. The demand is plotted as a line plot and
     suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
@@ -383,6 +400,8 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
         String with unit sign of plotted data on y-axis.
     colors_odict : collections.OrderedDictionary
         Ordered dictionary with labels as keys and colourcodes as values.
+    linewidth: float
+        Width of the line - set by default to 1.
     """
     assert not df.empty, "DataFrame is empty. Cannot plot empty data."
     assert (
@@ -412,13 +431,17 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None):
     for i in y_stack_pos:
         if df[i].isin([0]).all():
             y_stack_pos.remove(i)
-    stackplot(ax, df[y_stack_pos], colors_odict)
-    # check whether the list y_stack_neg is filled
-    if y_stack_neg != []:
+
+    # plot if there is positive data
+    if not df[y_stack_pos].empty:
+        stackplot(ax, df[y_stack_pos], colors_odict)
+
+    # plot if there is negative data
+    if not df[y_stack_neg].empty:
         stackplot(ax, df[y_stack_neg], colors_odict)
 
     # plot lineplot (demand)
-    lineplot(ax, df_demand, colors_odict)
+    lineplot(ax, df_demand, colors_odict, linewidth)
 
 
 def plot_dispatch_plotly(
