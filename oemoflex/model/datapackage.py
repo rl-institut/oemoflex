@@ -550,22 +550,28 @@ def group_by_pivot(stacked_frame, group_by):
     return elements
 
 
-def stack_frames(frames_to_stack, unstacked_vars, index_vars):
-
+def stack_frames(frames_to_stack, vars_to_stack, index_vars):
+    r"""
+    Takes several pd.DataFrames, a set of vars_to_stack and stacks them.
+    An index is set.
+    The columns are sorted.
+    """
     stacked = []
 
     for key, df in frames_to_stack.items():
 
         df.reset_index(inplace=True)
 
-        df = df.melt(unstacked_vars, var_name="var_name", value_name="var_value")
+        df = df.melt(vars_to_stack, var_name="var_name", value_name="var_value")
 
         stacked.append(df)
 
     stacked_frame = pd.concat(stacked)
 
+    # TODO: Is it necessary to set the index, or could this be performed outside of the function?
     stacked_frame.set_index(index_vars, inplace=True)
 
+    # TODO: Is it necessary to sort the columns, and could the order be other than alphabetic?
     scalars = stacked_frame[sorted(stacked_frame.columns)]
 
     return scalars
