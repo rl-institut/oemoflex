@@ -269,7 +269,7 @@ class EnergyDataPackage(DataFramePackage):
             component_names,
             target_name="component",
             target_dir=os.path.join("data", "elements"),
-            unstacked_vars=["name", "region", "carrier", "tech", "type"],
+            vars_to_stack=["name", "region", "carrier", "tech", "type"],
             index_vars=["name", "var_name"],
         )
 
@@ -457,7 +457,7 @@ class ResultsDataPackage(DataFramePackage):
             frame_names=element_names,
             target_name="scalars",
             target_dir="",
-            unstacked_vars=["scenario", "name", "region", "carrier", "tech", "type"],
+            vars_to_stack=["scenario", "name", "region", "carrier", "tech", "type"],
             index_vars=["scenario", "name", "var_name"],
         )
 
@@ -501,16 +501,14 @@ def group_by_pivot(stacked_frame, group_by):
 
         return _df_piv
 
-    elements = {}
+    separated_dfs = {}
     for group, df in stacked_frame.groupby(group_by):
-        name = "-".join(group)
+        name = "-".join(group)  # This ain't necessary - it is a convention.
 
         df = df.reset_index()
 
-        index = df.columns
-
         df = pivot_pandas_0_25_3_compatible(
-            df, index=index, columns="var_name", values="var_value"
+            df, index=df.columns, columns="var_name", values="var_value"
         )
 
         # set index and sort columns for comparability
@@ -520,18 +518,16 @@ def group_by_pivot(stacked_frame, group_by):
 
         df = df[sorted(df.columns)]
 
-        elements[name] = df
+        separated_dfs[name] = df
 
-    return elements
+    return separated_dfs
 
 
-def _stack_frames(
-    dfp, frame_names, target_name, target_dir, unstacked_vars, index_vars
-):
+def _stack_frames(dfp, frame_names, target_name, target_dir, vars_to_stack, index_vars):
     r"""
     Stacks given frames of a DataFramePackage into a single frame with a target name
     and directory. The columns of the frames fall in two categories: index_vars that
-    remain unstack and unstacked_vars that will be stacked.
+    remain unstack and vars_to_stack that will be stacked.
     """
     assert frame_names, "Cannot stack scalars if frames are not in ."
 
@@ -544,7 +540,7 @@ def _stack_frames(
         dfp.rel_paths.pop(name)
 
     # stack data
-    stacked_frame = stack_dataframes(dfs_to_stack, unstacked_vars, index_vars)
+    stacked_frame = stack_dataframes(dfs_to_stack, vars_to_stack, index_vars)
 
     # Write stacked data
     dfp.data[target_name] = stacked_frame
