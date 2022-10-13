@@ -572,6 +572,7 @@ def stack_dataframes(dfs_to_stack, vars_to_stack, index_vars):
     stacked_frame = pd.concat(stacked)
 
     # TODO: Is it necessary to set the index, or could this be performed outside of the function?
+    # Maybe it is only done to avoid sorting these in the next step?
     stacked_frame.set_index(index_vars, inplace=True)
 
     # TODO: Is it necessary to sort the columns, and could the order be other than alphabetic?
