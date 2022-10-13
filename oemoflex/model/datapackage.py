@@ -488,6 +488,10 @@ def _separate_stacked_frame(dfp, frame_name, target_dir, group_by):
 
 
 def group_by_pivot(stacked_frame, group_by):
+    r"""
+    Takes a stacked frame that has the index "name" and columns "var_name", "var_value".
+    Separates the frame by "group_by" and unstacks "var_name" so that it forms columns.
+    """
     def pivot_pandas_0_25_3_compatible(df, index, columns, values):
         _df = df.copy()
 
