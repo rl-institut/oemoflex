@@ -543,8 +543,11 @@ def _stack_frames(
         # pop the paths of the frames that should be stacked
         dfp.rel_paths.pop(name)
 
+    # stack data
+    stacked_frame = stack_dataframes(dfs_to_stack, unstacked_vars, index_vars)
+
     # Write stacked data
-    dfp.data[target_name] = stack_dataframes(dfs_to_stack, unstacked_vars, index_vars)
+    dfp.data[target_name] = stacked_frame
 
     # set path for stacked data
     dfp.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
