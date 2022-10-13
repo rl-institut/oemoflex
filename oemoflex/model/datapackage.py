@@ -535,30 +535,30 @@ def _stack_frames(
     """
     assert frame_names, "Cannot stack scalars if frames are not in ."
 
-    frames_to_stack = {}
+    dfs_to_stack = []
     for name in frame_names:
         # pop the frames that should be stacked
-        frames_to_stack[name] = dfp.data.pop(name)
+        dfs_to_stack.append(dfp.data.pop(name))
 
         # pop the paths of the frames that should be stacked
         dfp.rel_paths.pop(name)
 
     # Write stacked data
-    dfp.data[target_name] = stack_frames(frames_to_stack, unstacked_vars, index_vars)
+    dfp.data[target_name] = stack_dataframes(dfs_to_stack, unstacked_vars, index_vars)
 
     # set path for stacked data
     dfp.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
 
 
-def stack_frames(frames_to_stack, vars_to_stack, index_vars):
+def stack_dataframes(dfs_to_stack, vars_to_stack, index_vars):
     r"""
-    Takes several pd.DataFrames, a set of vars_to_stack and stacks them.
+    Takes a list of pd.DataFrames, a set of vars_to_stack and stacks them.
     An index is set.
     The columns are sorted.
     """
     stacked = []
 
-    for key, df in frames_to_stack.items():
+    for df in dfs_to_stack:
 
         df.reset_index(inplace=True)
 
