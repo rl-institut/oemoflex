@@ -109,6 +109,9 @@ class DataFramePackage:
                     name = os.path.splitext(file)[0]
                     rel_paths[name] = os.path.join(rel_path, file)
 
+        if not rel_paths:
+            raise Warning(f"No files with extension '{file_ext}' found.")
+
         return rel_paths
 
     def _load_csv(self, basepath, rel_paths):
