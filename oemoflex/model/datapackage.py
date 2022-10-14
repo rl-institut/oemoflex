@@ -487,7 +487,7 @@ def _dfp_separate_stacked_frame(dfp, frame_name, target_dir, group_by):
     )
 
 
-def df_separate_pivot(stacked_frame, separate_by):
+def df_separate_pivot(stacked_frame, separate_by, func_new_frame_name=None):
     r"""
     Takes a stacked frame that has the index "name" and columns "var_name", "var_value".
     Separates the frame by "group_by" and unstacks "var_name" so that it forms columns.
@@ -506,9 +506,14 @@ def df_separate_pivot(stacked_frame, separate_by):
 
         return _df_piv
 
+    if func_new_frame_name is None:
+        # This ain't necessary - it is a convention.
+        def func_new_frame_name(group):
+            return "-".join(group)
+
     separated_dfs = {}
     for group, df in stacked_frame.groupby(separate_by):
-        name = "-".join(group)  # This ain't necessary - it is a convention.
+        name = func_new_frame_name(group)
 
         df = df.reset_index()
 
