@@ -96,6 +96,9 @@ class DataFramePackage:
         Get paths to all files in a given directory relative
         to the root with a given file extension.
         """
+        if not os.path.exists(dir):
+            raise NotADirectoryError(f"Directory '{dir}' does not exist.")
+
         rel_paths = {}
         for root, dirs, files in os.walk(dir):
 
