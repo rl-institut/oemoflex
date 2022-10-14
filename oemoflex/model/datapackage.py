@@ -128,7 +128,7 @@ class DataFramePackage:
 
     @staticmethod
     def _read_resource(path):
-        return pd.read_csv(path, index_col=0, sep=settings.SEPARATOR)
+        return pd.read_csv(path, index_col=settings.INDEX_COL, sep=settings.SEPARATOR)
 
     @staticmethod
     def _write_resource(data, path):
