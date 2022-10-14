@@ -96,6 +96,9 @@ class DataFramePackage:
         Get paths to all files in a given directory relative
         to the root with a given file extension.
         """
+        if not os.path.exists(dir):
+            raise NotADirectoryError(f"Directory '{dir}' does not exist.")
+
         rel_paths = {}
         for root, dirs, files in os.walk(dir):
 
@@ -105,6 +108,9 @@ class DataFramePackage:
                 if file.endswith(file_ext):
                     name = os.path.splitext(file)[0]
                     rel_paths[name] = os.path.join(rel_path, file)
+
+        if not rel_paths:
+            raise Warning(f"No files with extension '{file_ext}' found.")
 
         return rel_paths
 
@@ -122,7 +128,7 @@ class DataFramePackage:
 
     @staticmethod
     def _read_resource(path):
-        return pd.read_csv(path, index_col=0, sep=settings.SEPARATOR)
+        return pd.read_csv(path, index_col=settings.INDEX_COL, sep=settings.SEPARATOR)
 
     @staticmethod
     def _write_resource(data, path):
@@ -132,6 +138,11 @@ class DataFramePackage:
             os.makedirs(root)
 
         data.to_csv(path, sep=settings.SEPARATOR)
+
+    def __repr__(self):
+        raw_repr = super().__repr__()
+        num_dfs = len(self.data.keys())
+        return f"{raw_repr} \n" f"Containing {str(num_dfs)} DataFrame(s)."
 
 
 class EnergyDataPackage(DataFramePackage):
