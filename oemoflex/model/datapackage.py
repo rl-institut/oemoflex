@@ -133,42 +133,6 @@ class DataFramePackage:
 
         data.to_csv(path, sep=settings.SEPARATOR)
 
-    def _separate_stacked_frame(self, frame_name, target_dir, group_by):
-
-        assert frame_name in self.data, (
-            "Cannot group by component if stacked frame is " "missing."
-        )
-
-        frame_to_separate = self.data.pop(frame_name)
-
-        self.rel_paths.pop(frame_name)
-
-        separate_dfs = group_by_pivot(frame_to_separate, group_by=group_by)
-
-        self.data.update(separate_dfs)
-
-        self.rel_paths.update(
-            {key: os.path.join(target_dir, key + ".csv") for key in separate_dfs.keys()}
-        )
-
-    def _stack_frames(
-        self, frame_names, target_name, target_dir, unstacked_vars, index_vars
-    ):
-
-        assert frame_names, "Cannot stack scalars if frames are not in ."
-
-        frames_to_stack = {}
-        for name in frame_names:
-            frames_to_stack[name] = self.data.pop(name)
-
-            self.rel_paths.pop(name)
-
-        self.data[target_name] = stack_frames(
-            frames_to_stack, unstacked_vars, index_vars
-        )
-
-        self.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
-
 
 class EnergyDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
@@ -300,11 +264,12 @@ class EnergyDataPackage(DataFramePackage):
             if is_element(rel_path) and not key == "bus"
         ]
 
-        self._stack_frames(
+        _dfp_stack_dataframes(
+            self,
             component_names,
             target_name="component",
             target_dir=os.path.join("data", "elements"),
-            unstacked_vars=["name", "region", "carrier", "tech", "type"],
+            vars_to_stack=["name", "region", "carrier", "tech", "type"],
             index_vars=["name", "var_name"],
         )
 
@@ -312,7 +277,8 @@ class EnergyDataPackage(DataFramePackage):
         r"""
         Unstacks a single component DataFrame into separate DataFrames for each component.
         """
-        self._separate_stacked_frame(
+        _dfp_separate_stacked_frame(
+            self,
             frame_name="component",
             target_dir=os.path.join("data", "elements"),
             group_by=["carrier", "tech"],
@@ -466,8 +432,11 @@ class ResultsDataPackage(DataFramePackage):
         r"""
         Separates scalar results such that each component is represented by one DataFrame.
         """
-        self._separate_stacked_frame(
-            frame_name="scalars", target_dir="elements", group_by=["carrier", "tech"]
+        _dfp_separate_stacked_frame(
+            self,
+            frame_name="scalars",
+            target_dir="elements",
+            group_by=["carrier", "tech"],
         )
 
     def to_stacked_scalars(self):
@@ -483,16 +452,55 @@ class ResultsDataPackage(DataFramePackage):
             key for key, rel_path in self.rel_paths.items() if is_element(rel_path)
         ]
 
-        self._stack_frames(
+        _dfp_stack_dataframes(
+            self,
             frame_names=element_names,
             target_name="scalars",
             target_dir="",
-            unstacked_vars=["scenario", "name", "region", "carrier", "tech", "type"],
+            vars_to_stack=["scenario", "name", "region", "carrier", "tech", "type"],
             index_vars=["scenario", "name", "var_name"],
         )
 
 
-def group_by_pivot(stacked_frame, group_by):
+def _dfp_separate_stacked_frame(dfp, frame_name, target_dir, group_by):
+    r"""
+    Separates a frame of the DataFramepackage with the structure
+    "name", "var_name", "var_value" into several frames according
+    to groupby into a target directory
+    """
+    assert (
+        frame_name in dfp.data
+    ), f"Cannot group by component if stacked frame {frame_name} is missing."
+
+    frame_to_separate = dfp.data.pop(frame_name)  # pop frame from data
+
+    dfp.rel_paths.pop(frame_name)  # pop path of frame from paths
+
+    separate_dfs = df_separate_pivot(frame_to_separate, separate_by=group_by)
+
+    dfp.data.update(separate_dfs)  # add separate frames to data
+
+    # add paths of separate frames
+    dfp.rel_paths.update(
+        {key: os.path.join(target_dir, key + ".csv") for key in separate_dfs.keys()}
+    )
+
+
+def df_separate_pivot(stacked_frame, separate_by, func_new_frame_name=None):
+    r"""
+    Takes a stacked frame that has the index or columns "name", "var_name", "var_value".
+    Separates the frame by "group_by" and unstacks "var_name" so that it forms columns.
+    """
+    # TODO: Check if this step is necessary only because function is used differently in some cases.
+    _stacked_frame = stacked_frame.reset_index()
+
+    # assert that the necessary columns are present
+    missing_columns = {"name", "var_name", "var_value"}.difference(
+        set(_stacked_frame.columns)
+    )
+
+    assert not missing_columns, f"{missing_columns} in {_stacked_frame.columns}"
+
     def pivot_pandas_0_25_3_compatible(df, index, columns, values):
         _df = df.copy()
 
@@ -506,16 +514,17 @@ def group_by_pivot(stacked_frame, group_by):
 
         return _df_piv
 
-    elements = {}
-    for group, df in stacked_frame.groupby(group_by):
-        name = "-".join(group)
+    if func_new_frame_name is None:
+        # This ain't necessary - it is a convention.
+        def func_new_frame_name(group):
+            return "-".join(group)
 
-        df = df.reset_index()
-
-        index = df.columns
+    separated_dfs = {}
+    for group, df in _stacked_frame.groupby(separate_by):
+        name = func_new_frame_name(group)
 
         df = pivot_pandas_0_25_3_compatible(
-            df, index=index, columns="var_name", values="var_value"
+            df, index=df.columns, columns="var_name", values="var_value"
         )
 
         # set index and sort columns for comparability
@@ -525,27 +534,62 @@ def group_by_pivot(stacked_frame, group_by):
 
         df = df[sorted(df.columns)]
 
-        elements[name] = df
+        separated_dfs[name] = df
 
-    return elements
+    return separated_dfs
 
 
-def stack_frames(frames_to_stack, unstacked_vars, index_vars):
+def _dfp_stack_dataframes(
+    dfp, frame_names, target_name, target_dir, vars_to_stack, index_vars
+):
+    r"""
+    Stacks given frames of a DataFramePackage into a single frame with a target name
+    and directory. The columns of the frames fall in two categories: index_vars that
+    remain unstack and vars_to_stack that will be stacked.
+    """
+    assert frame_names, "Cannot stack scalars if frames are not in ."
 
+    dfs_to_stack = []
+    for name in frame_names:
+        # pop the frames that should be stacked
+        dfs_to_stack.append(dfp.data.pop(name))
+
+        # pop the paths of the frames that should be stacked
+        dfp.rel_paths.pop(name)
+
+    # stack data
+    stacked_frame = stack_dataframes(dfs_to_stack, vars_to_stack, index_vars)
+
+    # Write stacked data
+    dfp.data[target_name] = stacked_frame
+
+    # set path for stacked data
+    dfp.rel_paths[target_name] = os.path.join(target_dir, target_name + ".csv")
+
+
+def stack_dataframes(dfs_to_stack, vars_to_stack, index_vars):
+    r"""
+    Takes a list of pd.DataFrames, a set of vars_to_stack and stacks them.
+    An index is set.
+    The columns are sorted.
+    """
     stacked = []
 
-    for key, df in frames_to_stack.items():
+    for df in dfs_to_stack:
 
         df.reset_index(inplace=True)
 
-        df = df.melt(unstacked_vars, var_name="var_name", value_name="var_value")
+        df = df.melt(vars_to_stack, var_name="var_name", value_name="var_value")
 
         stacked.append(df)
 
     stacked_frame = pd.concat(stacked)
 
+    # TODO: Is it necessary to set the index, or could this be performed outside of the function?
+    # Maybe it is only done to avoid sorting these in the next step?
     stacked_frame.set_index(index_vars, inplace=True)
 
+    # TODO: Is it necessary to sort the columns, and could the order be other than alphabetic?
     scalars = stacked_frame[sorted(stacked_frame.columns)]
 
     return scalars
