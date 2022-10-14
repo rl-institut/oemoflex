@@ -264,7 +264,7 @@ class EnergyDataPackage(DataFramePackage):
             if is_element(rel_path) and not key == "bus"
         ]
 
-        _stack_frames(
+        _dfp_stack_dataframes(
             self,
             component_names,
             target_name="component",
@@ -277,7 +277,7 @@ class EnergyDataPackage(DataFramePackage):
         r"""
         Unstacks a single component DataFrame into separate DataFrames for each component.
         """
-        _separate_stacked_frame(
+        _dfp_separate_stacked_frame(
             self,
             frame_name="component",
             target_dir=os.path.join("data", "elements"),
@@ -432,7 +432,7 @@ class ResultsDataPackage(DataFramePackage):
         r"""
         Separates scalar results such that each component is represented by one DataFrame.
         """
-        _separate_stacked_frame(
+        _dfp_separate_stacked_frame(
             self,
             frame_name="scalars",
             target_dir="elements",
@@ -452,7 +452,7 @@ class ResultsDataPackage(DataFramePackage):
             key for key, rel_path in self.rel_paths.items() if is_element(rel_path)
         ]
 
-        _stack_frames(
+        _dfp_stack_dataframes(
             self,
             frame_names=element_names,
             target_name="scalars",
@@ -462,7 +462,7 @@ class ResultsDataPackage(DataFramePackage):
         )
 
 
-def _separate_stacked_frame(dfp, frame_name, target_dir, group_by):
+def _dfp_separate_stacked_frame(dfp, frame_name, target_dir, group_by):
     r"""
     Separates a frame of the DataFramepackage with the structure
     "name", "var_name", "var_value" into several frames according
@@ -477,7 +477,7 @@ def _separate_stacked_frame(dfp, frame_name, target_dir, group_by):
 
     dfp.rel_paths.pop(frame_name)  # pop path of frame from paths
 
-    separate_dfs = group_by_pivot(frame_to_separate, group_by=group_by)
+    separate_dfs = df_separate_pivot(frame_to_separate, separate_by=group_by)
 
     dfp.data.update(separate_dfs)  # add separate frames to data
 
@@ -487,11 +487,12 @@ def _separate_stacked_frame(dfp, frame_name, target_dir, group_by):
     )
 
 
-def group_by_pivot(stacked_frame, group_by):
+def df_separate_pivot(stacked_frame, separate_by):
     r"""
     Takes a stacked frame that has the index "name" and columns "var_name", "var_value".
     Separates the frame by "group_by" and unstacks "var_name" so that it forms columns.
     """
+
     def pivot_pandas_0_25_3_compatible(df, index, columns, values):
         _df = df.copy()
 
@@ -506,7 +507,7 @@ def group_by_pivot(stacked_frame, group_by):
         return _df_piv
 
     separated_dfs = {}
-    for group, df in stacked_frame.groupby(group_by):
+    for group, df in stacked_frame.groupby(separate_by):
         name = "-".join(group)  # This ain't necessary - it is a convention.
 
         df = df.reset_index()
@@ -527,7 +528,9 @@ def group_by_pivot(stacked_frame, group_by):
     return separated_dfs
 
 
-def _stack_frames(dfp, frame_names, target_name, target_dir, vars_to_stack, index_vars):
+def _dfp_stack_dataframes(
+    dfp, frame_names, target_name, target_dir, vars_to_stack, index_vars
+):
     r"""
     Stacks given frames of a DataFramePackage into a single frame with a target name
     and directory. The columns of the frames fall in two categories: index_vars that
