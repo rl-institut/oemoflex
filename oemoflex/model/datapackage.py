@@ -468,10 +468,9 @@ def _dfp_separate_stacked_frame(dfp, frame_name, target_dir, group_by):
     "name", "var_name", "var_value" into several frames according
     to groupby into a target directory
     """
-    assert frame_name in dfp.data, (
-        "Cannot group by component if stacked frame is " "missing."
-    )
-    # TODO: The method assumes a certain structure but does not assert it.
+    assert (
+        frame_name in dfp.data
+    ), f"Cannot group by component if stacked frame {frame_name} is missing."
 
     frame_to_separate = dfp.data.pop(frame_name)  # pop frame from data
 
