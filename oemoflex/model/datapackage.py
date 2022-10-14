@@ -139,6 +139,11 @@ class DataFramePackage:
 
         data.to_csv(path, sep=settings.SEPARATOR)
 
+    def __repr__(self):
+        raw_repr = super().__repr__()
+        num_dfs = len(self.data.keys())
+        return f"{raw_repr} \n" f"Containing {str(num_dfs)} DataFrame(s)."
+
 
 class EnergyDataPackage(DataFramePackage):
     def __init__(self, *args, **kwargs):
