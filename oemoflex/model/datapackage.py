@@ -488,9 +488,18 @@ def _dfp_separate_stacked_frame(dfp, frame_name, target_dir, group_by):
 
 def df_separate_pivot(stacked_frame, separate_by, func_new_frame_name=None):
     r"""
-    Takes a stacked frame that has the index "name" and columns "var_name", "var_value".
+    Takes a stacked frame that has the index or columns "name", "var_name", "var_value".
     Separates the frame by "group_by" and unstacks "var_name" so that it forms columns.
     """
+    # TODO: Check if this step is necessary only because function is used differently in some cases.
+    _stacked_frame = stacked_frame.reset_index()
+
+    # assert that the necessary columns are present
+    missing_columns = {"name", "var_name", "var_value"}.difference(
+        set(_stacked_frame.columns)
+    )
+
+    assert not missing_columns, f"{missing_columns} in {_stacked_frame.columns}"
 
     def pivot_pandas_0_25_3_compatible(df, index, columns, values):
         _df = df.copy()
@@ -511,10 +520,8 @@ def df_separate_pivot(stacked_frame, separate_by, func_new_frame_name=None):
             return "-".join(group)
 
     separated_dfs = {}
-    for group, df in stacked_frame.groupby(separate_by):
+    for group, df in _stacked_frame.groupby(separate_by):
         name = func_new_frame_name(group)
-
-        df = df.reset_index()
 
         df = pivot_pandas_0_25_3_compatible(
             df, index=df.columns, columns="var_name", values="var_value"
