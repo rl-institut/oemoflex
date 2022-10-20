@@ -58,8 +58,7 @@ Postprocessed results are stored as `csv` files in the following directory struc
     ├── scalars.csv
 
 The directory `sequences` contains time series of flows. In directory `bus` flows from and to each bus can be found.
-In the directory `by_variable` a `csv` file contains all time series of the flows and another `csv` file contains the
-time series of the storage content of each storage component.
+The `by_variable` directory contains `csv` files with time series of all optimized variables.
 In `component` there is a `csv` file for each component which contains the time series of flows from and to it.
 
 The result of the objective function of the optimized energy system is stored in `objective.csv`.
