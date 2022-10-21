@@ -12,8 +12,12 @@ energy systems that can be optimized with oemof.solph. You want to focus on the 
 modeling: Find suitable data and make assumptions to build meaningful scenarios and interpret them.
 To support you with that, oemoflex helps you to:
 
-Define **schemas for tabular data packages** that describe energy systems. The schemas for different
-types of components are defined in
+
+Define schemas for tabular data packages
+========================================
+
+The schemas describe the energy systems and are defined for different
+types of components in
 `facade_attrs <https://github.com/rl-institut/oemoflex/tree/dev/oemoflex/model/facade_attrs>`_.
 The files `component_attrs.yml <https://github.com/rl-institut/oemoflex/blob/dev/oemoflex/model/component_attrs.yml>`_
 and `busses.yml <https://github.com/rl-institut/oemoflex/blob/dev/oemoflex/model/busses.yml>`_
