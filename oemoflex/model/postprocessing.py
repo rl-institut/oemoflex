@@ -42,8 +42,8 @@ class Calculation(abc.ABC):
     """
     Abstract class for calculations
 
-    Dependent calculations are defined in 'depends_on' and automatically added to calculation 'tree' if not yet present.
-    Function 'calculate_result' is abstract and must be implemented by child class.
+    Dependent calculations are defined in `depends_on` and automatically added to calculation 'tree' if not yet present.
+    Function `calculate_result` is abstract and must be implemented by child class.
     """
     depends_on: Dict[str, "Calculation"] = None
 
@@ -195,7 +195,7 @@ class SummedCarrierCosts(Calculation):
     """
     Calculates summed carrier costs
 
-    An oemof.tabular convention: Carrier costs are on inputs, marginal costs on output
+    An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
     depends_on = {"summed_var_costs": SummedVariableCosts}
 
@@ -207,7 +207,7 @@ class SummedMarginalCosts(Calculation):
     """
     Calculates summed marginal costs
 
-    An oemof.tabular convention: Carrier costs are on inputs, marginal costs on output
+    An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
     depends_on = {"summed_var_costs": SummedVariableCosts}
 
