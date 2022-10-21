@@ -8,7 +8,8 @@ from frictionless import Package
 from oemof.solph.views import convert_to_multiindex
 
 from oemoflex.model.model_structure import create_default_data
-from oemoflex.model.postprocessing import group_by_element, run_postprocessing
+from oemoflex.model.postprocessing import run_postprocessing
+from oemoflex.model.postprocessing_utils import group_by_element
 from oemoflex.tools.helpers import load_yaml
 from oemoflex.config.config import settings
 
