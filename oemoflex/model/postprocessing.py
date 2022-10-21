@@ -12,6 +12,7 @@ class CalculationError(Exception):
 
 class Calculator:
     """Entity to gather calculations and their results"""
+
     def __init__(self, scalar_params, scalars, sequences_params, sequences):
         self.calculations = {}
         self.scalar_params = scalar_params
@@ -23,7 +24,9 @@ class Calculator:
         """Adds calculation to calculations 'tree' if not yet present"""
         if isinstance(calculation, Calculation):
             if calculation.__class__.__name__ in self.calculations:
-                raise CalculationError(f"Calculation '{calculation.__class__.__name__}' already exists in calculator")
+                raise CalculationError(
+                    f"Calculation '{calculation.__class__.__name__}' already exists in calculator"
+                )
             self.calculations[calculation.__class__.__name__] = calculation
         else:
             if calculation.__name__ in self.calculations:
@@ -42,9 +45,11 @@ class Calculation(abc.ABC):
     """
     Abstract class for calculations
 
-    Dependent calculations are defined in `depends_on` and automatically added to calculation 'tree' if not yet present.
+    Dependent calculations are defined in `depends_on` and automatically added to
+    calculation 'tree' if not yet present.
     Function `calculate_result` is abstract and must be implemented by child class.
     """
+
     depends_on: Dict[str, "Calculation"] = None
 
     def __init__(self, calculator: Calculator):
@@ -105,7 +110,9 @@ class StorageLosses(Calculation):
     depends_on = {"summed_flows": SummedFlows}
 
     def calculate_result(self):
-        summed_flows_storage = ppu.filter_series_by_component_attr(self.dependency("summed_flows"), type="storage")
+        summed_flows_storage = ppu.filter_series_by_component_attr(
+            self.dependency("summed_flows"), type="storage"
+        )
         return ppu.get_losses(summed_flows_storage, var_name="storage_losses")
 
 
@@ -116,14 +123,16 @@ class TransmissionLosses(Calculation):
         summed_flows_transmission = ppu.filter_series_by_component_attr(
             self.dependency("summed_flows"), type="link"
         )
-        return ppu.get_losses(
-            summed_flows_transmission, var_name="transmission_losses"
-        )
+        return ppu.get_losses(summed_flows_transmission, var_name="transmission_losses")
 
 
 class Investment(Calculation):
     def calculate_result(self):
-        return None if (self.scalars is None or self.scalars.empty) else ppu.filter_by_var_name(self.scalars, "invest")
+        return (
+            None
+            if (self.scalars is None or self.scalars.empty)
+            else ppu.filter_by_var_name(self.scalars, "invest")
+        )
 
 
 class EPCosts(Calculation):
@@ -170,7 +179,10 @@ class InvestedCapacityCosts(Calculation):
 
 
 class InvestedStorageCapacityCosts(Calculation):
-    depends_on = {"invested_storage_capacity": InvestedStorageCapacity, "ep_costs": EPCosts}
+    depends_on = {
+        "invested_storage_capacity": InvestedStorageCapacity,
+        "ep_costs": EPCosts,
+    }
 
     def calculate_result(self):
         invested_storage_capacity_costs = ppu.multiply_var_with_param(
@@ -188,7 +200,9 @@ class SummedVariableCosts(Calculation):
     depends_on = {"summed_flows": SummedFlows}
 
     def calculate_result(self):
-        return ppu.get_summed_variable_costs(self.dependency("summed_flows"), self.scalar_params)
+        return ppu.get_summed_variable_costs(
+            self.dependency("summed_flows"), self.scalar_params
+        )
 
 
 class SummedCarrierCosts(Calculation):
@@ -197,6 +211,7 @@ class SummedCarrierCosts(Calculation):
 
     An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
+
     depends_on = {"summed_var_costs": SummedVariableCosts}
 
     def calculate_result(self):
@@ -209,6 +224,7 @@ class SummedMarginalCosts(Calculation):
 
     An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
+
     depends_on = {"summed_var_costs": SummedVariableCosts}
 
     def calculate_result(self):
@@ -220,7 +236,7 @@ class TotalSystemCosts(Calculation):
         "icc": InvestedCapacityCosts,
         "iscc": InvestedStorageCapacityCosts,
         "scc": SummedCarrierCosts,
-        "smc": SummedMarginalCosts
+        "smc": SummedMarginalCosts,
     }
 
     def calculate_result(self):
