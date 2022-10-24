@@ -140,6 +140,18 @@ def create_default_data(
         component_attrs, select_components
     )
 
+    transmission_without_link = [
+        True
+        for comp in selected_component_attrs.values()
+        if (("type", "link") in comp.items() and select_links is None)
+    ]
+
+    if transmission_without_link:
+        raise ValueError(
+            "You have electricity transmission in your components but no link. "
+            "Please define links."
+        )
+
     # Create empty dictionaries for the dataframes and their relative paths in the datapackage.
     data = {}
 
