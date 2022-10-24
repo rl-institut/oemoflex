@@ -29,9 +29,12 @@ setup(
     package_dir={"oemoflex": "oemoflex"},
     install_requires=[
         "pyyaml",
+        "dynaconf",
         "pandas",
         "oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular",
+        "plotly",
         "frictionless",
+        "matplotlib",
     ],
     # black version is specified so that each contributor uses the same one
     extras_require={"dev": ["pytest", "black==20.8b1", "coverage", "flake8"]},
