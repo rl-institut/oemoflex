@@ -5,7 +5,8 @@ import pathlib
 
 from oemof.solph import EnergySystem
 
-from oemoflex.model import postprocessing
+import oemoflex.postprocessing.postprocessing
+from oemoflex.postprocessing import core
 
 path_to_oemof_b3 = str(pathlib.Path(__file__).parent.parent.parent / "oemof-B3")
 sys.path.append(path_to_oemof_b3)  # FIXME: Workaround to restore dump from oemof-B3
@@ -19,7 +20,7 @@ def test_postprocessing_with_dump():
     for scenario in scenarios:
         es = EnergySystem()
         es.restore(TEST_FILES_DIR / "es_dumps", filename=f"{scenario}.oemof")
-        results: pandas.DataFrame = postprocessing.run_postprocessing(es)
+        results: pandas.DataFrame = oemoflex.postprocessing.postprocessing.run_postprocessing(es)
         results["scenario"] = scenario
         results = results.reset_index()
         results = results.astype({"var_value": "float64"})
