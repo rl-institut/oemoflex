@@ -1,4 +1,6 @@
 import abc
+import pandas as pd
+import enum
 from typing import Dict
 
 
@@ -6,15 +8,60 @@ class CalculationError(Exception):
     """Raised if something is wrong in calculation"""
 
 
+class DataType(enum.Enum):
+    Scalars = "scalars"
+    Sequences = "sequences"
+
+
 class Calculator:
     """Entity to gather calculations and their results"""
 
-    def __init__(self, scalar_params, scalars, sequences_params, sequences):
+    def __init__(self, input_parameters, output_parameters):
         self.calculations = {}
-        self.scalar_params = scalar_params
-        self.scalars = scalars
-        self.sequences_params = sequences_params
-        self.sequences = sequences
+        self.scalar_params = self.__init_df_from_oemof_data(
+            input_parameters, DataType.Scalars
+        )
+        self.scalars = self.__init_df_from_oemof_data(
+            output_parameters, DataType.Scalars
+        )
+        self.sequences_params = self.__init_df_from_oemof_data(
+            input_parameters, DataType.Sequences
+        )
+        self.sequences = self.__init_df_from_oemof_data(
+            output_parameters, DataType.Sequences
+        )
+
+    @staticmethod
+    def __init_df_from_oemof_data(oemof_data, filter_: DataType):
+        r"""
+        Converts sequences dictionary to a multi-indexed
+        DataFrame.
+        """
+        data = {
+            key: value[filter_.value]
+            for key, value in oemof_data.items()
+            if filter_.value in value
+        }
+        result = pd.concat(data.values(), 0 if filter_ == DataType.Scalars else 1)
+
+        if result.empty:
+            return None
+
+        # adapted from oemof.solph.views' node() function
+        tuples = {
+            key: list(value.index if filter_ == DataType.Scalars else value.columns)
+            for key, value in data.items()
+        }
+        tuples = [tuple((*k, m) for m in v) for k, v in tuples.items()]
+        tuples = [c for sublist in tuples for c in sublist]
+        if filter_ == DataType.Scalars:
+            result.index = pd.MultiIndex.from_tuples(tuples)
+            result.index.names = ("source", "target", "var_name")
+        else:
+            result.columns = pd.MultiIndex.from_tuples(tuples)
+            result.columns.names = ("source", "target", "var_name")
+
+        return result
 
     def add(self, calculation):
         """Adds calculation to calculations 'tree' if not yet present"""

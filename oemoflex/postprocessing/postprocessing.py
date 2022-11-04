@@ -153,23 +153,8 @@ class TotalSystemCosts(Calculation):
 
 
 def run_postprocessing(es):
-
-    # separate scalar and sequences in results
-    scalars = ppu.get_scalars(es.results)
-    scalars = ppu.scalars_to_df(scalars)
-
-    sequences = ppu.get_sequences(es.results)
-    sequences = ppu.sequences_to_df(sequences)
-
-    # separate scalars and sequences in parameters
-    scalar_params = ppu.get_scalars(es.params)
-    scalar_params = ppu.scalars_to_df(scalar_params)
-
-    sequences_params = ppu.get_sequences(es.params)
-    sequences_params = ppu.sequences_to_df(sequences_params)
-
     # Setup calculations
-    calculator = Calculator(scalar_params, scalars, sequences_params, sequences)
+    calculator = Calculator(es.params, es.results)
 
     summed_flows = SummedFlows(calculator).result
     storage_losses = StorageLosses(calculator).result

@@ -1,54 +1,6 @@
-import copy
-
 import numpy as np
 import pandas as pd
 from oemof.solph import Bus, EnergySystem
-
-
-def get_sequences(dict):
-    r"""
-    Gets sequences from oemof.solph's parameter or results dictionary.
-
-    Parameters
-    ----------
-    dict : dict
-        oemof.solph's parameter or results dictionary
-
-    Returns
-    -------
-    seq : dict
-        dictionary containing sequences.
-    """
-    _dict = copy.deepcopy(dict)
-
-    seq = {
-        key: value["sequences"] for key, value in _dict.items() if "sequences" in value
-    }
-
-    return seq
-
-
-def get_scalars(dict):
-    r"""
-    Gets scalars from oemof.solph's parameter or results dictionary.
-
-    Parameters
-    ----------
-    dict : dict
-        oemof.solph's parameter or results dictionary
-
-    Returns
-    -------
-    seq : dict
-        dictionary containing scalars.
-    """
-    _dict = copy.deepcopy(dict)
-
-    scalars = {
-        key: value["scalars"] for key, value in _dict.items() if "scalars" in value
-    }
-
-    return scalars
 
 
 def drop_component_to_component(series):
@@ -197,51 +149,6 @@ def get_outputs(series):
     outputs = series.loc[output_ids]
 
     return outputs
-
-
-def sequences_to_df(dict):
-    r"""
-    Converts sequences dictionary to a multi-indexed
-    DataFrame.
-    """
-    result = pd.concat(dict.values(), 1)
-
-    # adapted from oemof.solph.views' node() function
-    tuples = {key: [c for c in value.columns] for key, value in dict.items()}
-
-    tuples = [tuple((*k, m) for m in v) for k, v in tuples.items()]
-
-    tuples = [c for sublist in tuples for c in sublist]
-
-    result.columns = pd.MultiIndex.from_tuples(tuples)
-
-    result.columns.names = ("source", "target", "var_name")
-
-    return result
-
-
-def scalars_to_df(dict):
-    r"""
-    Converts scalars dictionary to a multi-indexed
-    DataFrame.
-    """
-    result = pd.concat(dict.values(), 0)
-
-    if result.empty:
-        return None
-
-    # adapted from oemof.solph.views' node() function
-    tuples = {key: [c for c in value.index] for key, value in dict.items()}
-
-    tuples = [tuple((*k, m) for m in v) for k, v in tuples.items()]
-
-    tuples = [c for sublist in tuples for c in sublist]
-
-    result.index = pd.MultiIndex.from_tuples(tuples)
-
-    result.index.names = ("source", "target", "var_name")
-
-    return result
 
 
 def sum_flows(df):
