@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from oemoflex.postprocessing import helper as ppu
 from oemoflex.postprocessing.core import Calculation, Calculator
@@ -10,8 +11,35 @@ class SummedFlows(Calculation):
         return ppu.drop_component_to_component(summed_flows, self.busses)
 
 
-class StorageLosses(Calculation):
+class Losses(Calculation):
     depends_on = {"summed_flows": SummedFlows}
+    var_name = None
+
+    def _calculate_losses(self, summed_flows):
+        r"""
+        Calculate losses within components as the difference of summed input
+        to output.
+        """
+        if not self.var_name:
+            raise ValueError("var_name has to be set")
+        inputs = ppu.get_inputs(summed_flows, self.busses)
+        outputs = ppu.get_outputs(summed_flows, self.busses)
+        inputs = inputs.groupby("target").sum()
+        outputs = outputs.groupby("source").sum()
+        losses = inputs - outputs
+
+        # Create MultiIndex:
+        losses.index.name = "source"
+        losses = losses.reset_index()
+        losses["target"] = np.nan
+        losses["var_name"] = self.var_name
+        losses.set_index(["source", "target", "var_name"], inplace=True)
+        return losses[0]  # Return Series instead of DataFrame
+
+
+class StorageLosses(Losses):
+    depends_on = {"summed_flows": SummedFlows}
+    var_name = "storage_losses"
 
     def calculate_result(self):
         summed_flows_storage = ppu.filter_series_by_component_attr(
@@ -20,13 +48,12 @@ class StorageLosses(Calculation):
             busses=self.busses,
             type="storage",
         )
-        return ppu.get_losses(
-            summed_flows_storage, var_name="storage_losses", busses=self.busses
-        )
+        return self._calculate_losses(summed_flows_storage)
 
 
-class TransmissionLosses(Calculation):
+class TransmissionLosses(Losses):
     depends_on = {"summed_flows": SummedFlows}
+    var_name = "transmission_losses"
 
     def calculate_result(self):
         summed_flows_transmission = ppu.filter_series_by_component_attr(
@@ -35,11 +62,7 @@ class TransmissionLosses(Calculation):
             busses=self.busses,
             type="link",
         )
-        return ppu.get_losses(
-            summed_flows_transmission,
-            var_name="transmission_losses",
-            busses=self.busses,
-        )
+        return self._calculate_losses(summed_flows_transmission)
 
 
 class Investment(Calculation):
@@ -116,9 +139,17 @@ class SummedVariableCosts(Calculation):
     depends_on = {"summed_flows": SummedFlows}
 
     def calculate_result(self):
-        return ppu.get_summed_variable_costs(
-            self.dependency("summed_flows"), self.scalar_params
+        variable_costs = ppu.filter_by_var_name(self.scalar_params, "variable_costs").unstack(2)[
+            "variable_costs"
+        ]
+        variable_costs = variable_costs.loc[variable_costs != 0]
+        summed_flows = self.dependency("summed_flows").unstack(2).loc[:, "flow"]
+
+        summed_variable_costs = ppu.multiply_var_with_param(summed_flows, variable_costs)
+        summed_variable_costs = ppu.set_index_level(
+            summed_variable_costs, level="var_name", value="summed_variable_costs"
         )
+        return summed_variable_costs
 
 
 class SummedCarrierCosts(Calculation):
@@ -156,12 +187,17 @@ class TotalSystemCosts(Calculation):
     }
 
     def calculate_result(self):
-        return ppu.get_total_system_cost(
-            self.dependency("icc"),
-            self.dependency("iscc"),
-            self.dependency("scc"),
-            self.dependency("smc"),
+        all_costs = pd.concat(
+            [
+                self.dependency("icc"),
+                self.dependency("iscc"),
+                self.dependency("scc"),
+                self.dependency("smc"),
+            ]
         )
+        index = pd.MultiIndex.from_tuples([("system", "total_system_cost")])
+        total_system_cost = pd.DataFrame({"var_value": [all_costs.sum()]}, index=index)
+        return total_system_cost
 
 
 def run_postprocessing(es):
@@ -234,6 +270,6 @@ def run_postprocessing(es):
     # TODO: to be provided differently.
     # all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
     all_scalars = pd.concat([all_scalars, total_system_costs], axis=0)
-    all_scalars = ppu.sort_scalars(all_scalars)
+    all_scalars = all_scalars.sort_values(by=["carrier", "tech", "var_name"])
 
     return all_scalars

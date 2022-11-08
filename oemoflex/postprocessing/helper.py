@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-from functools import partial
-from oemof.solph import Bus, EnergySystem
 
 
 def drop_component_to_component(series, busses):
@@ -54,9 +52,7 @@ def get_component_from_oemof_tuple(oemof_tuple, busses):
     component : oemof.solph component
     """
     component_id = get_component_id_in_tuple(oemof_tuple, busses)
-
     component = oemof_tuple[component_id]
-
     return component
 
 
@@ -146,135 +142,14 @@ def sum_flows(df):
     return df
 
 
-def substract_output_from_input(inputs, outputs, var_name):
-    r"""
-    Calculates the differences of output from input.
-    """
-
-    def reduce_component_index(series, level):
-
-        _series = series.copy()
-
-        _series.name = "var_value"
-
-        _df = pd.DataFrame(_series)
-
-        _df.reset_index(inplace=True)
-
-        _df = _df[[level, "var_value"]]
-
-        _df.set_index(level, inplace=True)
-
-        return _df
-
-    _inputs = reduce_component_index(inputs, "target")
-
-    _outputs = reduce_component_index(outputs, "source")
-
-    losses = _inputs - _outputs
-
-    losses.index.name = "source"
-
-    losses.reset_index(inplace=True)
-
-    losses["target"] = np.nan
-
-    losses["var_name"] = var_name
-
-    losses.set_index(["source", "target", "var_name"], inplace=True)
-
-    losses = losses["var_value"]  # Switching back to series.
-    # TODO: Use DataFrame or Series more consistently.
-
-    return losses
-
-
-def get_losses(summed_flows, var_name, busses):
-    r"""
-    Calculate losses within components as the difference of summed input
-    to output.
-    """
-    inputs = get_inputs(summed_flows, busses)
-    outputs = get_outputs(summed_flows, busses)
-    inputs = inputs.groupby("target").sum()
-    outputs = outputs.groupby("source").sum()
-    losses = substract_output_from_input(inputs, outputs, var_name)
-    return losses
-
-
-def index_to_str(index):
-    r"""
-    Converts multiindex labels to string.
-    """
-    index = index.map(lambda tupl: tuple(str(node) for node in tupl))
-    return index
-
-
-def reindex_series_on_index(series, index_b):
-    r"""
-    Reindexes series on new index containing objects that have the same string
-    representation. A workaround necessary because oemof.solph results and params
-    have differences in the objects of the indices, even if their label is the same.
-    """
-    _index_b = index_b.copy()
-
-    _series = series.copy()
-
-    _index_b = index_to_str(_index_b)
-
-    _series.index = index_to_str(_series.index)
-
-    _series = _series.reindex(_index_b)
-
-    _series.index = index_b
-
-    _series = _series.loc[~_series.isna()]
-
-    return _series
-
-
 def multiply_var_with_param(var, param):
     r"""
     Multiplies a variable (a result from oemof) with a
     parameter.
     """
-    param = reindex_series_on_index(param, var.index)
-
     result = param * var
-
     result = result.loc[~result.isna()]
-
     return result
-
-
-def get_summed_variable_costs(summed_flows, scalar_params):
-
-    variable_costs = filter_by_var_name(scalar_params, "variable_costs").unstack(2)[
-        "variable_costs"
-    ]
-
-    variable_costs = variable_costs.loc[variable_costs != 0]
-
-    summed_flows = summed_flows.unstack(2).loc[:, "flow"]
-
-    summed_variable_costs = multiply_var_with_param(summed_flows, variable_costs)
-
-    summed_variable_costs = set_index_level(
-        summed_variable_costs, level="var_name", value="summed_variable_costs"
-    )
-
-    return summed_variable_costs
-
-
-def get_total_system_cost(*args):
-
-    all_costs = pd.concat(args)
-
-    index = pd.MultiIndex.from_tuples([("system", "total_system_cost")])
-
-    total_system_cost = pd.DataFrame({"var_value": [all_costs.sum()]}, index=index)
-
-    return total_system_cost
 
 
 def set_index_level(series, level, value):
@@ -318,11 +193,8 @@ def set_index_level(series, level, value):
 
 
 def filter_by_var_name(series, var_name):
-
     filtered_ids = series.index.get_level_values(2) == var_name
-
     filtered_series = series.loc[filtered_ids]
-
     return filtered_series
 
 
@@ -415,21 +287,3 @@ def group_by_element(scalars):
         elements[name] = df
 
     return elements
-
-
-def sort_scalars(scalars):
-
-    scalars = scalars.sort_values(by=["carrier", "tech", "var_name"])
-
-    return scalars
-
-
-def restore_es(path):
-    r"""
-    Restore EnergySystem with results
-    """
-    es = EnergySystem()
-
-    es.restore(path)
-
-    return es
