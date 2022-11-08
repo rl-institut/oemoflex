@@ -139,13 +139,15 @@ class SummedVariableCosts(Calculation):
     depends_on = {"summed_flows": SummedFlows}
 
     def calculate_result(self):
-        variable_costs = ppu.filter_by_var_name(self.scalar_params, "variable_costs").unstack(2)[
-            "variable_costs"
-        ]
+        variable_costs = ppu.filter_by_var_name(
+            self.scalar_params, "variable_costs"
+        ).unstack(2)["variable_costs"]
         variable_costs = variable_costs.loc[variable_costs != 0]
         summed_flows = self.dependency("summed_flows").unstack(2).loc[:, "flow"]
 
-        summed_variable_costs = ppu.multiply_var_with_param(summed_flows, variable_costs)
+        summed_variable_costs = ppu.multiply_var_with_param(
+            summed_flows, variable_costs
+        )
         summed_variable_costs = ppu.set_index_level(
             summed_variable_costs, level="var_name", value="summed_variable_costs"
         )
