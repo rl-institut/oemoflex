@@ -1,27 +1,22 @@
 import numpy as np
 import pandas as pd
+from functools import partial
 from oemof.solph import Bus, EnergySystem
 
 
-def drop_component_to_component(series):
+def drop_component_to_component(series, busses):
     r"""
     Drops those entries of an oemof_tuple indexed Series
     where both target and source are components.
     """
-    _series = series.copy()
-
     component_to_component_ids = [
-        id
-        for id in series.index
-        if not isinstance(id[0], Bus) and not isinstance(id[1], Bus)
+        node for node in series.index if node[0] not in busses and node[1] not in busses
     ]
-
-    result = _series.drop(component_to_component_ids)
-
+    result = series.drop(component_to_component_ids)
     return result
 
 
-def get_component_id_in_tuple(oemof_tuple):
+def get_component_id_in_tuple(oemof_tuple, busses):
     r"""
     Returns the id of the component in an oemof tuple.
     If the component is first in the tuple, will return 0,
@@ -31,71 +26,60 @@ def get_component_id_in_tuple(oemof_tuple):
     ----------
     oemof_tuple : tuple
         tuple of the form (node, node) or (node, None).
+    busses : tuple
+        tuple of bus names.
 
     Returns
     -------
     component_id : int
         Position of the component in the tuple
     """
-    if isinstance(oemof_tuple[1], Bus):
-        component_id = 0
-
-    elif oemof_tuple[1] is None:
-        component_id = 0
-
-    elif oemof_tuple[1] is np.nan:
-        component_id = 0
-
-    elif isinstance(oemof_tuple[0], Bus):
-        component_id = 1
-
-    return component_id
+    if oemof_tuple[0] in busses:
+        return 1
+    return 0
 
 
-def get_component_from_oemof_tuple(oemof_tuple):
+def get_component_from_oemof_tuple(oemof_tuple, busses):
     r"""
     Gets the component from an oemof_tuple.
 
     Parameters
     ----------
     oemof_tuple : tuple
+    busses : tuple
+        tuple of bus names.
 
     Returns
     -------
     component : oemof.solph component
     """
-    component_id = get_component_id_in_tuple(oemof_tuple)
+    component_id = get_component_id_in_tuple(oemof_tuple, busses)
 
     component = oemof_tuple[component_id]
 
     return component
 
 
-def get_bus_from_oemof_tuple(oemof_tuple):
+def get_bus_from_oemof_tuple(oemof_tuple, busses):
     r"""
     Gets the bus from an oemof_tuple.
 
     Parameters
     ----------
     oemof_tuple : tuple
+    busses : tuple
 
     Returns
     -------
     bus : oemof.solph bus
     """
-    if isinstance(oemof_tuple[0], Bus):
-        bus = oemof_tuple[0]
-
-    elif isinstance(oemof_tuple[1], Bus):
-        bus = oemof_tuple[1]
-
-    else:
-        bus = None
-
-    return bus
+    if oemof_tuple[0] in busses:
+        return oemof_tuple[0]
+    if oemof_tuple[1] in busses:
+        return oemof_tuple[1]
 
 
-def filter_series_by_component_attr(df, **kwargs):
+def filter_series_by_component_attr(df, scalar_params, busses, **kwargs):
     r"""
     Filter a series by components attributes.
 
@@ -103,6 +87,9 @@ def filter_series_by_component_attr(df, **kwargs):
     ----------
     df : pd.DataFrame
         DataFrame with oemof_tuple as index.
+    scalar_params : pd.DataFrame
+        DataFrame holding scalar params from oemof simulation.
+    busses : tuple
 
     kwargs : keyword arguments
         One or more component attributes
@@ -112,42 +99,39 @@ def filter_series_by_component_attr(df, **kwargs):
     filtered_df : pd.DataFrame
     """
     filtered_index = []
-    for id in df.index:
-        component = get_component_from_oemof_tuple(id[:2])
+    for com in df.index:
+        component = get_component_from_oemof_tuple(com[:2], busses)
 
         for key, value in kwargs.items():
-            if not hasattr(component, key):
+            try:
+                com_value = scalar_params[component, None, key]
+            except IndexError:
                 continue
-
-            if getattr(component, key) in value:
-                filtered_index.append(id)
+            if com_value in value:
+                filtered_index.append(com)
 
     filtered_df = df.loc[filtered_index]
 
     return filtered_df
 
 
-def get_inputs(series):
+def get_inputs(series, busses):
     r"""
     Gets those entries of an oemof_tuple indexed DataFrame
     where the component is the target.
     """
-    input_ids = [id for id in series.index if isinstance(id[0], Bus)]
-
+    input_ids = [node for node in series.index if node[0] in busses]
     inputs = series.loc[input_ids]
-
     return inputs
 
 
-def get_outputs(series):
+def get_outputs(series, busses):
     r"""
     Gets those entries of an oemof_tuple indexed DataFrame
     where the component is the source.
     """
-    output_ids = [id for id in series.index if isinstance(id[1], Bus)]
-
+    output_ids = [node for node in series.index if node[1] in busses]
     outputs = series.loc[output_ids]
-
     return outputs
 
 
@@ -157,11 +141,8 @@ def sum_flows(df):
     the flows.
     """
     is_flow = df.columns.get_level_values(2) == "flow"
-
     df = df.loc[:, is_flow]
-
     df = df.sum()
-
     return df
 
 
@@ -208,21 +189,16 @@ def substract_output_from_input(inputs, outputs, var_name):
     return losses
 
 
-def get_losses(summed_flows, var_name):
+def get_losses(summed_flows, var_name, busses):
     r"""
     Calculate losses within components as the difference of summed input
     to output.
     """
-    inputs = get_inputs(summed_flows)
-
-    outputs = get_outputs(summed_flows)
-
+    inputs = get_inputs(summed_flows, busses)
+    outputs = get_outputs(summed_flows, busses)
     inputs = inputs.groupby("target").sum()
-
     outputs = outputs.groupby("source").sum()
-
     losses = substract_output_from_input(inputs, outputs, var_name)
-
     return losses
 
 
@@ -231,7 +207,6 @@ def index_to_str(index):
     Converts multiindex labels to string.
     """
     index = index.map(lambda tupl: tuple(str(node) for node in tupl))
-
     return index
 
 
@@ -351,63 +326,45 @@ def filter_by_var_name(series, var_name):
     return filtered_series
 
 
-def map_var_names(scalars):
-    def get_component_id(id):
-
-        component_id = get_component_id_in_tuple((id[0], id[1]))
-
-        return component_id
-
-    def get_carrier(id):
-        bus = get_bus_from_oemof_tuple((id[0], id[1]))
-
+def map_var_names(scalars, scalar_params, busses, links):
+    def get_carrier(node):
+        bus = get_bus_from_oemof_tuple((node[0], node[1]), busses)
         if bus:
-            carrier = str.split(bus.label, "-")[1]
-
+            carrier = str.split(bus, "-")[1]
             return carrier
 
-    def get_in_out(id, component_id):
-
-        if not id[1] is np.nan:
+    def get_in_out(node, component_id):
+        if not node[1] is np.nan:
             in_out = ["out", "in"][component_id]
 
             return in_out
 
-    def get_from_to(id, component_id):
-        from oemoflex.facades import Link
-
-        if id[1] is np.nan:
+    def get_from_to(node, component_id):
+        if node[1] is np.nan:
+            return None
+        if node[component_id] not in links:
             return None
 
-        if not isinstance(id[component_id], Link):
-            return None
-
-        from_bus = id[component_id].from_bus
-
-        to_bus = id[component_id].to_bus
-
-        bus = get_bus_from_oemof_tuple(id)
-
+        from_bus = scalar_params[node[component_id], None, "from_bus"].label
+        to_bus = scalar_params[node[component_id], None, "to_bus"].label
+        bus = get_bus_from_oemof_tuple(node, busses)
         if bus == to_bus:
-            in_out = "to_bus"
+            return "to_bus"
+        if bus == from_bus:
+            return "from_bus"
 
-        elif bus == from_bus:
-            in_out = "from_bus"
+    def map_index(node):
+        component_id = get_component_id_in_tuple(node, busses)
 
-        return in_out
+        component = node[component_id]
 
-    def map_index(id):
-        component_id = get_component_id(id)
+        carrier = get_carrier(node)
 
-        component = id[component_id]
+        in_out = get_in_out(node, component_id)
 
-        carrier = get_carrier(id)
+        from_to = get_from_to(node, component_id)
 
-        in_out = get_in_out(id, component_id)
-
-        from_to = get_from_to(id, component_id)
-
-        var_name = [id[2], in_out, carrier, from_to]
+        var_name = [node[2], in_out, carrier, from_to]
 
         var_name = [item for item in var_name if item is not None]
 
@@ -418,19 +375,16 @@ def map_var_names(scalars):
         return index
 
     scalars.index = scalars.index.map(map_index)
-
     scalars.index = scalars.index.droplevel(1)
-
     scalars.index.names = ("name", "var_name")
-
     return scalars
 
 
-def add_component_info(scalars):
+def add_component_info(scalars, scalar_params):
     def try_get_attr(x, attr):
         try:
-            return getattr(x, attr)
-        except AttributeError:
+            return scalar_params[x, None, attr]
+        except IndexError:
             return None
 
     scalars.name = "var_value"

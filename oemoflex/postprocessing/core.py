@@ -1,4 +1,6 @@
 import abc
+import logging
+
 import pandas as pd
 import enum
 from typing import Dict
@@ -30,6 +32,9 @@ class Calculator:
         self.sequences = self.__init_df_from_oemof_data(
             output_parameters, DataType.Sequences
         )
+        self.busses = self.__filter_type("bus")
+        self.links = self.__filter_type("link")
+        logging.info("Successfully set up calculator")
 
     @staticmethod
     def __init_df_from_oemof_data(oemof_data, filter_: DataType):
@@ -38,7 +43,7 @@ class Calculator:
         DataFrame.
         """
         data = {
-            key: value[filter_.value]
+            tuple(str(k) if k is not None else None for k in key): value[filter_.value]
             for key, value in oemof_data.items()
             if filter_.value in value
         }
@@ -62,6 +67,13 @@ class Calculator:
             result.columns.names = ("source", "target", "var_name")
 
         return result
+
+    def __filter_type(self, type_: str):
+        return tuple(
+            self.scalar_params[:, :, "type"][
+                self.scalar_params[:, :, "type"] == type_
+            ].index.get_level_values(0)
+        )
 
     def add(self, calculation):
         """Adds calculation to calculations 'tree' if not yet present"""
@@ -137,3 +149,11 @@ class Calculation(abc.ABC):
     @property
     def sequences(self):
         return self.calculator.sequences
+
+    @property
+    def busses(self):
+        return self.calculator.busses
+
+    @property
+    def links(self):
+        return self.calculator.links

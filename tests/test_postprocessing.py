@@ -24,9 +24,13 @@ def test_postprocessing_with_dump():
         results["scenario"] = scenario
         results = results.reset_index()
         results = results.astype({"var_value": "float64"})
+        results = results.sort_values(["name", "var_name"])
+        results = results.reset_index(drop=True)
 
         original_results = pandas.read_csv(TEST_FILES_DIR / "postprocessed_results" / f"{scenario}.csv")
         original_results = original_results[results.columns]
+        original_results = original_results.sort_values(["name", "var_name"])
+        original_results = original_results.reset_index(drop=True)
 
         assert len(set(results) ^ set(original_results)) == 0
         pandas.testing.assert_frame_equal(results, original_results)

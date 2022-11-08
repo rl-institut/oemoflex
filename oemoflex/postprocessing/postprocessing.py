@@ -7,7 +7,7 @@ from oemoflex.postprocessing.core import Calculation, Calculator
 class SummedFlows(Calculation):
     def calculate_result(self):
         summed_flows = ppu.sum_flows(self.sequences)
-        return ppu.drop_component_to_component(summed_flows)
+        return ppu.drop_component_to_component(summed_flows, self.busses)
 
 
 class StorageLosses(Calculation):
@@ -15,9 +15,14 @@ class StorageLosses(Calculation):
 
     def calculate_result(self):
         summed_flows_storage = ppu.filter_series_by_component_attr(
-            self.dependency("summed_flows"), type="storage"
+            self.dependency("summed_flows"),
+            scalar_params=self.scalar_params,
+            busses=self.busses,
+            type="storage",
         )
-        return ppu.get_losses(summed_flows_storage, var_name="storage_losses")
+        return ppu.get_losses(
+            summed_flows_storage, var_name="storage_losses", busses=self.busses
+        )
 
 
 class TransmissionLosses(Calculation):
@@ -25,9 +30,16 @@ class TransmissionLosses(Calculation):
 
     def calculate_result(self):
         summed_flows_transmission = ppu.filter_series_by_component_attr(
-            self.dependency("summed_flows"), type="link"
+            self.dependency("summed_flows"),
+            scalar_params=self.scalar_params,
+            busses=self.busses,
+            type="link",
         )
-        return ppu.get_losses(summed_flows_transmission, var_name="transmission_losses")
+        return ppu.get_losses(
+            summed_flows_transmission,
+            var_name="transmission_losses",
+            busses=self.busses,
+        )
 
 
 class Investment(Calculation):
@@ -119,7 +131,7 @@ class SummedCarrierCosts(Calculation):
     depends_on = {"summed_var_costs": SummedVariableCosts}
 
     def calculate_result(self):
-        return ppu.get_inputs(self.dependency("summed_var_costs"))
+        return ppu.get_inputs(self.dependency("summed_var_costs"), self.busses)
 
 
 class SummedMarginalCosts(Calculation):
@@ -132,7 +144,7 @@ class SummedMarginalCosts(Calculation):
     depends_on = {"summed_var_costs": SummedVariableCosts}
 
     def calculate_result(self):
-        return ppu.get_outputs(self.dependency("summed_var_costs"))
+        return ppu.get_outputs(self.dependency("summed_var_costs"), self.busses)
 
 
 class TotalSystemCosts(Calculation):
@@ -211,14 +223,16 @@ def run_postprocessing(es):
         summed_marginal_costs,
     ]
     all_scalars = pd.concat(all_scalars, 0)
-    all_scalars = ppu.map_var_names(all_scalars)
-    all_scalars = ppu.add_component_info(all_scalars)
+    all_scalars = ppu.map_var_names(
+        all_scalars, calculator.scalar_params, calculator.busses, calculator.links
+    )
+    all_scalars = ppu.add_component_info(all_scalars, calculator.scalar_params)
 
     # Set index to string
     # TODO: Check if this can be done far earlier, also for performance reasons.
     # TODO: To do so, the information drawn from the components in add_component_info has
     # TODO: to be provided differently.
-    all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
+    # all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
     all_scalars = pd.concat([all_scalars, total_system_costs], axis=0)
     all_scalars = ppu.sort_scalars(all_scalars)
 
