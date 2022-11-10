@@ -30,21 +30,27 @@ class Calculator:
         DataFrame.
         """
         data = {
-            tuple(str(k) if k is not None else None for k in key): value["scalars"]
+            tuple(str(k) if k is not None else None for k in key): (
+                value["scalars"]
+                if isinstance(value["scalars"], pd.Series)
+                else pd.Series(value["scalars"])
+            )
             for key, value in oemof_data.items()
         }
         results = []
-        for key, value in data.items():
-            if value.empty:
+        for key, series in data.items():
+            if series.empty:
                 continue
-            value.index.name = "var_name"
-            df = pd.DataFrame(value)
+            series.index.name = "var_name"
+            df = pd.DataFrame(series)
             df["source"] = key[0]
             df["target"] = key[1]
             df = df.set_index(["source", "target"], append=True)
             df = df.reorder_levels(["source", "target", "var_name"])
             results.append(df.iloc[:, 0])
-        return pd.concat(results)
+        if results:
+            return pd.concat(results)
+        return pd.Series()
 
     @staticmethod
     def __init_sequences_df(oemof_data):
@@ -53,7 +59,11 @@ class Calculator:
         DataFrame.
         """
         data = {
-            tuple(str(k) if k is not None else None for k in key): value["sequences"]
+            tuple(str(k) if k is not None else None for k in key): (
+                value["sequences"]
+                if isinstance(value["sequences"], pd.DataFrame)
+                else pd.DataFrame.from_dict(value["sequences"])
+            )
             for key, value in oemof_data.items()
         }
 
@@ -63,7 +73,7 @@ class Calculator:
                 continue
             series.columns = pd.MultiIndex.from_tuples(
                 [(*key, column) for column in series.columns],
-                names=["source", "target", "var_name"]
+                names=["source", "target", "var_name"],
             )
             results.append(series)
         return pd.concat(results, axis=1)
