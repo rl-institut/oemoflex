@@ -10,63 +10,63 @@ class CalculationError(Exception):
     """Raised if something is wrong in calculation"""
 
 
-class DataType(enum.Enum):
-    Scalars = "scalars"
-    Sequences = "sequences"
-
-
 class Calculator:
     """Entity to gather calculations and their results"""
 
     def __init__(self, input_parameters, output_parameters):
         self.calculations = {}
-        self.scalar_params = self.__init_df_from_oemof_data(
-            input_parameters, DataType.Scalars
-        )
-        self.scalars = self.__init_df_from_oemof_data(
-            output_parameters, DataType.Scalars
-        )
-        self.sequences_params = self.__init_df_from_oemof_data(
-            input_parameters, DataType.Sequences
-        )
-        self.sequences = self.__init_df_from_oemof_data(
-            output_parameters, DataType.Sequences
-        )
+        self.scalar_params = self.__init_scalars_df(input_parameters)
+        self.scalars = self.__init_scalars_df(output_parameters)
+        self.sequences_params = self.__init_sequences_df(input_parameters)
+        self.sequences = self.__init_sequences_df(output_parameters)
         self.busses = self.__filter_type("bus")
         self.links = self.__filter_type("link")
         logging.info("Successfully set up calculator")
 
     @staticmethod
-    def __init_df_from_oemof_data(oemof_data, filter_: DataType):
+    def __init_scalars_df(oemof_data):
+        r"""
+        Converts scalars dictionary to a multi-indexed
+        DataFrame.
+        """
+        data = {
+            tuple(str(k) if k is not None else None for k in key): value["scalars"]
+            for key, value in oemof_data.items()
+        }
+        results = []
+        for key, value in data.items():
+            if value.empty:
+                continue
+            value.index.name = "var_name"
+            df = pd.DataFrame(value)
+            df["source"] = key[0]
+            df["target"] = key[1]
+            df = df.set_index(["source", "target"], append=True)
+            df = df.reorder_levels(["source", "target", "var_name"])
+            results.append(df.iloc[:, 0])
+        return pd.concat(results)
+
+    @staticmethod
+    def __init_sequences_df(oemof_data):
         r"""
         Converts sequences dictionary to a multi-indexed
         DataFrame.
         """
         data = {
-            tuple(str(k) if k is not None else None for k in key): value[filter_.value]
+            tuple(str(k) if k is not None else None for k in key): value["sequences"]
             for key, value in oemof_data.items()
-            if filter_.value in value
         }
-        result = pd.concat(data.values(), 0 if filter_ == DataType.Scalars else 1)
 
-        if result.empty:
-            return None
-
-        # adapted from oemof.solph.views' node() function
-        tuples = {
-            key: list(value.index if filter_ == DataType.Scalars else value.columns)
-            for key, value in data.items()
-        }
-        tuples = [tuple((*k, m) for m in v) for k, v in tuples.items()]
-        tuples = [c for sublist in tuples for c in sublist]
-        if filter_ == DataType.Scalars:
-            result.index = pd.MultiIndex.from_tuples(tuples)
-            result.index.names = ("source", "target", "var_name")
-        else:
-            result.columns = pd.MultiIndex.from_tuples(tuples)
-            result.columns.names = ("source", "target", "var_name")
-
-        return result
+        results = []
+        for key, series in data.items():
+            if series.empty:
+                continue
+            series.columns = pd.MultiIndex.from_tuples(
+                [(*key, column) for column in series.columns],
+                names=["source", "target", "var_name"]
+            )
+            results.append(series)
+        return pd.concat(results, axis=1)
 
     def __filter_type(self, type_: str):
         return tuple(
