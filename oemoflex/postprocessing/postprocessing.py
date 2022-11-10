@@ -68,7 +68,7 @@ class TransmissionLosses(Losses):
 class Investment(Calculation):
     def calculate_result(self):
         return (
-            None
+            pd.Series()
             if (self.scalars is None or self.scalars.empty)
             else ppu.filter_by_var_name(self.scalars, "invest")
         )
@@ -77,7 +77,10 @@ class Investment(Calculation):
 class EPCosts(Calculation):
     def calculate_result(self):
         ep_costs = ppu.filter_by_var_name(self.scalar_params, "investment_ep_costs")
-        return ep_costs.unstack(2)["investment_ep_costs"]
+        try:
+            return ep_costs.unstack(2)["investment_ep_costs"]
+        except KeyError:
+            return pd.Series()
 
 
 class InvestedCapacity(Calculation):
@@ -86,8 +89,8 @@ class InvestedCapacity(Calculation):
     depends_on = {"invest": Investment}
 
     def calculate_result(self):
-        if self.dependency("invest") is None:
-            return None
+        if self.dependency("invest").empty:
+            return pd.Series()
         target_is_none = self.dependency("invest").index.get_level_values(1).isnull()
         return self.dependency("invest").loc[~target_is_none]
 
@@ -98,8 +101,8 @@ class InvestedStorageCapacity(Calculation):
     depends_on = {"invest": Investment}
 
     def calculate_result(self):
-        if self.dependency("invest") is None:
-            return None
+        if self.dependency("invest").empty:
+            return pd.Series()
         target_is_none = self.dependency("invest").index.get_level_values(1).isnull()
         return self.dependency("invest").loc[target_is_none]
 
@@ -111,6 +114,8 @@ class InvestedCapacityCosts(Calculation):
         invested_capacity_costs = ppu.multiply_var_with_param(
             self.dependency("invested_capacity"), self.dependency("ep_costs")
         )
+        if invested_capacity_costs.empty:
+            return pd.Series()
         invested_capacity_costs.index = invested_capacity_costs.index.set_levels(
             invested_capacity_costs.index.levels[2] + "_costs", level=2
         )
@@ -127,6 +132,8 @@ class InvestedStorageCapacityCosts(Calculation):
         invested_storage_capacity_costs = ppu.multiply_var_with_param(
             self.dependency("invested_storage_capacity"), self.dependency("ep_costs")
         )
+        if invested_storage_capacity_costs.empty:
+            return pd.Series()
         invested_storage_capacity_costs.index = (
             invested_storage_capacity_costs.index.set_levels(
                 invested_storage_capacity_costs.index.levels[2] + "_costs", level=2
