@@ -36,9 +36,9 @@ class Calculator:
                     pd.Series if data_type == "scalars" else pd.DataFrame,
                 )
                 else (
-                    pd.Series(value[data_type])
+                    pd.Series(value[data_type], dtype="object")
                     if data_type == "scalars"
-                    else pd.DataFrame.from_dict(value[data_type])
+                    else pd.DataFrame.from_dict(value[data_type], dtype="object")
                 )
             )
             for key, value in oemof_data.items()

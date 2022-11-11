@@ -147,6 +147,8 @@ def multiply_var_with_param(var, param):
     Multiplies a variable (a result from oemof) with a
     parameter.
     """
+    if param.empty or var.empty:
+        return pd.Series(dtype="object")
     result = param * var
     result = result.loc[~result.isna()]
     return result
