@@ -6,13 +6,16 @@ from oemoflex.postprocessing.core import Calculation, Calculator
 
 
 class SummedFlows(Calculation):
+    name = "summed_flows"
+
     def calculate_result(self):
         summed_flows = ppu.sum_flows(self.sequences)
         return ppu.drop_component_to_component(summed_flows, self.busses)
 
 
 class Losses(Calculation):
-    depends_on = {"summed_flows": SummedFlows}
+    name = "losses"
+    depends_on = [SummedFlows]
     var_name = None
 
     def _calculate_losses(self, summed_flows):
@@ -38,7 +41,8 @@ class Losses(Calculation):
 
 
 class StorageLosses(Losses):
-    depends_on = {"summed_flows": SummedFlows}
+    name = "storage_losses"
+    depends_on = [SummedFlows]
     var_name = "storage_losses"
 
     def calculate_result(self):
@@ -52,7 +56,8 @@ class StorageLosses(Losses):
 
 
 class TransmissionLosses(Losses):
-    depends_on = {"summed_flows": SummedFlows}
+    name = "transmission_losses"
+    depends_on = [SummedFlows]
     var_name = "transmission_losses"
 
     def calculate_result(self):
@@ -66,6 +71,8 @@ class TransmissionLosses(Losses):
 
 
 class Investment(Calculation):
+    name = "investment"
+
     def calculate_result(self):
         return (
             pd.Series(dtype="object")
@@ -75,6 +82,8 @@ class Investment(Calculation):
 
 
 class EPCosts(Calculation):
+    name = "ep_costs"
+
     def calculate_result(self):
         ep_costs = ppu.filter_by_var_name(self.scalar_params, "investment_ep_costs")
         try:
@@ -86,29 +95,32 @@ class EPCosts(Calculation):
 class InvestedCapacity(Calculation):
     """Collect invested (endogenous) capacity (units of power)"""
 
-    depends_on = {"invest": Investment}
+    name = "invested_capacity"
+    depends_on = [Investment]
 
     def calculate_result(self):
-        if self.dependency("invest").empty:
+        if self.dependency("investment").empty:
             return pd.Series(dtype="object")
-        target_is_none = self.dependency("invest").index.get_level_values(1).isnull()
-        return self.dependency("invest").loc[~target_is_none]
+        target_is_none = self.dependency("investment").index.get_level_values(1).isnull()
+        return self.dependency("investment").loc[~target_is_none]
 
 
 class InvestedStorageCapacity(Calculation):
     """Collect storage capacity (units of energy)"""
 
-    depends_on = {"invest": Investment}
+    name = "invested_storage_capacity"
+    depends_on = [Investment]
 
     def calculate_result(self):
-        if self.dependency("invest").empty:
+        if self.dependency("investment").empty:
             return pd.Series(dtype="object")
-        target_is_none = self.dependency("invest").index.get_level_values(1).isnull()
-        return self.dependency("invest").loc[target_is_none]
+        target_is_none = self.dependency("investment").index.get_level_values(1).isnull()
+        return self.dependency("investment").loc[target_is_none]
 
 
 class InvestedCapacityCosts(Calculation):
-    depends_on = {"invested_capacity": InvestedCapacity, "ep_costs": EPCosts}
+    name = "invested_capacity_costs"
+    depends_on = [InvestedCapacity, EPCosts]
 
     def calculate_result(self):
         invested_capacity_costs = ppu.multiply_var_with_param(
@@ -123,10 +135,8 @@ class InvestedCapacityCosts(Calculation):
 
 
 class InvestedStorageCapacityCosts(Calculation):
-    depends_on = {
-        "invested_storage_capacity": InvestedStorageCapacity,
-        "ep_costs": EPCosts,
-    }
+    name = "invested_storage_capacity_costs"
+    depends_on = [InvestedStorageCapacity, EPCosts]
 
     def calculate_result(self):
         invested_storage_capacity_costs = ppu.multiply_var_with_param(
@@ -143,7 +153,8 @@ class InvestedStorageCapacityCosts(Calculation):
 
 
 class SummedVariableCosts(Calculation):
-    depends_on = {"summed_flows": SummedFlows}
+    name = "summed_variable_costs"
+    depends_on = [SummedFlows]
 
     def calculate_result(self):
         variable_costs = ppu.filter_by_var_name(
@@ -167,11 +178,11 @@ class SummedCarrierCosts(Calculation):
 
     An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
-
-    depends_on = {"summed_var_costs": SummedVariableCosts}
+    name = "summed_carrier_costs"
+    depends_on = [SummedVariableCosts]
 
     def calculate_result(self):
-        return ppu.get_inputs(self.dependency("summed_var_costs"), self.busses)
+        return ppu.get_inputs(self.dependency("summed_variable_costs"), self.busses)
 
 
 class SummedMarginalCosts(Calculation):
@@ -180,28 +191,24 @@ class SummedMarginalCosts(Calculation):
 
     An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
-
-    depends_on = {"summed_var_costs": SummedVariableCosts}
+    name = "summed_marginal_costs"
+    depends_on = [SummedVariableCosts]
 
     def calculate_result(self):
-        return ppu.get_outputs(self.dependency("summed_var_costs"), self.busses)
+        return ppu.get_outputs(self.dependency("summed_variable_costs"), self.busses)
 
 
 class TotalSystemCosts(Calculation):
-    depends_on = {
-        "icc": InvestedCapacityCosts,
-        "iscc": InvestedStorageCapacityCosts,
-        "scc": SummedCarrierCosts,
-        "smc": SummedMarginalCosts,
-    }
+    name = "total_system_costs"
+    depends_on = [InvestedCapacityCosts, InvestedStorageCapacityCosts, SummedCarrierCosts, SummedMarginalCosts]
 
     def calculate_result(self):
         all_costs = pd.concat(
             [
-                self.dependency("icc"),
-                self.dependency("iscc"),
-                self.dependency("scc"),
-                self.dependency("smc"),
+                self.dependency("invested_capacity_costs"),
+                self.dependency("invested_storage_capacity_costs"),
+                self.dependency("summed_carrier_costs"),
+                self.dependency("summed_marginal_costs"),
             ]
         )
         index = pd.MultiIndex.from_tuples([("system", "total_system_cost")])

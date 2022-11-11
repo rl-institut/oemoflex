@@ -2,7 +2,7 @@ import abc
 import logging
 
 import pandas as pd
-from typing import Dict
+from typing import List
 
 
 class CalculationError(Exception):
@@ -79,21 +79,23 @@ class Calculator:
     def add(self, calculation):
         """Adds calculation to calculations 'tree' if not yet present"""
         if isinstance(calculation, Calculation):
-            if calculation.__class__.__name__ in self.calculations:
+            if calculation.name in self.calculations:
                 raise CalculationError(
                     f"Calculation '{calculation.__class__.__name__}' already exists in calculator"
                 )
-            self.calculations[calculation.__class__.__name__] = calculation
+            self.calculations[calculation.name] = calculation
         else:
-            if calculation.__name__ in self.calculations:
+            if calculation.name in self.calculations:
                 return
             if issubclass(calculation, Calculation):
-                self.calculations[calculation.__name__] = calculation(self)
+                self.calculations[calculation.name] = calculation(self)
                 return
             raise CalculationError("Can only add Calculation instances or classes")
 
     def get_result(self, dependency_name):
         """Returns result of given dependency"""
+        if dependency_name not in self.calculations:
+            raise KeyError(f"Could not find calculation named '{dependency_name}'.")
         return self.calculations[dependency_name].result
 
 
@@ -105,8 +107,8 @@ class Calculation(abc.ABC):
     calculation 'tree' if not yet present.
     Function `calculate_result` is abstract and must be implemented by child class.
     """
-
-    depends_on: Dict[str, "Calculation"] = None
+    name = None
+    depends_on: List["Calculation"] = None
 
     def __init__(self, calculator: Calculator):
         super(Calculation, self).__init__()
@@ -118,12 +120,11 @@ class Calculation(abc.ABC):
     def __add_dependencies(self):
         if not self.depends_on:
             return
-        for dependency in self.depends_on.values():
+        for dependency in self.depends_on:
             self.calculator.add(dependency)
 
     def dependency(self, name):
-        dependency_name = self.depends_on[name].__name__
-        return self.calculator.get_result(dependency_name)
+        return self.calculator.get_result(name)
 
     @abc.abstractmethod
     def calculate_result(self):
