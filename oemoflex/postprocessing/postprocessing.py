@@ -101,7 +101,9 @@ class InvestedCapacity(Calculation):
     def calculate_result(self):
         if self.dependency("investment").empty:
             return pd.Series(dtype="object")
-        target_is_none = self.dependency("investment").index.get_level_values(1).isnull()
+        target_is_none = (
+            self.dependency("investment").index.get_level_values(1).isnull()
+        )
         return self.dependency("investment").loc[~target_is_none]
 
 
@@ -114,7 +116,9 @@ class InvestedStorageCapacity(Calculation):
     def calculate_result(self):
         if self.dependency("investment").empty:
             return pd.Series(dtype="object")
-        target_is_none = self.dependency("investment").index.get_level_values(1).isnull()
+        target_is_none = (
+            self.dependency("investment").index.get_level_values(1).isnull()
+        )
         return self.dependency("investment").loc[target_is_none]
 
 
@@ -178,6 +182,7 @@ class SummedCarrierCosts(Calculation):
 
     An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
+
     name = "summed_carrier_costs"
     depends_on = [SummedVariableCosts]
 
@@ -191,6 +196,7 @@ class SummedMarginalCosts(Calculation):
 
     An `oemof.tabular` convention: Carrier costs are on inputs, marginal costs on output
     """
+
     name = "summed_marginal_costs"
     depends_on = [SummedVariableCosts]
 
@@ -200,7 +206,12 @@ class SummedMarginalCosts(Calculation):
 
 class TotalSystemCosts(Calculation):
     name = "total_system_costs"
-    depends_on = [InvestedCapacityCosts, InvestedStorageCapacityCosts, SummedCarrierCosts, SummedMarginalCosts]
+    depends_on = [
+        InvestedCapacityCosts,
+        InvestedStorageCapacityCosts,
+        SummedCarrierCosts,
+        SummedMarginalCosts,
+    ]
 
     def calculate_result(self):
         all_costs = pd.concat(

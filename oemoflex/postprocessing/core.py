@@ -107,6 +107,7 @@ class Calculation(abc.ABC):
     calculation 'tree' if not yet present.
     Function `calculate_result` is abstract and must be implemented by child class.
     """
+
     name = None
     depends_on: List["Calculation"] = None
 
