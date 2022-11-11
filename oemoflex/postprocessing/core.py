@@ -2,7 +2,6 @@ import abc
 import logging
 
 import pandas as pd
-import enum
 from typing import Dict
 
 
@@ -15,25 +14,32 @@ class Calculator:
 
     def __init__(self, input_parameters, output_parameters):
         self.calculations = {}
-        self.scalar_params = self.__init_scalars_df(input_parameters)
-        self.scalars = self.__init_scalars_df(output_parameters)
-        self.sequences_params = self.__init_sequences_df(input_parameters)
-        self.sequences = self.__init_sequences_df(output_parameters)
+        self.scalar_params = self.__init_df(input_parameters, "scalars")
+        self.scalars = self.__init_df(output_parameters, "scalars")
+        self.sequences_params = self.__init_df(input_parameters, "sequences")
+        self.sequences = self.__init_df(output_parameters, "sequences")
         self.busses = self.__filter_type("bus")
         self.links = self.__filter_type("link")
         logging.info("Successfully set up calculator")
 
     @staticmethod
-    def __init_scalars_df(oemof_data):
+    def __init_df(oemof_data, data_type="scalars"):
         r"""
-        Converts scalars dictionary to a multi-indexed
+        Converts scalars/sequences dictionary to a multi-indexed
         DataFrame.
         """
         data = {
             tuple(str(k) if k is not None else None for k in key): (
-                value["scalars"]
-                if isinstance(value["scalars"], pd.Series)
-                else pd.Series(value["scalars"])
+                value[data_type]
+                if isinstance(
+                    value[data_type],
+                    pd.Series if data_type == "scalars" else pd.DataFrame,
+                )
+                else (
+                    pd.Series(value[data_type])
+                    if data_type == "scalars"
+                    else pd.DataFrame.from_dict(value[data_type])
+                )
             )
             for key, value in oemof_data.items()
         }
@@ -41,42 +47,27 @@ class Calculator:
         for key, series in data.items():
             if series.empty:
                 continue
-            series.index.name = "var_name"
-            df = pd.DataFrame(series)
-            df["source"] = key[0]
-            df["target"] = key[1]
-            df = df.set_index(["source", "target"], append=True)
-            df = df.reorder_levels(["source", "target", "var_name"])
-            results.append(df.iloc[:, 0])
-        if results:
-            return pd.concat(results)
-        return pd.Series()
-
-    @staticmethod
-    def __init_sequences_df(oemof_data):
-        r"""
-        Converts sequences dictionary to a multi-indexed
-        DataFrame.
-        """
-        data = {
-            tuple(str(k) if k is not None else None for k in key): (
-                value["sequences"]
-                if isinstance(value["sequences"], pd.DataFrame)
-                else pd.DataFrame.from_dict(value["sequences"])
-            )
-            for key, value in oemof_data.items()
-        }
-
-        results = []
-        for key, series in data.items():
-            if series.empty:
-                continue
-            series.columns = pd.MultiIndex.from_tuples(
-                [(*key, column) for column in series.columns],
+            mindex = pd.MultiIndex.from_tuples(
+                [
+                    (*key, entry)
+                    for entry in (
+                        series.index if data_type == "scalars" else series.columns
+                    )
+                ],
                 names=["source", "target", "var_name"],
             )
+            if data_type == "scalars":
+                series.index = mindex
+            else:
+                series.columns = mindex
             results.append(series)
-        return pd.concat(results, axis=1)
+        if results:
+            return pd.concat(results, axis=(0 if data_type == "scalars" else 1))
+        return (
+            pd.Series(dtype="object")
+            if data_type == "scalars"
+            else pd.DataFrame(dtype="object")
+        )
 
     def __filter_type(self, type_: str):
         return tuple(
