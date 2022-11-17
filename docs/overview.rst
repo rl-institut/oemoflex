@@ -19,6 +19,24 @@ Define schemas for tabular data packages
 The schemas describe the energy systems and are defined for different
 types of components in
 `facade_attrs <https://github.com/rl-institut/oemoflex/tree/dev/oemoflex/model/facade_attrs>`_.
+
+Currently the following components can be modeled:
+
+* Assymetric storage
+* Back pressure turbine
+* Battery electric vehicles (bev)
+* Conversion
+* Excess
+* Extraction Turbine
+* Link
+* Load
+* Reservoir
+* Shortage
+* Storage
+* Volatile
+
+The files gathered in :attr:`facade_attrs` contain the attributes of each component.
+
 The files `component_attrs.yml <https://github.com/rl-institut/oemoflex/blob/dev/oemoflex/model/component_attrs.yml>`_
 and `busses.yml <https://github.com/rl-institut/oemoflex/blob/dev/oemoflex/model/busses.yml>`_
 define the available components and busses.
