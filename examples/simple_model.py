@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from oemof.solph import EnergySystem, Model
-from oemof.outputlib.processing import parameter_as_dict
+from oemof.solph.processing import parameter_as_dict
 
 # DONT REMOVE THIS LINE!
 # pylint: disable=unused-import
