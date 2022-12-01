@@ -220,6 +220,12 @@ def prepare_dispatch_data(df, bus_name, demand_name, labels_dict=None):
     replaced by more simple names. Columns the same name are grouped together. Really small
     numerical values which are practically zero are replaced with 0.0.
 
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
+
     Parameters
     ---------------
     df : pandas.DataFrame
@@ -270,6 +276,12 @@ def filter_timeseries(df, start_date=None, end_date=None):
     Filters a dataframe with a timeseries from a start date to an end date.
     If start_date or end_date are not given, filtering is done from the first
     available date or to the last available date.
+
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
 
     Parameters
     ---------------
@@ -330,6 +342,12 @@ def stackplot(ax, df, colors_odict):
     of labels in the colors_odict. It is stacked beginning with the x-axis as
     the bottom.
 
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
+
     Parameters
     ---------------
     ax : matplotlib.AxesSubplot
@@ -365,6 +383,12 @@ def lineplot(ax, df, colors_odict, linewidth=1):
     r"""
     Plots data as a lineplot.
 
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
+
     Parameters
     ---------------
     ax : matplotlib.AxesSubplot
@@ -387,6 +411,12 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None, linewidth=1):
     Plots data as a dispatch plot. The demand is plotted as a line plot and
     suppliers and other consumers are plotted with a stackplot. Columns with negative vlaues
     are stacked below the x axis and columns with positive values above.
+
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
 
     Parameters
     ---------------
@@ -453,6 +483,12 @@ def plot_dispatch_plotly(
     r"""
     Plots data as a dispatch plot in an interactive plotly plot. The demand is plotted as a
     line plot and suppliers and other consumers are plotted with a stackplot.
+
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
 
     Parameters
     ---------------
@@ -567,6 +603,12 @@ def plot_grouped_bar(ax, df, color_dict, unit, stacked=False):
     This function plots scalar data as grouped bar plot. The index of the DataFrame
     will be interpreted as groups (e.g. regions), the columns as different categories (e.g. energy
     carriers) within the groups which will be plotted in different colors.
+
+    The DataFrame `df` is expected to have this form:
+
+    .. csv-table::
+       :file: ../../tests/_files/plot_data/input_prepare_dispatch_data.csv
+       :header-rows: 1
 
     Parameters
     ----------
