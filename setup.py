@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     package_data={
         "oemoflex.config": [
-            "settings.yml"
+            "settings.yaml"
         ],
         "oemoflex.model": [
             "*.yml",
