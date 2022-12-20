@@ -16,6 +16,9 @@ setup(
     long_description=read("README.md"),
     packages=find_packages(),
     package_data={
+        "oemoflex.config": [
+            "settings.yml"
+        ],
         "oemoflex.model": [
             "*.yml",
             "*.csv",
