@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,input_parameters,marginal_cost,region,tech,type
+ABW-ch4-excess,ABW-ch4,,ch4,{},0,ABW,excess,excess

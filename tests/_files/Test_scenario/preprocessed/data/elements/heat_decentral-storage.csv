@@ -1,0 +1,2 @@
+name,bus,capacity,capacity_cost,capacity_potential,carrier,efficiency,expandable,input_parameters,loss_rate,marginal_cost,output_parameters,region,storage_capacity,storage_capacity_cost,storage_capacity_potential,tech,type
+ABW-heat_decentral-storage,ABW-heat_decentral,0.0,5.7830099133661314e-08,,heat_decentral,1.0,True,"{""variable_costs"": 1E-7}",21.0,1.2,{},ABW,0.0,40376.34064480114,,storage,storage

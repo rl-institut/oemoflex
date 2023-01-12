@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,marginal_cost,output_parameters,region,tech,type
+ABW-electricity-shortage,ABW-electricity,,electricity,1000000000,{},ABW,shortage,shortage

@@ -1,0 +1,2 @@
+name,amount,bus,carrier,profile,region,tech,type
+ABW-heat_decentral-demand,12000000,ABW-heat_decentral,heat_decentral,ABW-heat_decentral-demand-profile,ABW,demand,load

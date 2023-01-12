@@ -1,0 +1,2 @@
+name,capacity,capacity_cost,carrier,carrier_cost,condensing_efficiency,electric_efficiency,electricity_bus,expandable,fuel_bus,heat_bus,marginal_cost,region,tech,thermal_efficiency,type
+ABW-ch4-extchp_large,0.0,77209.57022916367,ch4,0,0.3,0.6,ABW-electricity,True,ABW-ch4,ABW-heat_central,4.0,ABW,extchp_large,0.4,extraction

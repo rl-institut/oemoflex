@@ -1,23 +1,60 @@
-import sys
 import pandas
 import pathlib
 
-from oemof.solph import EnergySystem
-
+from oemof.tabular import datapackage
+from oemof.solph import EnergySystem, Model, processing, constraints
+from oemof.tabular.facades import TYPEMAP
 import oemoflex.postprocessing.postprocessing
 
-path_to_oemof_b3 = str(pathlib.Path(__file__).parent.parent.parent / "oemof-B3")
-sys.path.append(path_to_oemof_b3)  # FIXME: Workaround to restore dump from oemof-B3
+from tests import helpers
+
 
 TEST_FILES_DIR = pathlib.Path(__file__).parent / "_files"
 
 
-def test_postprocessing_with_dump():
-    scenarios = ("example_more_re_less_fossil", "2050-100-gas_moreCH4")
+def test_postprocessing_with_constraints():
+    scenarios = ("Test_scenario",)
 
     for scenario in scenarios:
-        es = EnergySystem()
-        es.restore(TEST_FILES_DIR / "es_dumps", filename=f"{scenario}.oemof")
+        dump_folder = TEST_FILES_DIR / scenario / "optimized"
+
+        if not (dump_folder / "es_dump.oemof").exists():
+            es = EnergySystem.from_datapackage(
+                str(TEST_FILES_DIR / scenario / "preprocessed" / "datapackage.json"),
+                attributemap={},
+                typemap=TYPEMAP
+            )
+            # get additional scalars, set to None at first
+            emission_limit = None
+            el_gas_relations = None
+            bpchp_out = None
+            additional_scalars = helpers.get_additional_scalars(scenario)
+            if additional_scalars is not None:
+                emission_limit = helpers.get_emission_limit(additional_scalars)
+                el_gas_relations = helpers.get_electricity_gas_relations(additional_scalars)
+                bpchp_out = helpers.get_bpchp_output_parameters(additional_scalars)
+
+            if bpchp_out is not None:
+                es = helpers.add_output_parameters_to_bpchp(parameters=bpchp_out, energysystem=es)
+
+            m = Model(es)
+
+            if emission_limit is not None:
+                constraints.emission_limit(m, limit=emission_limit)
+            if el_gas_relations is not None:
+                helpers.add_electricity_gas_relation_constraints(
+                    model=m, relations=el_gas_relations
+                )
+
+            m.receive_duals()
+            m.solve()
+            es.meta_results = processing.meta_results(m)
+            es.results = processing.results(m)
+            es.params = processing.parameter_as_dict(es)
+            es.dump(str(TEST_FILES_DIR / scenario / "optimized"))
+        else:
+            es = EnergySystem()
+            es.restore(dump_folder)
         results: pandas.DataFrame = (
             oemoflex.postprocessing.postprocessing.run_postprocessing(es)
         )
@@ -28,7 +65,7 @@ def test_postprocessing_with_dump():
         results = results.reset_index(drop=True)
 
         original_results = pandas.read_csv(
-            TEST_FILES_DIR / "postprocessed_results" / f"{scenario}.csv"
+            TEST_FILES_DIR / scenario / "postprocessed" / "scalars.csv"
         )
         original_results = original_results[results.columns]
         original_results = original_results.sort_values(["name", "var_name"])

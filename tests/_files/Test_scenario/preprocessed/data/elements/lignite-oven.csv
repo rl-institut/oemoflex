@@ -1,0 +1,2 @@
+name,capacity,capacity_cost,capacity_potential,carrier,carrier_cost,efficiency,expandable,from_bus,marginal_cost,output_parameters,region,tech,to_bus,type
+ABW-lignite-oven,0.0,14344.715059153192,,lignite,0,0.95,True,ABW-lignite,1e-06,"{""lignite-heat_decentral-ABW"": 1}",ABW,oven,ABW-heat_decentral,conversion

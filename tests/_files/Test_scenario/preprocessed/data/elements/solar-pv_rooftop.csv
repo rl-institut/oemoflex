@@ -1,0 +1,2 @@
+name,bus,capacity,capacity_cost,capacity_potential,carrier,expandable,marginal_cost,output_parameters,profile,region,tech,type
+ABW-solar-pv_rooftop,ABW-electricity,0.0,10101.794417968187,45000.0,solar,True,0.99,{},ABW-solar-pv_rooftop-profile,ABW,pv_rooftop,volatile

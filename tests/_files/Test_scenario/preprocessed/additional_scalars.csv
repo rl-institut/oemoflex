@@ -1,0 +1,6 @@
+id_scal;scenario_key;name;var_name;carrier;region;tech;type;var_value;var_unit;source;comment
+0;dummy_scenario;ABW-heat_central-gas_electricity_relation;electricity_gas_relation;heat_central;ABW;constraint;relation;0.5;;;DUMMY
+1;dummy_scenario;ABW-heat_decentral-gas_electricity_relation;electricity_gas_relation;heat_decentral;ABW;constraint;relation;3.0;;;DUMMY
+2;dummy_scenario;;emissions_1990;emission;TOTAL;constraint;limit;80000000000.0;kg_CO2_eq/MWh;;DUMMY
+3;dummy_scenario;ABW-ch4-bpchp_small;output_parameters;ch4;ABW;bpchp;backpressure;"{""gas-heat_decentral-ABW"": 1}";;;DUMMY
+4;ALL;;emission_limit;emission;;;;;kg_CO2_eq;;

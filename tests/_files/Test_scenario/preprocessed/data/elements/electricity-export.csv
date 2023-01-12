@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,input_parameters,marginal_cost,region,tech,type
+ABW-electricity-export,ABW-electricity,15235.0,electricity,"{""emission_factor"": 0}",0,ABW,export,excess

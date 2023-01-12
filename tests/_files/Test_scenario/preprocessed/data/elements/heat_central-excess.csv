@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,input_parameters,marginal_cost,region,tech,type
+ABW-heat_central-excess,ABW-heat_central,,heat_central,{},0,ABW,excess,excess

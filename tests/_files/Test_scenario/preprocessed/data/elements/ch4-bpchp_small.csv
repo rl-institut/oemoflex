@@ -1,0 +1,2 @@
+name,capacity,capacity_cost,carrier,carrier_cost,electric_efficiency,electricity_bus,expandable,fuel_bus,heat_bus,marginal_cost,region,tech,thermal_efficiency,type
+ABW-ch4-bpchp_small,0.0,96413.15906510004,ch4,0,0.52,ABW-electricity,TRUE,ABW-ch4,ABW-heat_decentral,4.0,ABW,bpchp_small,0.34,backpressure
