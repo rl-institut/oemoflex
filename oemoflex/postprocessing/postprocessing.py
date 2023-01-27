@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from abc import abstractmethod
 
 from oemoflex.postprocessing import helper as ppu
 from oemoflex.postprocessing.core import Calculation, Calculator
@@ -38,6 +39,10 @@ class Losses(Calculation):
         losses["var_name"] = self.var_name
         losses.set_index(["source", "target", "var_name"], inplace=True)
         return losses[0]  # Return Series instead of DataFrame
+
+    @abstractmethod
+    def calculate_result(self):
+        raise NotImplementedError
 
 
 class StorageLosses(Losses):
