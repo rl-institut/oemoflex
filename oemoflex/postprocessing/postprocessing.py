@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from abc import abstractmethod
 
-from oemoflex.postprocessing import helper as ppu
+from oemoflex.postprocessing import naming, helper as ppu
 from oemoflex.postprocessing.core import Calculation, Calculator
 
 
@@ -260,10 +260,10 @@ def run_postprocessing(es):
         summed_marginal_costs,
     ]
     all_scalars = pd.concat(all_scalars, 0)
-    all_scalars = ppu.map_var_names(
+    all_scalars = naming.map_var_names(
         all_scalars, calculator.scalar_params, calculator.busses, calculator.links
     )
-    all_scalars = ppu.add_component_info(all_scalars, calculator.scalar_params)
+    all_scalars = naming.add_component_info(all_scalars, calculator.scalar_params)
     all_scalars = pd.concat([all_scalars, total_system_costs], axis=0)
     all_scalars = all_scalars.sort_values(by=["carrier", "tech", "var_name"])
 
