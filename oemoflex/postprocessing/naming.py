@@ -7,7 +7,26 @@ from oemoflex.postprocessing.helper import get_bus_from_oemof_tuple, get_compone
 DEFAULT_COMPONENT_INFOS = ("region", "type", "carrier", "tech")
 
 
-def map_var_names(scalars, scalar_params, busses, links):
+def map_var_names(scalars: pd.Series, scalar_params: pd.DataFrame, busses: tuple, links: tuple):
+    """
+    Reindexes scalars to store carrier, in-out, from-to and variable name in a cleaner way.
+
+    Parameters
+    ----------
+    scalars : pd.Series
+        Scalar results from oemof simulation.
+    scalar_params : pd.DataFrame
+        Holds scalar params from oemof simulation.
+    busses : tuple
+        List of busses in oemof simulation.
+    links : tuple
+        List of links in oemof simulation.
+
+    Returns
+    -------
+    pd.Series
+        Series with index holding carrier, in-out, from-to and value information
+    """
     def get_carrier(node):
         bus = get_bus_from_oemof_tuple((node[0], node[1]), busses)
         if bus:
@@ -56,6 +75,26 @@ def map_var_names(scalars, scalar_params, busses, links):
 
 
 def add_component_info(scalars, scalar_params, attributes=DEFAULT_COMPONENT_INFOS):
+    """
+    Adds columns from extracted component information.
+
+    Each attribute is looked up in component of current index (in scalar_params).
+    If present, attribute is stored in new populated column.
+
+    Parameters
+    ----------
+    scalars: pd.Series
+        Holding current dataset in column "var_value"
+    scalar_params: pd.DataFrame
+        Input parameter set of oemof results
+    attributes: tuple
+        Attributes to lookup in component parameters
+
+    Returns
+    -------
+    pd.DataFrame
+        Expanded dataframe, which holds extra columns for extracted attributes
+    """
     def try_get_attr(x, attr):
         try:
             return scalar_params[x, None, attr]
