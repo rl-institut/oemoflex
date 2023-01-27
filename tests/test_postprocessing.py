@@ -6,7 +6,7 @@ from oemof.solph import EnergySystem, Model, processing, constraints
 from oemof.tabular.facades import TYPEMAP
 import oemoflex.postprocessing.postprocessing
 
-from tests import helpers
+import helpers
 
 
 TEST_FILES_DIR = pathlib.Path(__file__).parent / "_files"

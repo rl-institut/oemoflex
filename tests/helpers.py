@@ -4,7 +4,7 @@ import numpy as np
 import pandas
 from pyomo import environ as po
 
-from tests.test_postprocessing import TEST_FILES_DIR
+import test_postprocessing
 
 
 def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
@@ -168,7 +168,7 @@ def add_electricity_gas_relation_constraints(model, relations):
 
 def get_additional_scalars(scenario):
     """Returns additional scalars as pd.DataFrame or None if file does not exist"""
-    filename_add_scalars = str(TEST_FILES_DIR / scenario / "preprocessed" / "additional_scalars.csv")
+    filename_add_scalars = str(test_postprocessing.TEST_FILES_DIR / scenario / "preprocessed" / "additional_scalars.csv")
     if os.path.exists(filename_add_scalars):
         scalars = pandas.read_csv(filename_add_scalars, sep=";")
         scalars["var_value"] = pandas.to_numeric(scalars["var_value"], errors="coerce").fillna(scalars["var_value"])
