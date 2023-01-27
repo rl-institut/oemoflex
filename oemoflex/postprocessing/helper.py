@@ -229,23 +229,17 @@ def map_var_names(scalars, scalar_params, busses, links):
 
     def map_index(node):
         component_id = get_component_id_in_tuple(node, busses)
-
         component = node[component_id]
 
         carrier = get_carrier(node)
-
         in_out = get_in_out(node, component_id)
-
         from_to = get_from_to(node, component_id)
 
         var_name = [node[2], in_out, carrier, from_to]
-
         var_name = [item for item in var_name if item is not None]
-
         var_name = "_".join(var_name)
 
         index = (component, None, var_name)
-
         return index
 
     scalars.index = scalars.index.map(map_index)
