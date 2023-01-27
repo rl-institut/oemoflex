@@ -242,37 +242,6 @@ def run_postprocessing(es):
     summed_marginal_costs = SummedMarginalCosts(calculator).result
     total_system_costs = TotalSystemCosts(calculator).result
 
-    # # Get flows with emissions
-    # carriers_with_emissions = 'ch4'
-    #
-    # specific_emissions = 1  # TODO: Replace with real data
-    #
-    # inputs = get_inputs(summed_flows)
-    #
-    # flows_with_emissions = filter_series_by_component_attr(inputs,
-    #                                                        carrier=carriers_with_emissions)
-    #
-    # # Get emissions
-    #
-    # summed_emissions = flows_with_emissions * specific_emissions
-    #
-    # summed_emissions = set_index_level(
-    #     summed_emissions,
-    #     level='var_name',
-    #     value='summed_emissions'
-    # )
-    #
-    # # Get emission costs
-    # emission_costs = 1  # TODO: Replace this with real data
-    #
-    # summed_emission_costs = summed_emissions * emission_costs
-    #
-    # summed_emission_costs = set_index_level(
-    #     summed_emission_costs,
-    #     level='var_name',
-    #     value='summed_emission_costs'
-    # )
-
     # Combine all results
     all_scalars = [
         summed_flows,
@@ -290,12 +259,6 @@ def run_postprocessing(es):
         all_scalars, calculator.scalar_params, calculator.busses, calculator.links
     )
     all_scalars = ppu.add_component_info(all_scalars, calculator.scalar_params)
-
-    # Set index to string
-    # TODO: Check if this can be done far earlier, also for performance reasons.
-    # TODO: To do so, the information drawn from the components in add_component_info has
-    # TODO: to be provided differently.
-    # all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
     all_scalars = pd.concat([all_scalars, total_system_costs], axis=0)
     all_scalars = all_scalars.sort_values(by=["carrier", "tech", "var_name"])
 
