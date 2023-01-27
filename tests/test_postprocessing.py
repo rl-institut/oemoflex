@@ -1,7 +1,7 @@
 import pandas
 import pathlib
 
-from oemof.tabular import datapackage
+from oemof.tabular import datapackage  # noqa: F401
 from oemof.solph import EnergySystem, Model, processing, constraints
 from oemof.tabular.facades import TYPEMAP
 import oemoflex.postprocessing.postprocessing
@@ -22,7 +22,7 @@ def test_postprocessing_with_constraints():
             es = EnergySystem.from_datapackage(
                 str(TEST_FILES_DIR / scenario / "preprocessed" / "datapackage.json"),
                 attributemap={},
-                typemap=TYPEMAP
+                typemap=TYPEMAP,
             )
             # get additional scalars, set to None at first
             emission_limit = None
@@ -31,11 +31,15 @@ def test_postprocessing_with_constraints():
             additional_scalars = helpers.get_additional_scalars(scenario)
             if additional_scalars is not None:
                 emission_limit = helpers.get_emission_limit(additional_scalars)
-                el_gas_relations = helpers.get_electricity_gas_relations(additional_scalars)
+                el_gas_relations = helpers.get_electricity_gas_relations(
+                    additional_scalars
+                )
                 bpchp_out = helpers.get_bpchp_output_parameters(additional_scalars)
 
             if bpchp_out is not None:
-                es = helpers.add_output_parameters_to_bpchp(parameters=bpchp_out, energysystem=es)
+                es = helpers.add_output_parameters_to_bpchp(
+                    parameters=bpchp_out, energysystem=es
+                )
 
             m = Model(es)
 

@@ -81,15 +81,13 @@ def get_electricity_gas_relations(scalars):
         Contains rows of scalars with 'var_name' `EL_GAS_RELATION`
     If no relation is given returns None.
     """
-    relations_raw = scalars.loc[
-        scalars.var_name == "electricity_gas_relation"
-    ]
+    relations_raw = scalars.loc[scalars.var_name == "electricity_gas_relation"]
     # drop relations that are None
     relations = drop_values_by_keyword(relations_raw)
     if relations.empty:
         return None
     else:
-        busses = relations.carrier.drop_duplicates().values
+        busses = relations.carrier.drop_duplicates().values  # noqaF841
         return relations
 
 
@@ -168,10 +166,17 @@ def add_electricity_gas_relation_constraints(model, relations):
 
 def get_additional_scalars(scenario):
     """Returns additional scalars as pd.DataFrame or None if file does not exist"""
-    filename_add_scalars = str(test_postprocessing.TEST_FILES_DIR / scenario / "preprocessed" / "additional_scalars.csv")
+    filename_add_scalars = str(
+        test_postprocessing.TEST_FILES_DIR
+        / scenario
+        / "preprocessed"
+        / "additional_scalars.csv"
+    )
     if os.path.exists(filename_add_scalars):
         scalars = pandas.read_csv(filename_add_scalars, sep=";")
-        scalars["var_value"] = pandas.to_numeric(scalars["var_value"], errors="coerce").fillna(scalars["var_value"])
+        scalars["var_value"] = pandas.to_numeric(
+            scalars["var_value"], errors="coerce"
+        ).fillna(scalars["var_value"])
         return scalars
     else:
         return None
