@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name="oemoflex",
-    version="0.0.1",
+    version="0.0.2dev0",
     description="A flexible model structure for creating and analysing multi-regional"
     "sector-integrated energysystem models featuring many flexibility options",
     long_description=read("README.md"),
