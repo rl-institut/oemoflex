@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import find_packages, setup
 import os
 
 
@@ -9,15 +9,34 @@ def read(fname):
 
 
 setup(
-    name='oemoflex',
-    version='0.0.0',
-    description='',
-    long_description=read('README.md'),
-    packages=['oemoflex'],
+    name="oemoflex",
+    version="0.0.1",
+    description="A flexible model structure for creating and analysing multi-regional"
+    "sector-integrated energysystem models featuring many flexibility options",
+    long_description=read("README.md"),
+    packages=find_packages(),
+    package_data={
+        "oemoflex.config": ["settings.yaml"],
+        "oemoflex.model": [
+            "*.yml",
+            "*.csv",
+            os.path.join("facade_attrs", "*.csv"),
+        ],
+        "oemoflex.tools": [
+            "*.yaml",
+            "*.csv",
+        ],
+    },
+    package_dir={"oemoflex": "oemoflex"},
     install_requires=[
-        'pandas',
-        'pyomo<5.6.9',
-        'pyutilib<6.0.0',
-        'oemof.tabular @ git+https://git@github.com/oemof/oemof-tabular@dev#egg=oemof.tabular',
+        "pyyaml",
+        "dynaconf",
+        "pandas",
+        "oemof.tabular==0.0.3",
+        "plotly",
+        "frictionless",
+        "matplotlib",
     ],
+    # black version is specified so that each contributor uses the same one
+    extras_require={"dev": ["pytest", "black==20.8b1", "coverage", "flake8"]},
 )

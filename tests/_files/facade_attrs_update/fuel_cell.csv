@@ -1,0 +1,15 @@
+attribute,type,unit,description
+region,str,n/a,Country code
+name,str,n/a,Name
+type,str,n/a,Type
+carrier,str,n/a,Energy carrier
+tech,str,n/a,Technology
+h2_bus,str,n/a,H2 bus
+electricity_bus,str,n/a,Electricity bus
+heat_bus,str,n/a,Heat bus
+capacity,float,MW,Installed capacity
+efficiency,float,unitless,Efficiency
+availability,float,unitless,Availability
+marginal_cost,float,Eur/MWh,Marginal cost
+input_parameters,dict,n/a,Optional parameters passed to oemof-solph's input flow
+output_parameters,dict,n/a,Optional parameters passed to oemof-solph's output flow

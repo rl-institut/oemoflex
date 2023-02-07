@@ -1,0 +1,9 @@
+attribute,type,unit,description
+region,str,n/a,Country code
+name,str,n/a,Name
+type,str,n/a,Type
+carrier,str,n/a,Energy carrier
+tech,str,n/a,Technology
+bus,str,n/a,The bus this component is connected to
+amount,float,GWh/a,Total load over one year
+profile,str,n/a,Name of the profile

@@ -1,0 +1,16 @@
+attribute,type,unit,description
+region,str,n/a,Country code
+name,str,n/a,Name
+type,str,n/a,Type
+carrier,str,,Energy carrier of input flow
+tech,str,,Technology
+fuel_bus,str,,The bus that supports the fuel for the CHP
+electricity_bus,str,n/a,The bus for electricity output
+heat_bus,str,n/a,The bus for heat output
+capacity,float,MW_el,Installed electric capacity in full extraction mode
+electric_efficiency,float,,Electrical efficiency of the chp unit
+thermal_efficiency,float,,Thermal efficiency of the chp unit
+expandable,boolean,,Capacity can be expanded
+capacity_cost,float,Eur/MW,Annualized costs of capacity expansion
+carrier_cost,float,Eur/MWh,Cost per unit of used fuel
+marginal_cost,float,Eur/MWh_el,Marginal cost per unit of produced electrical output

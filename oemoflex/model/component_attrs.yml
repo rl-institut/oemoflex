@@ -1,0 +1,261 @@
+biomass-gt:
+  carrier: biomass
+  tech: gt
+  type: conversion
+  foreign_keys:
+    from_bus: biomass
+    to_bus: electricity
+  defaults:
+    output_parameters: "{}"
+
+ch4-boiler:
+  carrier: ch4
+  tech: boiler
+  type: conversion
+  foreign_keys:
+    from_bus: ch4
+    to_bus: heat
+  defaults:
+    output_parameters: "{}"
+
+ch4-bpchp:
+  carrier: ch4
+  tech: bpchp
+  type: backpressure
+  foreign_keys:
+    fuel_bus: ch4
+    electricity_bus: electricity
+    heat_bus: heat
+
+ch4-excess:
+  carrier: ch4
+  tech: excess
+  type: excess
+  foreign_keys:
+    bus: ch4
+  defaults:
+    marginal_cost: 0
+    input_parameters: "{}"
+
+ch4-extchp:
+  carrier: ch4
+  tech: extchp
+  type: extraction
+  foreign_keys:
+    fuel_bus: ch4
+    electricity_bus: electricity
+    heat_bus: heat
+
+ch4-gt:
+  carrier: ch4
+  tech: gt
+  type: conversion
+  foreign_keys:
+    from_bus: ch4
+    to_bus: electricity
+  defaults:
+    output_parameters: "{}"
+
+electricity-bev:
+  carrier: electricity
+  tech: bev
+  type: bev
+  foreign_keys:
+    bus: electricity
+    availability: availability-profile
+    drive_power: drive_power-profile
+    min_storage_level: min_storage_level-profile
+    max_storage_level: max_storage_level-profile
+  defaults:
+    efficiency_charging: 1
+    efficiency_discharging: 1
+    efficiency_v2g: 1
+    input_parameters: "{}"
+    output_parameters: "{}"
+
+electricity-curtailment:
+  carrier: electricity
+  tech: curtailment
+  type: excess
+  foreign_keys:
+    bus: electricity
+  defaults:
+    marginal_cost: 0
+    input_parameters: "{}"
+
+electricity-demand:
+  carrier: electricity
+  tech: demand
+  type: load
+  foreign_keys:
+    bus: electricity
+    profile: electricity-demand-profile
+
+electricity-h2_cavern:
+  carrier: electricity
+  tech: h2_cavern
+  type: asymmetric_storage
+  foreign_keys:
+    bus: electricity
+  defaults:
+    input_parameters: "{}"
+    output_parameters: "{}"
+
+electricity-heatpump:
+  carrier: electricity
+  tech: heatpump
+  type: conversion
+  foreign_keys:
+    from_bus: electricity
+    to_bus: heat
+    efficiency: cop-profile
+  defaults:
+    output_parameters: "{}"
+
+electricity-liion_battery:
+  carrier: electricity
+  tech: liion_battery
+  type: storage
+  foreign_keys:
+    bus: electricity
+  defaults:
+    input_parameters: "{}"
+    output_parameters: "{}"
+
+electricity-pth:
+  carrier: electricity
+  tech: pth
+  type: conversion
+  foreign_keys:
+    from_bus: electricity
+    to_bus: heat
+  defaults:
+    output_parameters: "{}"
+
+electricity-shortage:
+  carrier: electricity
+  tech: shortage
+  type: shortage
+  foreign_keys:
+    bus: electricity
+  defaults:
+    output_parameters: "{}"
+
+electricity-transmission:
+  carrier: electricity
+  tech: transmission
+  type: link
+  foreign_keys:
+    from_bus: electricity
+    to_bus: electricity
+
+h2-gt:
+  carrier: h2
+  tech: gt
+  type: conversion
+  foreign_keys:
+    from_bus: h2
+    to_bus: electricity
+  defaults:
+    output_parameters: "{}"
+
+heat-demand:
+  carrier: heat
+  tech: demand
+  type: load
+  foreign_keys:
+    bus: heat
+    profile: heat-demand-profile
+
+heat-excess:
+  carrier: heat
+  tech: excess
+  type: excess
+  foreign_keys:
+    bus: heat
+  defaults:
+    marginal_cost: 0
+    input_parameters: "{}"
+
+heat-shortage:
+  carrier: heat
+  tech: shortage
+  type: shortage
+  foreign_keys:
+    bus: heat
+  defaults:
+    output_parameters: "{}"
+
+heat-storage:
+  carrier: heat
+  tech: storage
+  type: storage
+  foreign_keys:
+    bus: heat
+  defaults:
+    input_parameters: "{}"
+    output_parameters: "{}"
+
+hydro-reservoir:
+  carrier: hydro
+  tech: reservoir
+  type: reservoir
+  foreign_keys:
+    bus: electricity
+    profile: hydro-reservoir_profile
+  defaults:
+    output_parameters: "{}"
+
+hydro-ror:
+  carrier: hydro
+  tech: ror
+  type: volatile
+  foreign_keys:
+    bus: electricity
+    profile: hydro-ror-profile
+  defaults:
+    marginal_cost: 0
+    output_parameters: "{}"
+
+solar-pv:
+  carrier: solar
+  tech: pv
+  type: volatile
+  foreign_keys:
+    bus: electricity
+    profile: solar-pv-profile
+  defaults:
+    marginal_cost: 0
+    output_parameters: "{}"
+
+uranium-nuclear_st:
+  carrier: uranium
+  tech: nuclear_st
+  type: conversion
+  foreign_keys:
+    from_bus: uranium
+    to_bus: electricity
+  defaults:
+    output_parameters: "{}"
+
+wind-offshore:
+  carrier: wind
+  tech: offshore
+  type: volatile
+  foreign_keys:
+    bus: electricity
+    profile: wind-offshore-profile
+  defaults:
+    marginal_cost: 0
+    output_parameters: "{}"
+
+wind-onshore:
+  carrier: wind
+  tech: onshore
+  type: volatile
+  foreign_keys:
+    bus: electricity
+    profile: wind-onshore-profile
+  defaults:
+    marginal_cost: 0
+    output_parameters: "{}"

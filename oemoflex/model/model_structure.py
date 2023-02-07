@@ -2,31 +2,73 @@ import os
 
 import pandas as pd
 
-from oemof_b3.tools.helpers import load_yaml
+from oemoflex.tools.helpers import load_yaml
 
 module_path = os.path.dirname(os.path.abspath(__file__))
 
-datetimeindex = pd.date_range(start='2019-01-01', freq='H', periods=8760)
 
-topology = load_yaml(os.path.join(module_path, 'topology.yml'))
+class FacadeAttrs:
+    r"""
+    A class representing facade attributes specified in .csv files.
 
-regions_list = topology['regions']
+    Parameters
+    ----------
+    dir_facade_attrs : path
+        Path of the directory containing specifications as .csv files
 
-link_list = topology['links']
+    Attributes
+    ---------
+    paths : dict
+        Dictionary mapping facade type to absolute paths
+    specs : dict
+        Dictionary mapping facade type to pd.DataFrame containing specs
+    """
+
+    def __init__(self, dir_facade_attrs):
+        self.paths = {}
+        self.specs = {}
+        self.update(dir_facade_attrs)
+
+    def get_facade_attr(self, type):
+        return self.specs[type]
+
+    def update(self, dir_facade_attrs):
+        self._update_paths(dir_facade_attrs)
+        self._update_specs()
+
+    def _update_paths(self, dir_facade_attrs):
+        paths = {
+            os.path.splitext(path)[0]: os.path.join(dir_facade_attrs, path)
+            for path in os.listdir(dir_facade_attrs)
+            if path
+        }
+
+        self.paths.update(paths)
+
+    def _update_specs(self):
+        for type, path in self.paths.items():
+            self.specs[type] = pd.read_csv(
+                self.paths[type],
+                index_col=0,
+                header=0,
+            )
 
 
 def create_default_data(
-        destination,
-        busses_file=os.path.join(module_path, 'busses.csv'),
-        components_file=os.path.join(module_path, 'components.csv'),
-        component_attrs_dir=os.path.join(module_path, 'component_attrs'),
-        select_components=None,
-        select_busses=None,
-        select_regions=regions_list,
-        select_links=link_list,
-        elements_subdir='elements',
-        sequences_subdir='sequences',
-        dummy_sequences=False,
+    select_regions,
+    select_links,
+    datetimeindex=None,
+    select_components=None,
+    select_busses=None,
+    dummy_sequences=False,
+    bus_attrs_file=os.path.join(module_path, "busses.yml"),
+    component_attrs_file=os.path.join(module_path, "component_attrs.yml"),
+    facade_attrs_dir=os.path.join(module_path, "facade_attrs"),
+    bus_attrs_update=None,
+    component_attrs_update=None,
+    facade_attrs_update=None,
+    elements_subdir="elements",
+    sequences_subdir="sequences",
 ):
     r"""
     Prepares oemoef.tabluar input CSV files:
@@ -35,66 +77,149 @@ def create_default_data(
 
     Parameters
     ----------
-    destination : str (dir path)
-        target directory where to put the prepared CSVs
+    select_regions : list
+        List of regions.
 
-    components_file : str (file path)
-        CSV where to read the components from
+    select_links : list
+        List of links.
 
-    component_attrs_dir : str (dir path)
-        CSV where to read the components' attributes from
+    datetimeindex : pd.DateTimeIndex
+        Timeindex for sequences.
 
     select_components : list
-        List of default elements to create
+        List of components.
+
+    select_busses : list
+        List of busses.
+
+    dummy_sequences : True/False
+        Create dummy sequences.
+
+    busses_file : path
+        Path to a YAML file that defines the busses
+
+    component_attrs_file : path
+        Path to a YAML file that defines the component_attributes
+
+    elements_subdir : str
+        oemof.tabular definition.
+
+    sequences_subdir : str
+        oemof.tabular definition.
 
     Returns
     -------
-    None
+    data : dict
+        Dictionary containing pd.DataFrames for elements and sequences
+
+    rel_paths : dict
+        Dictionary containing relative file paths.
     """
-    for subdir in [elements_subdir, sequences_subdir]:
+    # load component, bus and facade specifications
+    component_attrs = load_yaml(component_attrs_file)
 
-        subdir_full_path = os.path.join(destination, subdir)
+    bus_attrs = load_yaml(bus_attrs_file)
 
-        if not os.path.exists(subdir_full_path):
+    facade_attrs = FacadeAttrs(facade_attrs_dir)
 
-            os.makedirs(subdir_full_path)
+    # update
+    if component_attrs_update:
+        component_attrs.update(component_attrs_update)
 
-    components_file = os.path.join(module_path, components_file)
+    if bus_attrs_update:
+        bus_attrs.update(bus_attrs_update)
 
-    # TODO Better put this as another field into the components.csv as well?
-    component_attrs_dir = os.path.join(module_path, component_attrs_dir)
+    if facade_attrs_update:
+        facade_attrs.update(facade_attrs_update)
 
-    components = pd.read_csv(components_file).name.values
+    # TODO: Use only the busses necessary or defined.
+    selected_bus_attrs = select_from_node_attrs(bus_attrs, select_busses)
 
-    if select_components is not None:
-        undefined_components = set(select_components).difference(set(components))
+    # select components or choose all if selection is None
+    selected_component_attrs = select_from_node_attrs(
+        component_attrs, select_components
+    )
 
-        assert not undefined_components,\
-            f"Selected components {undefined_components} are not in components."
+    transmissions_without_link = [
+        comp.get("tech")
+        for comp in selected_component_attrs.values()
+        if (("type", "link") in comp.items() and select_links is None)
+    ]
 
-        components = [c for c in components if c in select_components]
-
-    bus_df = create_bus_element(busses_file, select_busses, select_regions)
-
-    bus_df.to_csv(os.path.join(destination, elements_subdir, 'bus.csv'))
-
-    for component in components:
-        component_attrs_file = os.path.join(component_attrs_dir, component + '.csv')
-
-        df = create_component_element(component_attrs_file, select_regions, select_links)
-
-        # Write to target directory
-        df.to_csv(os.path.join(destination, elements_subdir, component + '.csv'))
-
-        create_component_sequences(
-            component_attrs_file,
-            select_regions,
-            os.path.join(destination, sequences_subdir),
-            dummy_sequences,
+    if transmissions_without_link:
+        raise ValueError(
+            f"You don't have a link, but you have at least one component, that requires a link. "
+            f"This affects component(s) with the following 'tech': {transmissions_without_link}. "
+            "Please define link(s)."
         )
 
+    # Create empty dictionaries for the dataframes and their relative paths in the datapackage.
+    data = {}
 
-def create_bus_element(busses_file, select_busses, select_regions):
+    rel_paths = {}
+
+    # Create bus df
+    data["bus"] = create_bus_element(selected_bus_attrs, select_regions)
+
+    rel_paths["bus"] = os.path.join("data", elements_subdir, "bus" + ".csv")
+
+    # Create component dfs
+    for component, attrs in selected_component_attrs.items():
+
+        data[component] = create_component_element(
+            attrs, select_regions, select_links, facade_attrs
+        )
+
+        rel_paths[component] = os.path.join("data", elements_subdir, component + ".csv")
+
+    # Create profile dfs
+    def get_profile_rel_path(name):
+
+        file_name = name.replace("-profile", "_profile") + ".csv"
+
+        path = os.path.join("data", sequences_subdir, file_name)
+
+        return path
+
+    for component, attrs in selected_component_attrs.items():
+
+        profile_data = create_component_sequences(
+            attrs,
+            select_regions,
+            datetimeindex,
+            dummy_sequences=dummy_sequences,
+        )
+
+        data.update(profile_data)
+
+        rel_paths.update(
+            {key: get_profile_rel_path(key) for key in profile_data.keys()}
+        )
+
+    return data, rel_paths
+
+
+def select_from_node_attrs(node_attrs, select_nodes):
+    def filter_dict_keys_by_list(dictionary, lst):
+        result = {}
+        for key in lst:
+            result[key] = dictionary[key]
+        return result
+
+    if select_nodes is not None:
+        undefined_nodes = set(select_nodes).difference(set(node_attrs))
+
+        assert not undefined_nodes, f"Selected nodes {undefined_nodes} are not defined."
+
+        selected_components = filter_dict_keys_by_list(node_attrs, select_nodes)
+
+    else:
+        selected_components = node_attrs
+
+    return selected_components
+
+
+def create_bus_element(bus_attrs, select_regions):
     r"""
 
     Parameters
@@ -107,42 +232,36 @@ def create_bus_element(busses_file, select_busses, select_regions):
     bus_df : pd.DataFrame
         Bus element DataFrame
     """
-    busses = pd.read_csv(busses_file, index_col='carrier')
-
-    if select_busses:
-        busses = busses.loc[select_busses]
-
     regions = []
     carriers = []
     balanced = []
 
     for region in select_regions:
-        for carrier, row in busses.iterrows():
+        for carrier, attrs in bus_attrs.items():
             regions.append(region)
-            carriers.append(region + '-' + carrier)
-            balanced.append(row['balanced'])
+            carriers.append(region + "-" + carrier)
+            balanced.append(attrs["balanced"])
 
-    bus_df = pd.DataFrame({
-        'region': regions,
-        'name': carriers,
-        'type': 'bus',
-        'balanced': balanced
-    })
+    bus_df = pd.DataFrame(
+        {"region": regions, "name": carriers, "type": "bus", "balanced": balanced}
+    )
 
-    bus_df = bus_df.set_index('region')
+    bus_df = bus_df.set_index("name")
 
     return bus_df
 
 
-def create_component_element(component_attrs_file, select_regions, select_links):
+def create_component_element(
+    component_attrs, select_regions, select_links, facade_attrs
+):
     r"""
-    Loads file for component attribute specs and returns a pd.DataFrame with the right regions,
+    Takes dictionary for component attributes and returns a pd.DataFrame with the regions,
     links, names, references to profiles and default values.
 
     Parameters
     ----------
-    component_attrs_file : path
-        Path to file with component attribute specifications.
+    component_attrs : dict
+        Dcitionary with component attribute specifications.
 
     Returns
     -------
@@ -150,55 +269,87 @@ def create_component_element(component_attrs_file, select_regions, select_links)
         DataFrame for the given component with default values filled.
 
     """
-    try:
-        component_attrs = pd.read_csv(component_attrs_file, index_col=0)
-
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"There is no file {component_attrs_file}") from e
-
     # Collect default values and suffices for the component
-    defaults = component_attrs.loc[component_attrs['default'].notna(), 'default'].to_dict()
+    foreign_keys = component_attrs["foreign_keys"]
 
-    suffices = component_attrs.loc[component_attrs['suffix'].notna(), 'suffix'].to_dict()
+    def pop_keys(dictionary, keys):
+        popped = {}
 
-    comp_data = {key: None for key in component_attrs.index}
+        for key in keys:
+            popped[key] = dictionary.pop(key)
+
+        return popped
+
+    simple = ["carrier", "type", "tech"]
+
+    simple_keys = pop_keys(component_attrs, simple)
+
+    defaults = {}
+    if "defaults" in component_attrs:
+        defaults = component_attrs["defaults"]
+
+    # load facade attrs
+    facade_attr = facade_attrs.get_facade_attr(simple_keys["type"])
+
+    comp_data = {key: None for key in facade_attr.index}
+
+    comp_data.update(simple_keys)
 
     # Create dict for component data
-    if defaults['type'] == 'link':
+    if simple_keys["type"] == "link":
         # TODO: Check the diverging conventions of '-' and '_' and think about unifying.
-        comp_data['region'] = [link.replace('-', '_') for link in select_links]
-        comp_data['name'] = select_links
-        comp_data['from_bus'] = [link.split('-')[0] + suffices['from_bus'] for link in select_links]
-        comp_data['to_bus'] = [link.split('-')[1] + suffices['to_bus'] for link in select_links]
+        comp_data["region"] = [link.replace("-", "_") for link in select_links]
+        comp_data["name"] = [
+            "-".join([link, simple_keys["carrier"], simple_keys["tech"]])
+            for link in select_links
+        ]
+        comp_data["from_bus"] = [
+            link.split("-")[0] + "-" + foreign_keys["from_bus"] for link in select_links
+        ]
+        comp_data["to_bus"] = [
+            link.split("-")[1] + "-" + foreign_keys["to_bus"] for link in select_links
+        ]
 
     else:
-        comp_data['region'] = select_regions
-        comp_data['name'] = [region + suffices['name'] for region in select_regions]
+        comp_data["region"] = select_regions
+        comp_data["name"] = [
+            "-".join([region, simple_keys["carrier"], simple_keys["tech"]])
+            for region in select_regions
+        ]
 
-        for key, value in suffices.items():
-            comp_data[key] = [region + value for region in select_regions]
+        for key, value in foreign_keys.items():
+            comp_data[key] = [region + "-" + value for region in select_regions]
 
     for key, value in defaults.items():
         comp_data[key] = value
 
-    component_df = pd.DataFrame(comp_data).set_index('region')
+    # sort the columns for comparability
+    component_df = pd.DataFrame(comp_data).set_index("name")
+
+    component_df = component_df[sorted(component_df.columns)]
 
     return component_df
 
 
 def create_component_sequences(
-        component_attrs_file, select_regions, destination,
-        dummy_sequences=False, dummy_value=0,
-    ):
+    component_attrs,
+    select_regions,
+    datetimeindex,
+    dummy_sequences=False,
+    dummy_value=0,
+):
     r"""
 
     Parameters
     ----------
-    component_attrs_file : path
-        Path to file describing the components' attributes
+    component_attrs : dict
+        Dictionary describing the components' attributes
 
-    destination : path
+    select_regions : path
         Path where sequences are saved.
+
+    datetimeindex : pd.DateTimeIndex
+        Timeindex of the sequences
 
     dummy_sequences : bool
         If True, create a short timeindex and dummy values.
@@ -208,50 +359,41 @@ def create_component_sequences(
 
     Returns
     -------
-    None
+    profile_data : dict
+        Dictionary containing profile DataFrames.
     """
-    try:
-        component_attrs = pd.read_csv(component_attrs_file, index_col=0)
+    foreign_keys = component_attrs["foreign_keys"]
 
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"There is no file {component_attrs_file}") from e
+    profile_names = {k: v for k, v in foreign_keys.items() if "profile" in v}
 
-    suffices = component_attrs.loc[component_attrs['suffix'].notna(), 'suffix'].to_dict()
-
-    def remove_prefix(string, prefix):
-        if string.startswith(prefix):
-            return string[len(prefix):]
-
-    def remove_suffix(string, suffix):
-        if string.endswith(suffix):
-            return string[:-len(suffix)]
-
-    profile_names = {k: remove_prefix(v, '-') for k, v in suffices.items() if 'profile' in v}
+    profile_data = {}
 
     for profile_name in profile_names.values():
 
-        profile_filename = remove_suffix(profile_name, '-profile') + '_profile.csv'
-
         profile_columns = []
 
-        profile_columns.extend(['-'.join([region, profile_name]) for region in select_regions])
+        profile_columns.extend(
+            ["-".join([region, profile_name]) for region in select_regions]
+        )
 
         if dummy_sequences:
-            datetimeindex = pd.date_range(start='2020-10-20', periods=3, freq='H')
+            datetimeindex = pd.date_range(start="2020-10-20", periods=3, freq="H")
 
-            profile_df = pd.DataFrame(dummy_value, index=datetimeindex, columns=profile_columns)
+            profile_df = pd.DataFrame(
+                dummy_value, index=datetimeindex, columns=profile_columns
+            )
 
-            dummy_msg = 'dummy'
+            dummy_msg = "dummy"
 
         else:
-            profile_df = pd.DataFrame(columns=profile_columns)
+            profile_df = pd.DataFrame(columns=profile_columns, index=datetimeindex)
 
-            dummy_msg = 'empty'
+            dummy_msg = "empty"
 
-        profile_df.index.name = 'timeindex'
+        profile_df.index.name = "timeindex"
 
-        profile_destination = os.path.join(destination, profile_filename)
+        profile_data[profile_name] = profile_df
 
-        profile_df.to_csv(profile_destination)
+        print(f"Created {dummy_msg} profile: '{profile_name}'.")
 
-        print(f"Saved {dummy_msg} profile to {profile_destination}")
+    return profile_data

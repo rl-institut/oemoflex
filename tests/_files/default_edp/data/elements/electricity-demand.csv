@@ -1,0 +1,3 @@
+name,amount,bus,carrier,profile,region,tech,type
+A-electricity-demand,,A-electricity,electricity,A-electricity-demand-profile,A,demand,load
+B-electricity-demand,,B-electricity,electricity,B-electricity-demand-profile,B,demand,load

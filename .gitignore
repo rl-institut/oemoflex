@@ -1,0 +1,12 @@
+.idea/
+.snakemake/
+*.egg-info/
+__pycache__/
+
+docs/_build
+
+examples/01_preprocessed/
+examples/02_optimized/
+examples/03_postprocessed/
+examples/04_plotted/
+examples/dispatch_interactive.html
