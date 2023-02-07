@@ -324,9 +324,9 @@ class ResultsDataPackage(DataFramePackage):
 
         rel_paths = {}
 
-        data_scal, rel_paths_scal = self._get_scalars(self, es)
-
         data_seq, rel_paths_seq = self._get_sequences(self, es)
+
+        data_scal, rel_paths_scal = self._get_scalars(self, es)
 
         data.update(data_seq)
 
