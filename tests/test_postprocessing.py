@@ -1,15 +1,47 @@
 import pandas
 import pathlib
 
+from unittest import mock
+
 from oemof.tabular import datapackage  # noqa: F401
 from oemof.solph import EnergySystem, Model, processing, constraints
 from oemof.tabular.facades import TYPEMAP
-import oemoflex.postprocessing.postprocessing
+from oemoflex.postprocessing import core, postprocessing
 
 import helpers
 
 
 TEST_FILES_DIR = pathlib.Path(__file__).parent / "_files"
+
+
+class ParametrizedCalculation(postprocessing.Calculation):
+    name = "pc"
+
+    def __init__(self, calculator, a=2, b=4):
+        self.a = a
+        self.b = b
+        super().__init__(calculator)
+
+    def calculate_result(self):
+        return
+
+
+def test_dependency_name():
+    calculator = mock.MagicMock()
+    summed_flows = postprocessing.SummedFlows(calculator)
+    name = core.get_dependency_name(summed_flows)
+    assert name == "summed_flows"
+
+    dep = core.Dependency(postprocessing.SummedFlows)
+    name = core.get_dependency_name(dep)
+    assert name == "summed_flows"
+
+    name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2, b=2))
+    assert name == "pc_a=2_b=2"
+
+    dep = core.Dependency(ParametrizedCalculation)
+    name = core.get_dependency_name(dep)
+    assert name == "pc_a=2_b=4"
 
 
 def test_postprocessing_with_constraints():
@@ -60,7 +92,7 @@ def test_postprocessing_with_constraints():
             es = EnergySystem()
             es.restore(dump_folder)
         results: pandas.DataFrame = (
-            oemoflex.postprocessing.postprocessing.run_postprocessing(es)
+            postprocessing.run_postprocessing(es)
         )
         results["scenario"] = scenario
         results = results.reset_index()

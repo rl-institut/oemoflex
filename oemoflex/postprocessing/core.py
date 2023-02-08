@@ -1,12 +1,54 @@
 import abc
 import logging
+import inspect
+from dataclasses import dataclass
 
 import pandas as pd
-from typing import List
+from typing import Dict, Union, Optional, Type
 
 
 class CalculationError(Exception):
     """Raised if something is wrong in calculation"""
+
+
+@dataclass
+class Dependency:
+    calculation: Type["Calculation"]
+    parameters: Optional[dict] = None
+
+
+def get_dependency_name(dependency: Union[Dependency, "Calculation"]):
+    if isinstance(dependency, Calculation):
+        # Get name from instance
+        signiture = inspect.signature(dependency.__init__)
+        return "_".join(
+            [dependency.name]
+            + [
+                f"{parameter}={getattr(dependency, parameter)}"
+                for parameter in signiture.parameters
+                if parameter not in ("self", "calculator")
+            ]
+        )
+    if dependency.parameters:
+        # Get name from class and parameters
+        return "_".join(
+            [dependency.calculation.name]
+            + [
+                f"{parameter}={value}"
+                for parameter, value in dependency.parameters.items()
+                if parameter not in ("self", "calculator")
+            ]
+        )
+    # Get name from class and default parameters in class
+    signiture = inspect.signature(dependency.calculation.__init__)
+    return "_".join(
+        [dependency.calculation.name]
+        + [
+            f"{name}={parameter.default}"
+            for name, parameter in signiture.parameters.items()
+            if name not in ("self", "calculator")
+        ]
+    )
 
 
 class Calculator:
@@ -76,19 +118,25 @@ class Calculator:
             ].index.get_level_values(0)
         )
 
-    def add(self, calculation):
+    def add(self, dependency: Union[Dependency, "Calculation"]):
         """Adds calculation to calculations 'tree' if not yet present"""
-        if isinstance(calculation, Calculation):
-            if calculation.name in self.calculations:
+        dependency_name = get_dependency_name(dependency)
+        if isinstance(dependency, Calculation):
+            if dependency_name in self.calculations:
                 raise CalculationError(
-                    f"Calculation '{calculation.__class__.__name__}' already exists in calculator"
+                    f"Calculation '{dependency.__class__.__name__}' already exists in calculator"
                 )
-            self.calculations[calculation.name] = calculation
+            self.calculations[dependency_name] = dependency
         else:
-            if calculation.name in self.calculations:
+            if dependency_name in self.calculations:
                 return
-            if issubclass(calculation, Calculation):
-                self.calculations[calculation.name] = calculation(self)
+            if issubclass(dependency.calculation, Calculation):
+                if dependency.parameters:
+                    self.calculations[dependency_name] = dependency.calculation(
+                        self, **dependency.parameters
+                    )
+                else:
+                    self.calculations[dependency_name] = dependency.calculation(self)
                 return
             raise CalculationError("Can only add Calculation instances or classes")
 
@@ -109,7 +157,8 @@ class Calculation(abc.ABC):
     """
 
     name = None
-    depends_on: List["Calculation"] = None
+    parameters = ()
+    depends_on: Dict[str, Dependency] = None
 
     def __init__(self, calculator: Calculator):
         super(Calculation, self).__init__()
@@ -121,11 +170,12 @@ class Calculation(abc.ABC):
     def __add_dependencies(self):
         if not self.depends_on:
             return
-        for dependency in self.depends_on:
+        for dependency in self.depends_on.values():
             self.calculator.add(dependency)
 
     def dependency(self, name):
-        return self.calculator.get_result(name)
+        dependency_name = get_dependency_name(self.depends_on[name])
+        return self.calculator.get_result(dependency_name)
 
     @abc.abstractmethod
     def calculate_result(self):
