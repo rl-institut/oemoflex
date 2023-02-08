@@ -91,9 +91,7 @@ def test_postprocessing_with_constraints():
         else:
             es = EnergySystem()
             es.restore(dump_folder)
-        results: pandas.DataFrame = (
-            postprocessing.run_postprocessing(es)
-        )
+        results: pandas.DataFrame = postprocessing.run_postprocessing(es)
         results["scenario"] = scenario
         results = results.reset_index()
         results = results.astype({"var_value": "float64"})

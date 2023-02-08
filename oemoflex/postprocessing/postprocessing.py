@@ -131,7 +131,7 @@ class InvestedCapacityCosts(Calculation):
     name = "invested_capacity_costs"
     depends_on = {
         "invested_capacity": Dependency(InvestedCapacity),
-        "ep_costs": Dependency(EPCosts)
+        "ep_costs": Dependency(EPCosts),
     }
 
     def calculate_result(self):
@@ -150,7 +150,7 @@ class InvestedStorageCapacityCosts(Calculation):
     name = "invested_storage_capacity_costs"
     depends_on = {
         "invested_storage_capacity": Dependency(InvestedStorageCapacity),
-        "ep_costs": Dependency(EPCosts)
+        "ep_costs": Dependency(EPCosts),
     }
 
     def calculate_result(self):
