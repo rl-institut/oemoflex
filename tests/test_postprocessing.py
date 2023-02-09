@@ -3,6 +3,7 @@ import pathlib
 
 from unittest import mock
 
+import pytest
 from oemof.tabular import datapackage  # noqa: F401
 from oemof.solph import EnergySystem, Model, processing, constraints
 from oemof.tabular.facades import TYPEMAP
@@ -17,7 +18,7 @@ TEST_FILES_DIR = pathlib.Path(__file__).parent / "_files"
 class ParametrizedCalculation(core.Calculation):
     name = "pc"
 
-    def __init__(self, calculator, a=2, b=4):
+    def __init__(self, calculator, a, b=4):
         self.a = a
         self.b = b
         super().__init__(calculator)
@@ -39,7 +40,18 @@ def test_dependency_name():
     name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2, b=2))
     assert name == "pc_a=2_b=2"
 
+    name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2))
+    assert name == "pc_a=2_b=4"
+
     dep = core.ParametrizedCalculation(ParametrizedCalculation)
+    with pytest.raises(core.CalculationError):
+        core.get_dependency_name(dep)
+
+    dep = core.ParametrizedCalculation(ParametrizedCalculation, {"a": 2, "b": 6})
+    name = core.get_dependency_name(dep)
+    assert name == "pc_a=2_b=6"
+
+    dep = core.ParametrizedCalculation(ParametrizedCalculation, {"a": 2})
     name = core.get_dependency_name(dep)
     assert name == "pc_a=2_b=4"
 

@@ -31,30 +31,25 @@ def get_dependency_name(
                 if parameter not in ("self", "calculator")
             ]
         )
-    if isinstance(calculation, ParametrizedCalculation) and calculation.parameters:
-        # Get name from class and parameters
-        return "_".join(
-            [calculation.calculation.name]
-            + [
-                f"{parameter}={value}"
-                for parameter, value in calculation.parameters.items()
-                if parameter not in ("self", "calculator")
-            ]
-        )
     # Get name from class and default parameters in class
     if isinstance(calculation, ParametrizedCalculation):
         calc = calculation.calculation
+        parameters = calculation.parameters or {}
     else:
         calc = calculation
+        parameters = {}
     signiture = inspect.signature(calc.__init__)
-    return "_".join(
-        [calc.name]
-        + [
-            f"{name}={parameter.default}"
-            for name, parameter in signiture.parameters.items()
-            if name not in ("self", "calculator")
-        ]
-    )
+    names = [calc.name]
+    for name, sig_parameter in signiture.parameters.items():
+        if name not in ("self", "calculator"):
+            value = parameters.get(name)
+            if value:
+                names.append(f"{name}={value}")
+                continue
+            if sig_parameter.default is inspect.Parameter.empty:
+                raise CalculationError(f"Parameter '{name}' in calculation '{calc.name}' not set.")
+            names.append(f"{name}={sig_parameter.default}")
+    return "_".join(names)
 
 
 class Calculator:
