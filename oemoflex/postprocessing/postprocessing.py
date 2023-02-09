@@ -1,33 +1,56 @@
 import pandas as pd
 import numpy as np
 from abc import abstractmethod
+from typing import List
 
 from oemoflex.postprocessing import naming, helper as ppu
-from oemoflex.postprocessing.core import Calculation, Calculator
+from oemoflex.postprocessing import core
 
 
-class SummedFlows(Calculation):
-    name = "summed_flows"
+class AggregatedFlows(core.Calculation):
+    name = "aggregated_flows"
+
+    def __init__(
+        self,
+        calculator: core.Calculator,
+        from_nodes: List[str] = None,
+        to_nodes: List[str] = None,
+        resample_mode: str = None,
+        drop_component_to_component: bool = True
+    ):
+        if from_nodes and to_nodes and len(from_nodes) > 1 and len(to_nodes) > 1:
+            raise core.CalculationError(
+                "Either 'from_nodes' or 'to_nodes' must contain a single source/sink."
+            )
+        self.from_nodes = from_nodes
+        self.to_nodes = to_nodes
+        self.resample_mode = resample_mode
+        self.drop_component_to_component = drop_component_to_component
+        super().__init__(calculator)
 
     def calculate_result(self):
-        summed_flows = ppu.sum_flows(self.sequences)
-        return ppu.drop_component_to_component(summed_flows, self.busses)
+        aggregated_flows = ppu.sum_flows(self.sequences, resample_mode=self.resample_mode)
+        axis = 1 if self.resample_mode else 0
+        filtered_flows = ppu.filter_df_by_input_and_output_nodes(aggregated_flows, self.from_nodes, self.to_nodes, axis=axis)
+        if self.drop_component_to_component:
+            filtered_flows = ppu.drop_component_to_component(filtered_flows, self.busses, axis=axis)
+        return filtered_flows
 
 
-class Losses(Calculation):
+class Losses(core.Calculation):
     name = "losses"
-    depends_on = {"summed_flows": SummedFlows}
+    depends_on = {"aggregated_flows": AggregatedFlows}
     var_name = None
 
-    def _calculate_losses(self, summed_flows):
+    def _calculate_losses(self, aggregated_flows):
         r"""
         Calculate losses within components as the difference of summed input
         to output.
         """
         if not self.var_name:
             raise ValueError("var_name has to be set")
-        inputs = ppu.get_inputs(summed_flows, self.busses)
-        outputs = ppu.get_outputs(summed_flows, self.busses)
+        inputs = ppu.get_inputs(aggregated_flows, self.busses)
+        outputs = ppu.get_outputs(aggregated_flows, self.busses)
         inputs = inputs.groupby("target").sum()
         outputs = outputs.groupby("source").sum()
         losses = inputs - outputs
@@ -47,35 +70,35 @@ class Losses(Calculation):
 
 class StorageLosses(Losses):
     name = "storage_losses"
-    depends_on = {"summed_flows": SummedFlows}
+    depends_on = {"aggregated_flows": AggregatedFlows}
     var_name = "storage_losses"
 
     def calculate_result(self):
-        summed_flows_storage = ppu.filter_series_by_component_attr(
-            self.dependency("summed_flows"),
+        aggregated_flows_storage = ppu.filter_series_by_component_attr(
+            self.dependency("aggregated_flows"),
             scalar_params=self.scalar_params,
             busses=self.busses,
             type="storage",
         )
-        return self._calculate_losses(summed_flows_storage)
+        return self._calculate_losses(aggregated_flows_storage)
 
 
 class TransmissionLosses(Losses):
     name = "transmission_losses"
-    depends_on = {"summed_flows": SummedFlows}
+    depends_on = {"aggregated_flows": AggregatedFlows}
     var_name = "transmission_losses"
 
     def calculate_result(self):
-        summed_flows_transmission = ppu.filter_series_by_component_attr(
-            self.dependency("summed_flows"),
+        aggregated_flows_transmission = ppu.filter_series_by_component_attr(
+            self.dependency("aggregated_flows"),
             scalar_params=self.scalar_params,
             busses=self.busses,
             type="link",
         )
-        return self._calculate_losses(summed_flows_transmission)
+        return self._calculate_losses(aggregated_flows_transmission)
 
 
-class Investment(Calculation):
+class Investment(core.Calculation):
     name = "investment"
 
     def calculate_result(self):
@@ -86,7 +109,7 @@ class Investment(Calculation):
         )
 
 
-class EPCosts(Calculation):
+class EPCosts(core.Calculation):
     name = "ep_costs"
 
     def calculate_result(self):
@@ -97,7 +120,7 @@ class EPCosts(Calculation):
             return pd.Series(dtype="object")
 
 
-class InvestedCapacity(Calculation):
+class InvestedCapacity(core.Calculation):
     """Collect invested (endogenous) capacity (units of power)"""
 
     name = "invested_capacity"
@@ -112,7 +135,7 @@ class InvestedCapacity(Calculation):
         return self.dependency("investment").loc[~target_is_none]
 
 
-class InvestedStorageCapacity(Calculation):
+class InvestedStorageCapacity(core.Calculation):
     """Collect storage capacity (units of energy)"""
 
     name = "invested_storage_capacity"
@@ -127,7 +150,7 @@ class InvestedStorageCapacity(Calculation):
         return self.dependency("investment").loc[target_is_none]
 
 
-class InvestedCapacityCosts(Calculation):
+class InvestedCapacityCosts(core.Calculation):
     name = "invested_capacity_costs"
     depends_on = {
         "invested_capacity": InvestedCapacity,
@@ -146,7 +169,7 @@ class InvestedCapacityCosts(Calculation):
         return invested_capacity_costs
 
 
-class InvestedStorageCapacityCosts(Calculation):
+class InvestedStorageCapacityCosts(core.Calculation):
     name = "invested_storage_capacity_costs"
     depends_on = {
         "invested_storage_capacity": InvestedStorageCapacity,
@@ -167,19 +190,19 @@ class InvestedStorageCapacityCosts(Calculation):
         return invested_storage_capacity_costs
 
 
-class SummedVariableCosts(Calculation):
+class SummedVariableCosts(core.Calculation):
     name = "summed_variable_costs"
-    depends_on = {"summed_flows": SummedFlows}
+    depends_on = {"aggregated_flows": AggregatedFlows}
 
     def calculate_result(self):
         variable_costs = ppu.filter_by_var_name(
             self.scalar_params, "variable_costs"
         ).unstack(2)["variable_costs"]
         variable_costs = variable_costs.loc[variable_costs != 0]
-        summed_flows = self.dependency("summed_flows").unstack(2).loc[:, "flow"]
+        aggregated_flows = self.dependency("aggregated_flows").unstack(2).loc[:, "flow"]
 
         summed_variable_costs = ppu.multiply_var_with_param(
-            summed_flows, variable_costs
+            aggregated_flows, variable_costs
         )
         summed_variable_costs = ppu.set_index_level(
             summed_variable_costs, level="var_name", value="summed_variable_costs"
@@ -187,7 +210,7 @@ class SummedVariableCosts(Calculation):
         return summed_variable_costs
 
 
-class SummedCarrierCosts(Calculation):
+class SummedCarrierCosts(core.Calculation):
     """
     Calculates summed carrier costs
 
@@ -201,7 +224,7 @@ class SummedCarrierCosts(Calculation):
         return ppu.get_inputs(self.dependency("summed_variable_costs"), self.busses)
 
 
-class SummedMarginalCosts(Calculation):
+class SummedMarginalCosts(core.Calculation):
     """
     Calculates summed marginal costs
 
@@ -215,7 +238,7 @@ class SummedMarginalCosts(Calculation):
         return ppu.get_outputs(self.dependency("summed_variable_costs"), self.busses)
 
 
-class TotalSystemCosts(Calculation):
+class TotalSystemCosts(core.Calculation):
     name = "total_system_costs"
     depends_on = {
         "invested_capacity_costs": InvestedCapacityCosts,
@@ -240,9 +263,9 @@ class TotalSystemCosts(Calculation):
 
 def run_postprocessing(es):
     # Setup calculations
-    calculator = Calculator(es.params, es.results)
+    calculator = core.Calculator(es.params, es.results)
 
-    summed_flows = SummedFlows(calculator).result
+    aggregated_flows = AggregatedFlows(calculator).result
     storage_losses = StorageLosses(calculator).result
     transmission_losses = TransmissionLosses(calculator).result
     invested_capacity = InvestedCapacity(calculator).result
@@ -255,7 +278,7 @@ def run_postprocessing(es):
 
     # Combine all results
     all_scalars = [
-        summed_flows,
+        aggregated_flows,
         storage_losses,
         transmission_losses,
         invested_capacity,

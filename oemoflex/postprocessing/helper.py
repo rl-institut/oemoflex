@@ -1,15 +1,19 @@
+import pandas
 import pandas as pd
 
+from typing import List, Optional
 
-def drop_component_to_component(series, busses):
+
+def drop_component_to_component(df: pandas.DataFrame, busses, axis: int = 0):
     r"""
     Drops those entries of an oemof_tuple indexed Series
     where both target and source are components.
     """
+    nodes = df.index if axis == 0 else df.columns
     component_to_component_ids = [
-        node for node in series.index if node[0] not in busses and node[1] not in busses
+        node for node in nodes if node[0] not in busses and node[1] not in busses
     ]
-    result = series.drop(component_to_component_ids)
+    result = df.drop(component_to_component_ids, axis=axis)
     return result
 
 
@@ -110,6 +114,36 @@ def filter_series_by_component_attr(df, scalar_params, busses, **kwargs):
     return filtered_df
 
 
+def filter_df_by_input_and_output_nodes(
+    df: pandas.DataFrame,
+    from_nodes: Optional[List[str]] = None,
+    to_nodes: Optional[List[str]] = None,
+    axis: int = 0,
+):
+    r"""
+    Filter dataframe
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        Dataframe to filter
+    from_nodes: Optional[List[str]]
+        List of input nodes to filter. If None input nodes are not filtered.
+    to_nodes: List[str]
+        List of output nodes to filter. If None output nodes are not filtered.
+    axis: int
+        Whether to filter index (axis=0) or columns (axis=1)
+
+    Returns
+    -------
+    pandas.DataFrame
+        Filtered dataframe
+    """
+    index = df.index if axis == 0 else df.columns
+    froms = {node for node in index if node[0] not in from_nodes} if from_nodes else set()
+    tos = {node for node in index if node[1] not in to_nodes} if to_nodes else set()
+    return df.drop(froms.union(tos), axis=axis)
+
+
 def get_inputs(series, busses):
     r"""
     Gets those entries of an oemof_tuple indexed DataFrame
@@ -130,15 +164,16 @@ def get_outputs(series, busses):
     return outputs
 
 
-def sum_flows(df):
+def sum_flows(df, resample_mode: str = None):
     r"""
     Takes a multi-indexed DataFrame and returns the sum of
-    the flows.
+    the flows. If resample mode is given, flows are resampled first.
     """
     is_flow = df.columns.get_level_values(2) == "flow"
     df = df.loc[:, is_flow]
-    df = df.sum()
-    return df
+    if resample_mode:
+        return df.resample(resample_mode).sum()
+    return df.sum()
 
 
 def multiply_var_with_param(var, param):

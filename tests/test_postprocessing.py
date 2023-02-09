@@ -14,7 +14,7 @@ import helpers
 TEST_FILES_DIR = pathlib.Path(__file__).parent / "_files"
 
 
-class ParametrizedCalculation(postprocessing.Calculation):
+class ParametrizedCalculation(core.Calculation):
     name = "pc"
 
     def __init__(self, calculator, a=2, b=4):
@@ -28,13 +28,13 @@ class ParametrizedCalculation(postprocessing.Calculation):
 
 def test_dependency_name():
     calculator = mock.MagicMock()
-    summed_flows = postprocessing.SummedFlows(calculator)
+    summed_flows = postprocessing.AggregatedFlows(calculator)
     name = core.get_dependency_name(summed_flows)
-    assert name == "summed_flows"
+    assert name == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
 
-    dep = core.ParametrizedCalculation(postprocessing.SummedFlows)
+    dep = core.ParametrizedCalculation(postprocessing.AggregatedFlows)
     name = core.get_dependency_name(dep)
-    assert name == "summed_flows"
+    assert name == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
 
     name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2, b=2))
     assert name == "pc_a=2_b=2"
@@ -107,3 +107,17 @@ def test_postprocessing_with_constraints():
 
         assert len(set(results) ^ set(original_results)) == 0
         pandas.testing.assert_frame_equal(results, original_results)
+
+
+def test_aggregated_flows_calculation():
+    dump_folder = TEST_FILES_DIR / "Test_scenario" / "optimized"
+    es = EnergySystem()
+    es.restore(dump_folder)
+    calculator = core.Calculator(es.params, es.results)
+    agg = postprocessing.AggregatedFlows(calculator, resample_mode="M")
+    agg2 = postprocessing.AggregatedFlows(calculator, resample_mode="D", from_nodes=["ABW-biomass", "ABW-ch4"])
+    assert len(agg.result) == 12
+    assert len(agg.result.columns) == 59
+    assert len(agg2.result) == 365
+    assert len(agg2.result.columns) == 10
+
