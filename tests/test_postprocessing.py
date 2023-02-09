@@ -32,14 +32,14 @@ def test_dependency_name():
     name = core.get_dependency_name(summed_flows)
     assert name == "summed_flows"
 
-    dep = core.Dependency(postprocessing.SummedFlows)
+    dep = core.ParametrizedCalculation(postprocessing.SummedFlows)
     name = core.get_dependency_name(dep)
     assert name == "summed_flows"
 
     name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2, b=2))
     assert name == "pc_a=2_b=2"
 
-    dep = core.Dependency(ParametrizedCalculation)
+    dep = core.ParametrizedCalculation(ParametrizedCalculation)
     name = core.get_dependency_name(dep)
     assert name == "pc_a=2_b=4"
 

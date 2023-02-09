@@ -12,37 +12,41 @@ class CalculationError(Exception):
 
 
 @dataclass
-class Dependency:
+class ParametrizedCalculation:
     calculation: Type["Calculation"]
     parameters: Optional[dict] = None
 
 
-def get_dependency_name(dependency: Union[Dependency, "Calculation"]):
-    if isinstance(dependency, Calculation):
+def get_dependency_name(calculation: Union["Calculation", Type["Calculation"], ParametrizedCalculation]):
+    if isinstance(calculation, Calculation):
         # Get name from instance
-        signiture = inspect.signature(dependency.__init__)
+        signiture = inspect.signature(calculation.__init__)
         return "_".join(
-            [dependency.name]
+            [calculation.name]
             + [
-                f"{parameter}={getattr(dependency, parameter)}"
+                f"{parameter}={getattr(calculation, parameter)}"
                 for parameter in signiture.parameters
                 if parameter not in ("self", "calculator")
             ]
         )
-    if dependency.parameters:
+    if isinstance(calculation, ParametrizedCalculation) and calculation.parameters:
         # Get name from class and parameters
         return "_".join(
-            [dependency.calculation.name]
+            [calculation.calculation.name]
             + [
                 f"{parameter}={value}"
-                for parameter, value in dependency.parameters.items()
+                for parameter, value in calculation.parameters.items()
                 if parameter not in ("self", "calculator")
             ]
         )
     # Get name from class and default parameters in class
-    signiture = inspect.signature(dependency.calculation.__init__)
+    if isinstance(calculation, ParametrizedCalculation):
+        calc = calculation.calculation
+    else:
+        calc = calculation
+    signiture = inspect.signature(calc.__init__)
     return "_".join(
-        [dependency.calculation.name]
+        [calc.name]
         + [
             f"{name}={parameter.default}"
             for name, parameter in signiture.parameters.items()
@@ -118,27 +122,30 @@ class Calculator:
             ].index.get_level_values(0)
         )
 
-    def add(self, dependency: Union[Dependency, "Calculation"]):
+    def add(self, calculation: Union["Calculation", Type["Calculation"], ParametrizedCalculation]):
         """Adds calculation to calculations 'tree' if not yet present"""
-        dependency_name = get_dependency_name(dependency)
-        if isinstance(dependency, Calculation):
+        dependency_name = get_dependency_name(calculation)
+        if isinstance(calculation, Calculation):
             if dependency_name in self.calculations:
                 raise CalculationError(
-                    f"Calculation '{dependency.__class__.__name__}' already exists in calculator"
+                    f"Calculation '{calculation.__class__.__name__}' already exists in calculator"
                 )
-            self.calculations[dependency_name] = dependency
-        else:
-            if dependency_name in self.calculations:
-                return
-            if issubclass(dependency.calculation, Calculation):
-                if dependency.parameters:
-                    self.calculations[dependency_name] = dependency.calculation(
-                        self, **dependency.parameters
-                    )
-                else:
-                    self.calculations[dependency_name] = dependency.calculation(self)
-                return
-            raise CalculationError("Can only add Calculation instances or classes")
+            self.calculations[dependency_name] = calculation
+            return
+        if dependency_name in self.calculations:
+            return
+        if isinstance(calculation, ParametrizedCalculation):
+            if calculation.parameters:
+                self.calculations[dependency_name] = calculation.calculation(
+                    self, **calculation.parameters
+                )
+            else:
+                self.calculations[dependency_name] = calculation.calculation(self)
+            return
+        if issubclass(calculation, Calculation):
+            self.calculations[dependency_name] = calculation(self)
+            return
+        raise CalculationError("Can only add Calculation instances or classes")
 
     def get_result(self, dependency_name):
         """Returns result of given dependency"""
@@ -151,14 +158,14 @@ class Calculation(abc.ABC):
     """
     Abstract class for calculations
 
-    Dependent calculations are defined in `depends_on` and automatically added to
-    calculation 'tree' if not yet present.
-    Function `calculate_result` is abstract and must be implemented by child class.
+    Dependent calculations are defined in `depends_on` either as subclass of `Calculation` or as instance of
+    `ParametrizedCalculation` (if calculation needs parameters) and automatically added to calculation 'tree' if not yet
+    present. Function `calculate_result` is abstract and must be implemented by child class.
     """
 
     name = None
     parameters = ()
-    depends_on: Dict[str, Dependency] = None
+    depends_on: Dict[str, Union["Calculation", ParametrizedCalculation]] = None
 
     def __init__(self, calculator: Calculator):
         super(Calculation, self).__init__()

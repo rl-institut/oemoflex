@@ -3,7 +3,7 @@ import numpy as np
 from abc import abstractmethod
 
 from oemoflex.postprocessing import naming, helper as ppu
-from oemoflex.postprocessing.core import Calculation, Calculator, Dependency
+from oemoflex.postprocessing.core import Calculation, Calculator
 
 
 class SummedFlows(Calculation):
@@ -16,7 +16,7 @@ class SummedFlows(Calculation):
 
 class Losses(Calculation):
     name = "losses"
-    depends_on = {"summed_flows": Dependency(SummedFlows)}
+    depends_on = {"summed_flows": SummedFlows}
     var_name = None
 
     def _calculate_losses(self, summed_flows):
@@ -47,7 +47,7 @@ class Losses(Calculation):
 
 class StorageLosses(Losses):
     name = "storage_losses"
-    depends_on = {"summed_flows": Dependency(SummedFlows)}
+    depends_on = {"summed_flows": SummedFlows}
     var_name = "storage_losses"
 
     def calculate_result(self):
@@ -62,7 +62,7 @@ class StorageLosses(Losses):
 
 class TransmissionLosses(Losses):
     name = "transmission_losses"
-    depends_on = {"summed_flows": Dependency(SummedFlows)}
+    depends_on = {"summed_flows": SummedFlows}
     var_name = "transmission_losses"
 
     def calculate_result(self):
@@ -101,7 +101,7 @@ class InvestedCapacity(Calculation):
     """Collect invested (endogenous) capacity (units of power)"""
 
     name = "invested_capacity"
-    depends_on = {"investment": Dependency(Investment)}
+    depends_on = {"investment": Investment}
 
     def calculate_result(self):
         if self.dependency("investment").empty:
@@ -116,7 +116,7 @@ class InvestedStorageCapacity(Calculation):
     """Collect storage capacity (units of energy)"""
 
     name = "invested_storage_capacity"
-    depends_on = {"investment": Dependency(Investment)}
+    depends_on = {"investment": Investment}
 
     def calculate_result(self):
         if self.dependency("investment").empty:
@@ -130,8 +130,8 @@ class InvestedStorageCapacity(Calculation):
 class InvestedCapacityCosts(Calculation):
     name = "invested_capacity_costs"
     depends_on = {
-        "invested_capacity": Dependency(InvestedCapacity),
-        "ep_costs": Dependency(EPCosts),
+        "invested_capacity": InvestedCapacity,
+        "ep_costs": EPCosts,
     }
 
     def calculate_result(self):
@@ -149,8 +149,8 @@ class InvestedCapacityCosts(Calculation):
 class InvestedStorageCapacityCosts(Calculation):
     name = "invested_storage_capacity_costs"
     depends_on = {
-        "invested_storage_capacity": Dependency(InvestedStorageCapacity),
-        "ep_costs": Dependency(EPCosts),
+        "invested_storage_capacity": InvestedStorageCapacity,
+        "ep_costs": EPCosts,
     }
 
     def calculate_result(self):
@@ -169,7 +169,7 @@ class InvestedStorageCapacityCosts(Calculation):
 
 class SummedVariableCosts(Calculation):
     name = "summed_variable_costs"
-    depends_on = {"summed_flows": Dependency(SummedFlows)}
+    depends_on = {"summed_flows": SummedFlows}
 
     def calculate_result(self):
         variable_costs = ppu.filter_by_var_name(
@@ -195,7 +195,7 @@ class SummedCarrierCosts(Calculation):
     """
 
     name = "summed_carrier_costs"
-    depends_on = {"summed_variable_costs": Dependency(SummedVariableCosts)}
+    depends_on = {"summed_variable_costs": SummedVariableCosts}
 
     def calculate_result(self):
         return ppu.get_inputs(self.dependency("summed_variable_costs"), self.busses)
@@ -209,7 +209,7 @@ class SummedMarginalCosts(Calculation):
     """
 
     name = "summed_marginal_costs"
-    depends_on = {"summed_variable_costs": Dependency(SummedVariableCosts)}
+    depends_on = {"summed_variable_costs": SummedVariableCosts}
 
     def calculate_result(self):
         return ppu.get_outputs(self.dependency("summed_variable_costs"), self.busses)
@@ -218,10 +218,10 @@ class SummedMarginalCosts(Calculation):
 class TotalSystemCosts(Calculation):
     name = "total_system_costs"
     depends_on = {
-        "invested_capacity_costs": Dependency(InvestedCapacityCosts),
-        "invested_storage_capacity_costs": Dependency(InvestedStorageCapacityCosts),
-        "summed_carrier_costs": Dependency(SummedCarrierCosts),
-        "summed_marginal_costs": Dependency(SummedMarginalCosts),
+        "invested_capacity_costs": InvestedCapacityCosts,
+        "invested_storage_capacity_costs": InvestedStorageCapacityCosts,
+        "summed_carrier_costs": SummedCarrierCosts,
+        "summed_marginal_costs": SummedMarginalCosts,
     }
 
     def calculate_result(self):
