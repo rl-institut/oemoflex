@@ -17,7 +17,9 @@ class ParametrizedCalculation:
     parameters: Optional[dict] = None
 
 
-def get_dependency_name(calculation: Union["Calculation", Type["Calculation"], ParametrizedCalculation]):
+def get_dependency_name(
+    calculation: Union["Calculation", Type["Calculation"], ParametrizedCalculation]
+):
     if isinstance(calculation, Calculation):
         # Get name from instance
         signiture = inspect.signature(calculation.__init__)
@@ -122,7 +124,10 @@ class Calculator:
             ].index.get_level_values(0)
         )
 
-    def add(self, calculation: Union["Calculation", Type["Calculation"], ParametrizedCalculation]):
+    def add(
+        self,
+        calculation: Union["Calculation", Type["Calculation"], ParametrizedCalculation],
+    ):
         """Adds calculation to calculations 'tree' if not yet present"""
         dependency_name = get_dependency_name(calculation)
         if isinstance(calculation, Calculation):
@@ -158,9 +163,11 @@ class Calculation(abc.ABC):
     """
     Abstract class for calculations
 
-    Dependent calculations are defined in `depends_on` either as subclass of `Calculation` or as instance of
-    `ParametrizedCalculation` (if calculation needs parameters) and automatically added to calculation 'tree' if not yet
-    present. Function `calculate_result` is abstract and must be implemented by child class.
+    Dependent calculations are defined in `depends_on` either as subclass of
+    `Calculation` or as instance of `ParametrizedCalculation`
+    (if calculation needs parameters) and automatically added to calculation
+    'tree' if not yet present. Function `calculate_result` is abstract and must
+    be implemented by child class.
     """
 
     name = None
