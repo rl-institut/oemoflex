@@ -31,16 +31,16 @@ def test_dependency_name():
     calculator = mock.MagicMock()
     summed_flows = postprocessing.AggregatedFlows(calculator)
     name = core.get_dependency_name(summed_flows)
-    assert (
-        name
-        == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
+    assert name == (
+        "aggregated_flows_from_nodes=None_to_nodes=None_"
+        "resample_mode=None_drop_component_to_component=True"
     )
 
     dep = core.ParametrizedCalculation(postprocessing.AggregatedFlows)
     name = core.get_dependency_name(dep)
-    assert (
-        name
-        == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
+    assert name == (
+        "aggregated_flows_from_nodes=None_to_nodes=None_"
+        "resample_mode=None_drop_component_to_component=True"
     )
 
     name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2, b=2))
