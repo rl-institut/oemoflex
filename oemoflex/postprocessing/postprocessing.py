@@ -16,7 +16,7 @@ class AggregatedFlows(core.Calculation):
         from_nodes: List[str] = None,
         to_nodes: List[str] = None,
         resample_mode: str = None,
-        drop_component_to_component: bool = True
+        drop_component_to_component: bool = True,
     ):
         if from_nodes and to_nodes and len(from_nodes) > 1 and len(to_nodes) > 1:
             raise core.CalculationError(
@@ -29,11 +29,17 @@ class AggregatedFlows(core.Calculation):
         super().__init__(calculator)
 
     def calculate_result(self):
-        aggregated_flows = ppu.sum_flows(self.sequences, resample_mode=self.resample_mode)
+        aggregated_flows = ppu.sum_flows(
+            self.sequences, resample_mode=self.resample_mode
+        )
         axis = 1 if self.resample_mode else 0
-        filtered_flows = ppu.filter_df_by_input_and_output_nodes(aggregated_flows, self.from_nodes, self.to_nodes, axis=axis)
+        filtered_flows = ppu.filter_df_by_input_and_output_nodes(
+            aggregated_flows, self.from_nodes, self.to_nodes, axis=axis
+        )
         if self.drop_component_to_component:
-            filtered_flows = ppu.drop_component_to_component(filtered_flows, self.busses, axis=axis)
+            filtered_flows = ppu.drop_component_to_component(
+                filtered_flows, self.busses, axis=axis
+            )
         return filtered_flows
 
 

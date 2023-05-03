@@ -47,7 +47,9 @@ def get_dependency_name(
                 names.append(f"{name}={value}")
                 continue
             if sig_parameter.default is inspect.Parameter.empty:
-                raise CalculationError(f"Parameter '{name}' in calculation '{calc.name}' not set.")
+                raise CalculationError(
+                    f"Parameter '{name}' in calculation '{calc.name}' not set."
+                )
             names.append(f"{name}={sig_parameter.default}")
     return "_".join(names)
 

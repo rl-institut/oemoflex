@@ -139,7 +139,9 @@ def filter_df_by_input_and_output_nodes(
         Filtered dataframe
     """
     index = df.index if axis == 0 else df.columns
-    froms = {node for node in index if node[0] not in from_nodes} if from_nodes else set()
+    froms = (
+        {node for node in index if node[0] not in from_nodes} if from_nodes else set()
+    )
     tos = {node for node in index if node[1] not in to_nodes} if to_nodes else set()
     return df.drop(froms.union(tos), axis=axis)
 

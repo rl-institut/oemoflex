@@ -31,11 +31,17 @@ def test_dependency_name():
     calculator = mock.MagicMock()
     summed_flows = postprocessing.AggregatedFlows(calculator)
     name = core.get_dependency_name(summed_flows)
-    assert name == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
+    assert (
+        name
+        == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
+    )
 
     dep = core.ParametrizedCalculation(postprocessing.AggregatedFlows)
     name = core.get_dependency_name(dep)
-    assert name == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
+    assert (
+        name
+        == "aggregated_flows_from_nodes=None_to_nodes=None_resample_mode=None_drop_component_to_component=True"
+    )
 
     name = core.get_dependency_name(ParametrizedCalculation(calculator, a=2, b=2))
     assert name == "pc_a=2_b=2"
@@ -127,9 +133,10 @@ def test_aggregated_flows_calculation():
     es.restore(dump_folder)
     calculator = core.Calculator(es.params, es.results)
     agg = postprocessing.AggregatedFlows(calculator, resample_mode="M")
-    agg2 = postprocessing.AggregatedFlows(calculator, resample_mode="D", from_nodes=["ABW-biomass", "ABW-ch4"])
+    agg2 = postprocessing.AggregatedFlows(
+        calculator, resample_mode="D", from_nodes=["ABW-biomass", "ABW-ch4"]
+    )
     assert len(agg.result) == 12
     assert len(agg.result.columns) == 59
     assert len(agg2.result) == 365
     assert len(agg2.result.columns) == 10
-
