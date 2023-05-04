@@ -62,6 +62,7 @@ def test_dependency_name():
     assert name == "pc_a=2_b=4"
 
 
+@pytest.mark.skip(reason="Only works with locally with cbc installed and oemof dump.")
 def test_postprocessing_with_constraints():
     scenarios = ("Test_scenario",)
 
@@ -128,15 +129,34 @@ def test_postprocessing_with_constraints():
 
 
 def test_aggregated_flows_calculation():
-    dump_folder = TEST_FILES_DIR / "Test_scenario" / "optimized"
-    es = EnergySystem()
-    es.restore(dump_folder)
-    calculator = core.Calculator(es.params, es.results)
+    params = {
+        ("a", "b"): {
+            "scalars": pandas.Series(["bus"], ["type"]),
+            "sequences": pandas.DataFrame(),
+        }
+    }
+    results = {
+        ("process_1", "a"): {
+            "scalars": pandas.Series(),
+            "sequences": pandas.DataFrame(
+                index=pandas.date_range("01-01-2019", "01-05-2019", freq="d"),
+                data={"flow": range(5)},
+            ),
+        },
+        ("process_2", "a"): {
+            "scalars": pandas.Series(),
+            "sequences": pandas.DataFrame(
+                index=pandas.date_range("01-01-2019", "01-05-2019", freq="d"),
+                data={"flow": range(5)},
+            ),
+        },
+    }
+    calculator = core.Calculator(params, results)
     agg = postprocessing.AggregatedFlows(calculator, resample_mode="M")
     agg2 = postprocessing.AggregatedFlows(
-        calculator, resample_mode="D", from_nodes=["ABW-biomass", "ABW-ch4"]
+        calculator, resample_mode="D", from_nodes=["process_1"]
     )
-    assert len(agg.result) == 12
-    assert len(agg.result.columns) == 59
-    assert len(agg2.result) == 365
-    assert len(agg2.result.columns) == 10
+    assert len(agg.result) == 1
+    assert len(agg.result.columns) == 2
+    assert len(agg2.result) == 5
+    assert len(agg2.result.columns) == 1
