@@ -1,0 +1,2 @@
+name,bus,capacity,capacity_cost,capacity_potential,carrier,efficiency,expandable,input_parameters,loss_rate,marginal_cost,output_parameters,region,storage_capacity,storage_capacity_cost,storage_capacity_potential,tech,type
+ABW-electricity-large_scale_battery,ABW-electricity,0.0,4009.8059480196794,,electricity,0.92,True,"{""variable_costs"": 1E-7}",0.0,1.6,{},ABW,0.0,16021.675279083636,,large_scale_battery,storage

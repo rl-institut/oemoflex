@@ -8,7 +8,8 @@ from frictionless import Package
 from oemof.solph.views import convert_to_multiindex
 
 from oemoflex.model.model_structure import create_default_data
-from oemoflex.model.postprocessing import group_by_element, run_postprocessing
+from oemoflex.postprocessing.postprocessing import run_postprocessing
+from oemoflex.postprocessing.helper import group_by_element
 from oemoflex.tools.helpers import load_yaml
 from oemoflex.config.config import settings
 
@@ -323,9 +324,9 @@ class ResultsDataPackage(DataFramePackage):
 
         rel_paths = {}
 
-        data_scal, rel_paths_scal = self._get_scalars(self, es)
-
         data_seq, rel_paths_seq = self._get_sequences(self, es)
+
+        data_scal, rel_paths_scal = self._get_scalars(self, es)
 
         data.update(data_seq)
 

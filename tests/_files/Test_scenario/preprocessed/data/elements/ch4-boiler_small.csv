@@ -1,0 +1,2 @@
+name,capacity,capacity_cost,capacity_potential,carrier,carrier_cost,efficiency,expandable,from_bus,marginal_cost,output_parameters,region,tech,to_bus,type
+ABW-ch4-boiler_small,0.0,29802.620078870925,,ch4,0,0.99,True,ABW-ch4,1e-06,"{""gas-heat_decentral-ABW"": 1}",ABW,boiler_small,ABW-heat_decentral,conversion

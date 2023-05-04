@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,marginal_cost,output_parameters,region,tech,type
+ABW-electricity-import,ABW-electricity,15235.0,electricity,82,"{""emission_factor"": 0.03}",ABW,import,shortage

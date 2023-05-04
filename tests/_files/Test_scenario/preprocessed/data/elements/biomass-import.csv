@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,marginal_cost,output_parameters,region,tech,type
+ABW-biomass-import,ABW-biomass,,biomass,83,{},ABW,import,shortage

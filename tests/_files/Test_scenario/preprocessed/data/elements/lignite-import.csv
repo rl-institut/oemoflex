@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,marginal_cost,output_parameters,region,tech,type
+ABW-lignite-import,ABW-lignite,,lignite,96,{},ABW,import,shortage

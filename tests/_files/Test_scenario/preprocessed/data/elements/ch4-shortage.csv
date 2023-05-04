@@ -1,0 +1,2 @@
+name,bus,capacity,carrier,marginal_cost,output_parameters,region,tech,type
+ABW-ch4-shortage,ABW-ch4,,ch4,1000000000,{},ABW,shortage,shortage

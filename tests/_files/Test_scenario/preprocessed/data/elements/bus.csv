@@ -1,0 +1,8 @@
+name,region,type,balanced
+ABW-ch4,ABW,bus,True
+ABW-electricity,ABW,bus,True
+ABW-heat_central,ABW,bus,True
+ABW-heat_decentral,ABW,bus,True
+ABW-wood,ABW,bus,True
+ABW-lignite,ABW,bus,True
+ABW-biomass,ABW,bus,True

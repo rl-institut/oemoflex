@@ -1,0 +1,2 @@
+name,bus,capacity,capacity_cost,capacity_potential,carrier,expandable,marginal_cost,output_parameters,profile,region,tech,type
+ABW-wind-onshore,ABW-electricity,0.0,66856.89516831486,30000.0,wind,True,1.22,{},ABW-wind-onshore-profile,ABW,onshore,volatile

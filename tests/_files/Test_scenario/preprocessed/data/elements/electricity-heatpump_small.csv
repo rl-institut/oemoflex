@@ -1,0 +1,2 @@
+name,capacity,capacity_cost,capacity_potential,carrier,carrier_cost,efficiency,expandable,from_bus,marginal_cost,output_parameters,region,tech,to_bus,type
+ABW-electricity-heatpump_small,0.0,85215.55162239097,,electricity,0,ABW-efficiency-profile,True,ABW-electricity,2.7,"{""electricity-heat_decentral-ABW"": 1}",ABW,heatpump_small,ABW-heat_decentral,conversion
