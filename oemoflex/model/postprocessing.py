@@ -205,7 +205,7 @@ def sequences_to_df(dict):
     Converts sequences dictionary to a multi-indexed
     DataFrame.
     """
-    result = pd.concat(dict.values(), 1)
+    result = pd.concat(dict.values(), axis=1)
 
     # adapted from oemof.solph.views' node() function
     tuples = {key: [c for c in value.columns] for key, value in dict.items()}
@@ -226,7 +226,7 @@ def scalars_to_df(dict):
     Converts scalars dictionary to a multi-indexed
     DataFrame.
     """
-    result = pd.concat(dict.values(), 0)
+    result = pd.concat(dict.values(), axis=0)
 
     if result.empty:
         return None
