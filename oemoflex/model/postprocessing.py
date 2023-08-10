@@ -720,7 +720,7 @@ def run_postprocessing(es):
         summed_marginal_costs,
     ]
 
-    all_scalars = pd.concat(all_scalars, 0)
+    all_scalars = pd.concat(all_scalars, axis=0)
 
     all_scalars = map_var_names(all_scalars)
 
