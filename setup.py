@@ -32,7 +32,8 @@ setup(
         "pyyaml",
         "dynaconf",
         "pandas",
-        "oemof.tabular @ git+https://github.com/oemof/oemof-tabular.git@features/solph_version#egg=oemof.tabular",
+        "oemof.tabular @ git+https://github.com/oemof/oemof-tabular.git"
+        "@features/solph_version#egg=oemof.tabular",
         "plotly",
         "frictionless",
         "matplotlib",
