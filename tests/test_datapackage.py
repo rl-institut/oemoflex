@@ -187,7 +187,8 @@ def test_edp_setup_default_with_updates(monkeypatch):
     assert len(datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]) == 3
 
     foreign_keys_fuel_cell = [
-        fk["fields"] for fk in datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]
+        fk["fields"]
+        for fk in datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]
     ]
 
     foreign_keys_expected = ["h2_bus", "electricity_bus", "heat_bus"]
