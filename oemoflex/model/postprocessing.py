@@ -393,6 +393,8 @@ def get_total_system_cost(*args):
 
     total_system_cost = pd.DataFrame({"var_value": [all_costs.sum()]}, index=index)
 
+    total_system_cost.index.names = ("name", "var_name")
+
     return total_system_cost
 
 
