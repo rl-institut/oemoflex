@@ -8,7 +8,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 input_path = os.path.join(
     here, "03_postprocessed", "simple_model", "sequences", "bus", "A-electricity.csv"
 )
-data = pd.read_csv(input_path, header=[0, 1, 2], parse_dates=[0], index_col=[0])
+
+try:
+    data = pd.read_csv(input_path, header=[0, 1, 2], parse_dates=[0], index_col=[0])
+except FileNotFoundError:
+    raise FileNotFoundError(f"Missing file: {input_path}.\nPlease run 'simple_model' first.")
 
 # create directory for plots
 path_plotted = os.path.join(here, "04_plotted")
