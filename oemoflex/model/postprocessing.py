@@ -622,12 +622,13 @@ def run_postprocessing(es):
         summed_flows_transmission, var_name="transmission_losses"
     )
 
-    # Collect invested (endogenous) capacity (units of power) and
-    # storage capacity (units of energy)
-
+    # Set all invest variables to None
+    # Hence if invest does not exist, empty/None invest results are created
+    invest = None
     invested_capacity = None
-
     invested_storage_capacity = None
+    invested_capacity_costs = None
+    invested_storage_capacity_costs = None
 
     if not (scalars is None or scalars.empty):
         invest = filter_by_var_name(scalars, "invest")
@@ -638,23 +639,25 @@ def run_postprocessing(es):
 
         invested_storage_capacity = invest.loc[target_is_none]
 
-    ep_costs = filter_by_var_name(scalar_params, "investment_ep_costs")
+    if not (invest is None or invest.empty):
 
-    invested_capacity_costs = multiply_var_with_param(
-        invested_capacity, ep_costs.unstack(2)["investment_ep_costs"]
-    )
-    invested_capacity_costs.index = invested_capacity_costs.index.set_levels(
-        invested_capacity_costs.index.levels[2] + "_costs", level=2
-    )
+        ep_costs = filter_by_var_name(scalar_params, "investment_ep_costs")
 
-    invested_storage_capacity_costs = multiply_var_with_param(
-        invested_storage_capacity, ep_costs.unstack(2)["investment_ep_costs"]
-    )
-    invested_storage_capacity_costs.index = (
-        invested_storage_capacity_costs.index.set_levels(
-            invested_storage_capacity_costs.index.levels[2] + "_costs", level=2
+        invested_capacity_costs = multiply_var_with_param(
+            invested_capacity, ep_costs.unstack(2)["investment_ep_costs"]
         )
-    )
+        invested_capacity_costs.index = invested_capacity_costs.index.set_levels(
+            invested_capacity_costs.index.levels[2] + "_costs", level=2
+        )
+
+        invested_storage_capacity_costs = multiply_var_with_param(
+            invested_storage_capacity, ep_costs.unstack(2)["investment_ep_costs"]
+        )
+        invested_storage_capacity_costs.index = (
+            invested_storage_capacity_costs.index.set_levels(
+                invested_storage_capacity_costs.index.levels[2] + "_costs", level=2
+            )
+        )
 
     # Calculate summed variable costs
     summed_variable_costs = get_summed_variable_costs(summed_flows, scalar_params)
