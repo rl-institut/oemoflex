@@ -185,10 +185,15 @@ def test_edp_setup_default_with_updates(monkeypatch):
     )
     # With custom foreign_key descriptors given, oemof.tabular uses them to set the foreign keys.
     assert len(datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]) == 3
-    assert [
+
+    foreign_keys_fuel_cell = [
         fk["fields"]
         for fk in datapackage["resources"][fuel_cell_index]["schema"]["foreignKeys"]
-    ] == ["h2_bus", "electricity_bus", "heat_bus"]
+    ]
+
+    foreign_keys_expected = ["h2_bus", "electricity_bus", "heat_bus"]
+
+    assert sorted(foreign_keys_fuel_cell) == sorted(foreign_keys_expected)
 
 
 def test_edp_stack_unstack():
