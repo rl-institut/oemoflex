@@ -12,7 +12,9 @@ input_path = os.path.join(
 try:
     data = pd.read_csv(input_path, header=[0, 1, 2], parse_dates=[0], index_col=[0])
 except FileNotFoundError:
-    raise FileNotFoundError(f"Missing file: {input_path}.\nPlease run 'simple_model' first.")
+    raise FileNotFoundError(
+        f"Missing file: {input_path}.\nPlease run 'simple_model' first."
+    )
 
 # create directory for plots
 path_plotted = os.path.join(here, "04_plotted")
