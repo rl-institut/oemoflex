@@ -1,12 +1,12 @@
 from oemof import solph
-from oemof.solph import sequence, Bus, Sink, Flow, Investment
-from oemof.solph.components import GenericStorage, ExtractionTurbineCHP
+from oemof.solph import sequence, Bus, Flow, Investment
+from oemof.solph.components import GenericStorage, ExtractionTurbineCHP, Sink
 
-from oemof.tabular import facades
+from oemof.tabular._facade import Facade
 from oemof.tabular.facades import Link, TYPEMAP
 
 
-class Source(solph.Source):
+class Source(solph.components.Source):
     r"""
     Supplement Source with carrier and tech properties to work with labeling in postprocessing
 
@@ -21,7 +21,7 @@ class Source(solph.Source):
         self.tech = kwargs.get("tech", None)
 
 
-class Transformer(solph.Transformer):
+class Transformer(solph.components.Transformer):
     r"""
     Supplement Transformer with carrier and tech properties to work with labeling in postprocessing
 
@@ -37,7 +37,7 @@ class Transformer(solph.Transformer):
         self.tech = kwargs.get("tech", None)
 
 
-class Facade(facades.Facade):
+class Facade(Facade):
     def _nominal_value(self):
         """Returns None if self.expandable ist True otherwise it returns
         the capacities

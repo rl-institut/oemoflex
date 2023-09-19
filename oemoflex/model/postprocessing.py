@@ -205,7 +205,7 @@ def sequences_to_df(dict):
     Converts sequences dictionary to a multi-indexed
     DataFrame.
     """
-    result = pd.concat(dict.values(), 1)
+    result = pd.concat(dict.values(), axis=1)
 
     # adapted from oemof.solph.views' node() function
     tuples = {key: [c for c in value.columns] for key, value in dict.items()}
@@ -226,7 +226,7 @@ def scalars_to_df(dict):
     Converts scalars dictionary to a multi-indexed
     DataFrame.
     """
-    result = pd.concat(dict.values(), 0)
+    result = pd.concat(dict.values(), axis=0)
 
     if result.empty:
         return None
@@ -392,6 +392,8 @@ def get_total_system_cost(*args):
     index = pd.MultiIndex.from_tuples([("system", "total_system_cost")])
 
     total_system_cost = pd.DataFrame({"var_value": [all_costs.sum()]}, index=index)
+
+    total_system_cost.index.names = ("name", "var_name")
 
     return total_system_cost
 
@@ -718,7 +720,7 @@ def run_postprocessing(es):
         summed_marginal_costs,
     ]
 
-    all_scalars = pd.concat(all_scalars, 0)
+    all_scalars = pd.concat(all_scalars, axis=0)
 
     all_scalars = map_var_names(all_scalars)
 

@@ -421,7 +421,7 @@ def plot_dispatch(ax, df, df_demand, unit, colors_odict=None, linewidth=1):
     y_stack_neg = []
 
     # assign data to positive or negative stackplot
-    for key, values in df.iteritems():
+    for key, values in df.items():
         stackgroup = _assign_stackgroup(key, values)
         if stackgroup == "negative":
             y_stack_neg.append(key)
@@ -488,7 +488,7 @@ def plot_dispatch_plotly(
 
     # plot stacked generators and consumers
     df = df[[c for c in df.columns if not isinstance(c, tuple)]]
-    for key, values in df.iteritems():
+    for key, values in df.items():
         stackgroup = _assign_stackgroup(key, values)
 
         fig.add_trace(
