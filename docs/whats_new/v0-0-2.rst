@@ -1,0 +1,5 @@
+v0.0.2
+======
+
+* The oemof-tabular version has been increased to v0.0.4.dev1 which leads to an update of the
+  oemof.solph version to dev version which currently stands at version 0.5.1
