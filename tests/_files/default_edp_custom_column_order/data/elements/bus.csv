@@ -1,0 +1,5 @@
+region,name,type,balanced
+A,A-electricity,bus,True
+A,A-ch4,bus,False
+B,B-electricity,bus,True
+B,B-ch4,bus,False

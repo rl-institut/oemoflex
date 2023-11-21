@@ -230,3 +230,27 @@ def test_edp_stack_unstack():
     edp.to_csv_dir(after, overwrite=True)
 
     check_if_csv_dirs_equal(before, after)
+
+
+def test_edp_stack_unstack_keep_column_order():
+    # set up paths
+    here = os.path.dirname(__file__)
+    tmp = extend_basic_path("tmp")
+
+    default = os.path.join(here, "_files", "default_edp_custom_column_order")
+    stacked_unstacked = os.path.join(tmp, "stacked_unstacked")
+
+    clean_path(stacked_unstacked)
+
+    # load default energydatapackage
+    edp = EnergyDataPackage.from_csv_dir(default)
+
+    # stack and unstack
+    edp.stack_components()
+
+    edp.unstack_components()
+
+    # save and compare
+    edp.to_csv_dir(stacked_unstacked, overwrite=True)
+
+    check_if_csv_dirs_equal(default, stacked_unstacked)
