@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 
 from oemof.solph import Bus, EnergySystem
-
+from oemof.solph import views
+from oemof.tabular import facades
 
 def get_sequences(dict):
     r"""
@@ -50,6 +51,76 @@ def get_scalars(dict):
     }
 
     return scalars
+
+
+def component_results(es, results, select="sequences"):
+    """Aggregated by component type"""
+
+    c = {}
+
+    if not hasattr(es, "typemap"):
+        setattr(es, "typemap", facades.TYPEMAP)
+
+    for k, v in es.typemap.items():
+        if isinstance(k, str):
+            if select == "sequences":
+                _seq_by_type = [
+                    views.node(results, n, multiindex=True).get("sequences")
+                    for n in es.nodes
+                    if isinstance(n, v) and not isinstance(n, Bus)
+                ]
+                # check if dataframes / series have been returned
+                if any(
+                    [
+                        isinstance(i, (pd.DataFrame, pd.Series))
+                        for i in _seq_by_type
+                    ]
+                ):
+                    seq_by_type = pd.concat(_seq_by_type, axis=1)
+                    c[str(k)] = seq_by_type
+
+            if select == "scalars":
+                _sca_by_type = [
+                    views.node(results, n, multiindex=True).get("scalars")
+                    for n in es.nodes
+                    if isinstance(n, v) and not isinstance(n, Bus)
+                ]
+
+                if [x for x in _sca_by_type if x is not None]:
+                    _sca_by_type = pd.concat(_sca_by_type)
+                    c[str(k)] = _sca_by_type
+
+    return c
+
+
+def bus_results(es, results, select="sequences", concat=False):
+    """Aggregated for every bus of the energy system"""
+    br = {}
+
+    buses = [b for b in es.nodes if isinstance(b, Bus)]
+
+    for b in buses:
+        if select == "sequences":
+            bus_sequences = pd.concat(
+                [
+                    views.node(results, b, multiindex=True).get(
+                        "sequences", pd.DataFrame()
+                    )
+                ],
+                axis=1,
+            )
+            br[str(b)] = bus_sequences
+        if select == "scalars":
+            br[str(b)] = views.node(results, b, multiindex=True).get("scalars")
+
+    if concat:
+        if select == "sequences":
+            axis = 1
+        else:
+            axis = 0
+        br = pd.concat([b for b in br.values()], axis=axis)
+
+    return br
 
 
 def drop_component_to_component(series):
