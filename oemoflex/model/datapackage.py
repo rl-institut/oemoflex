@@ -1,14 +1,18 @@
 import copy
 import os
 
-import oemof.tabular.tools.postprocessing as tabular_pp
 from oemof.tabular.datapackage.building import infer_metadata
 import pandas as pd
 from frictionless import Package
 from oemof.solph.views import convert_to_multiindex
 
 from oemoflex.model.model_structure import create_default_data
-from oemoflex.model.postprocessing import group_by_element, run_postprocessing
+from oemoflex.model.postprocessing import (
+    group_by_element,
+    run_postprocessing,
+    component_results,
+    bus_results,
+)
 from oemoflex.tools.helpers import load_yaml
 from oemoflex.config.config import settings
 
@@ -345,8 +349,8 @@ class ResultsDataPackage(DataFramePackage):
             return {key: value for key, value in dictionary.items() if not value.empty}
 
         methods = {
-            "bus": tabular_pp.bus_results,
-            "component": tabular_pp.component_results,
+            "bus": bus_results,
+            "component": component_results,
             "by_variable": self._get_seq_by_var,
         }
 
