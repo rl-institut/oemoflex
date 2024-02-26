@@ -7,6 +7,7 @@ from oemof.solph import Bus, EnergySystem
 from oemof.solph import views
 from oemof.tabular import facades
 
+
 def get_sequences(dict):
     r"""
     Gets sequences from oemof.solph's parameter or results dictionary.
@@ -71,10 +72,7 @@ def component_results(es, results, select="sequences"):
                 ]
                 # check if dataframes / series have been returned
                 if any(
-                    [
-                        isinstance(i, (pd.DataFrame, pd.Series))
-                        for i in _seq_by_type
-                    ]
+                    [isinstance(i, (pd.DataFrame, pd.Series)) for i in _seq_by_type]
                 ):
                     seq_by_type = pd.concat(_seq_by_type, axis=1)
                     c[str(k)] = seq_by_type
