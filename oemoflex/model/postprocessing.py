@@ -820,10 +820,10 @@ def run_postprocessing(es):
     # TODO: Check if this can be done far earlier, also for performance reasons.
     # TODO: To do so, the information drawn from the components in add_component_info has
     # TODO: to be provided differently.
-    all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
+    all_scalars_df.index = all_scalars_df.index.map(lambda x: (x[0].label, x[1]))
 
-    all_scalars = pd.concat([all_scalars, total_system_cost], axis=0)
+    all_scalars_df = pd.concat([all_scalars_df, total_system_cost], axis=0)
 
-    all_scalars = sort_scalars(all_scalars)
+    all_scalars_df = sort_scalars(all_scalars_df)
 
-    return all_scalars
+    return all_scalars_df
