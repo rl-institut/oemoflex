@@ -802,8 +802,7 @@ def run_postprocessing(es):
     # Todo: To be further investigated
 
     # Index work-around - issues with concat and Multiindex
-    list(map(lambda series: series.rename("0", inplace=True), all_scalars))
-    all_scalars_reindexed = [s.reset_index() for s in all_scalars]
+    all_scalars_reindexed = [s.rename("0").reset_index() for s in all_scalars]
     all_scalars_df_reindexed = pd.concat(
         all_scalars_reindexed, ignore_index=True, axis=0
     )
