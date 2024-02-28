@@ -801,9 +801,20 @@ def run_postprocessing(es):
     # did not work
     # Todo: To be further investigated
 
-    all_scalars = map_var_names(all_scalars)
+    # Index work-around - issues with concat and Multiindex
+    list(map(lambda series: series.rename("0", inplace=True), all_scalars))
+    all_scalars_reindexed = [s.reset_index() for s in all_scalars]
+    all_scalars_df_reindexed = pd.concat(
+        all_scalars_reindexed, ignore_index=True, axis=0
+    )
+    all_scalars_df = all_scalars_df_reindexed.set_index(
+        ["source", "target", "var_name"]
+    )
 
-    all_scalars = add_component_info(all_scalars)
+    # Map var_names
+    all_scalars_df = map_var_names(all_scalars_df)
+
+    all_scalars_df = add_component_info(all_scalars_df)
 
     # Set index to string
     # TODO: Check if this can be done far earlier, also for performance reasons.
