@@ -789,20 +789,40 @@ def run_postprocessing(es):
         summed_marginal_costs,
     ]
 
-    all_scalars = pd.concat(all_scalars, axis=0)
+    # all_scalars = pd.concat(all_scalars, axis=0)
+    # This does not work with the update from pandas==2.0.3 to pandas==2.2.1 because
+    # invested_capacity and invested_storage_capacity both have a TimeStamp as column name which
+    # results in a mix-up of the levels
+    # Fixing Approach:
+    # list(map(lambda series: series.rename('0', inplace=True), all_scalars))
+    # timestamp_variable = pd.to_datetime("2017-01-01 00:00:00")
+    # all_scalars = pd.concat(all_scalars, axis=0,
+    # keys=['source', 'target', 'var_name', '0', 0, 'var_value', timestamp_variable])
+    # did not work
+    # Todo: To be further investigated
 
-    all_scalars = map_var_names(all_scalars)
+    # Index work-around - issues with concat and Multiindex
+    all_scalars_reindexed = [s.rename("var_value").reset_index() for s in all_scalars]
+    all_scalars_df_reindexed = pd.concat(
+        all_scalars_reindexed, ignore_index=True, axis=0
+    )
+    all_scalars_df = all_scalars_df_reindexed.set_index(
+        ["source", "target", "var_name"]
+    )
 
-    all_scalars = add_component_info(all_scalars)
+    # Map var_names
+    all_scalars_df = map_var_names(all_scalars_df)
+
+    all_scalars_df = add_component_info(all_scalars_df)
 
     # Set index to string
     # TODO: Check if this can be done far earlier, also for performance reasons.
     # TODO: To do so, the information drawn from the components in add_component_info has
     # TODO: to be provided differently.
-    all_scalars.index = all_scalars.index.map(lambda x: (x[0].label, x[1]))
+    all_scalars_df.index = all_scalars_df.index.map(lambda x: (x[0].label, x[1]))
 
-    all_scalars = pd.concat([all_scalars, total_system_cost], axis=0)
+    all_scalars_df = pd.concat([all_scalars_df, total_system_cost], axis=0)
 
-    all_scalars = sort_scalars(all_scalars)
+    all_scalars_df = sort_scalars(all_scalars_df)
 
-    return all_scalars
+    return all_scalars_df
