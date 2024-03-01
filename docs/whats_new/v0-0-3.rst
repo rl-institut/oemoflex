@@ -1,0 +1,8 @@
+v0.0.3
+======
+
+* The oemof-tabular version has been increased to v0.0.5 which leads to the oemof.solph version
+  0.5.2.dev1 (Changes made on dev)
+* Postprocessing functions have been moved from oemof-tabular to oemoflex (PR 99)
+* With higher pandas version (2.2.1) the concat function in postprocessing.py had to be revised
+  (PR 100)
