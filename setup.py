@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name="oemoflex",
-    version="0.0.2",
+    version="0.0.3",
     description="A flexible model structure for creating and analysing multi-regional"
     "sector-integrated energysystem models featuring many flexibility options",
     long_description=read("README.md"),
@@ -32,7 +32,7 @@ setup(
         "pyyaml",
         "dynaconf",
         "pandas",
-        "oemof.tabular @ git+https://github.com/oemof/oemof-tabular.git@v0.0.4.dev1",
+        "oemof.tabular==0.0.5",
         "plotly",
         "frictionless",
         "matplotlib",
