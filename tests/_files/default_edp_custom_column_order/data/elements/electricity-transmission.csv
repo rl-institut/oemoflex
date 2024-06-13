@@ -1,0 +1,2 @@
+region,name,type,carrier,tech,from_bus,to_bus,from_to_capacity,to_from_capacity,loss
+A_B,A-B-electricity-transmission,link,electricity,transmission,A-electricity,B-electricity,3000000,3000000,0
