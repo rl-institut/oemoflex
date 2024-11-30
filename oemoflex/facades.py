@@ -127,7 +127,9 @@ class AsymmetricStorage(GenericStorage, Facade):
 
             self.investment = Investment(
                 ep_costs=self.storage_capacity_cost,
-                maximum=getattr(self, "storage_capacity_potential", float("+inf")),
+                maximum=self._get_maximum_additional_invest(
+                    "storage_capacity_potential", "storage_capacity"
+                ),
                 minimum=getattr(self, "minimum_storage_capacity", 0),
                 existing=getattr(self, "storage_capacity", 0),
             )
@@ -135,7 +137,9 @@ class AsymmetricStorage(GenericStorage, Facade):
             fi = Flow(
                 investment=Investment(
                     ep_costs=self.capacity_cost_charge,
-                    maximum=getattr(self, "capacity_potential_charge", float("+inf")),
+                    maximum=self._get_maximum_additional_invest(
+                        "capacity_potential_charge", "capacity_charge"
+                    ),
                     existing=getattr(self, "capacity_charge", 0),
                 ),
                 **self.input_parameters
@@ -144,8 +148,8 @@ class AsymmetricStorage(GenericStorage, Facade):
             fo = Flow(
                 investment=Investment(
                     ep_costs=self.capacity_cost_discharge,
-                    maximum=getattr(
-                        self, "capacity_potential_discharge", float("+inf")
+                    maximum=self._get_maximum_additional_invest(
+                        "capacity_potential_discharge", "capacity_discharge"
                     ),
                     existing=getattr(self, "capacity_discharge", 0),
                 ),
