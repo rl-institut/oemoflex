@@ -21,7 +21,7 @@ class Source(solph.components.Source):
         self.tech = kwargs.get("tech", None)
 
 
-class Transformer(solph.components.Transformer):
+class Transformer(solph.components.Converter):
     r"""
     Supplement Transformer with carrier and tech properties to work with labeling in postprocessing
 
