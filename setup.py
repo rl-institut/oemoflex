@@ -32,6 +32,7 @@ setup(
         "pyyaml",
         "dynaconf",
         "pandas",
+        "oemof.tabular",
         "plotly",
         "frictionless",
         "matplotlib",
